@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Pixel Planet Enhanced</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Main Menu and Game Container */
+        #main-menu, #game {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Headings */
+        h1, h2, h3 {
+            margin: 10px 0;
+        }
+
+        /* Buttons */
+        button {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Load Menu */
+        #load-menu {
+            display: none;
+            margin-top: 20px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #loadCode {
+            width: 80%;
+            max-width: 400px;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+        }
+
+        /* Resources and Upgrades */
+        .resource, .stat, .upgrade {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        /* Biomes */
+        .biome {
+            margin: 10px;
+            padding: 15px;
+            border: 2px solid #444;
+            display: inline-block;
+            border-radius: 8px;
+            background-color: #2e2e2e;
+            width: 150px;
+        }
+
+        /* Upgrades Section */
+        #upgrades {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upgrade {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            width: 250px;
+            text-align: left;
+        }
+
+        .upgrade span {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .upgrade-button {
+            background-color: #008CBA;
+        }
+
+        .upgrade-button:hover {
+            background-color: #007bb5;
+        }
+
+        /* Save Code */
+        #saveCode {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            resize: none;
+        }
+
+        /* Notifications */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .upgrade {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            button {
+                width: 80%;
+                font-size: 1em;
+            }
+
+            #saveCode, #loadCode {
+                width: 90%;
+            }
+
+            .biome {
+                width: 100%;
+            }
+        }
+
+        /* Adjustments for Trackpads and Touch Devices */
+        button {
+            touch-action: manipulation;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification -->
+    <div id="notification"></div>
+
+    <!-- Main Menu -->
+    <div id="main-menu">
+        <h1>🌍 Pixel Planet</h1>
+        <button onclick="startNewGame()">Start New Game</button>
+        <button onclick="toggleLoadMenu()">Load Game</button>
+        <div id="load-menu">
+            <input type="text" id="loadCode" placeholder="Enter your save code here" readonly>
+            <button onclick="loadGame()">Load</button>
+            <button onclick="toggleLoadMenu()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Game Interface -->
+    <div id="game" style="display: none;">
+        <h2>Your Planet</h2>
+        <div id="resources">
+            <div class="resource" id="water">💧 Water: 0</div>
+            <div class="resource" id="minerals">⛏ Minerals: 0</div>
+            <div class="resource" id="plants">🌱 Plants: 0</div>
+            <div class="resource" id="energy">⚡ Energy: 0</div>
+        </div>
+        <button onclick="generateResources()">Generate Resources</button>
+        <div id="biomes"></div>
+        <h3>Upgrades</h3>
+        <div id="upgrades">
+            <!-- Upgrades will be dynamically generated -->
+        </div>
+        <button onclick="saveGame()">Save Game</button>
+        <button onclick="unlockTerraform()">Terraform Planet</button>
+        <textarea id="saveCode" rows="2" readonly placeholder="Your save code will appear here"></textarea>
+    </div>
+
+    <script>
+        // Game State
+        let resources = {
+            water: 0,
+            minerals: 0,
+            plants: 0,
+            energy: 0
+        };
+
+        let biomes = [];
+
+        let upgrades = {
+            waterBoost: {
+                name: "🔧 Improve Water Collection",
+                description: "+10 Water per second",
+                cost: 100,
+                effect: () => { waterPerSecond += 10; },
+                purchased: false
+            },
+            mineralsBoost: {
+                name: "🔧 Improve Mineral Extraction",
+                description: "+5 Minerals per second",
+                cost: 200,
+                effect: () => { mineralsPerSecond += 5; },
+                purchased: false
+            },
+            plantBoost: {
+                name: "🔧 Enhance Plant Growth",
+                description: "+3 Plants per second",
+                cost: 150,
+                effect: () => { plantsPerSecond += 3; },
+                purchased: false
+            },
+            energyBoost: {
+                name: "🔧 Boost Energy Generation",
+                description: "+2 Energy per second",
+                cost: 120,
+                effect: () => { energyPerSecond += 2; },
+                purchased: false
+            }
+            // Add more upgrades as needed
+        };
+
+        let waterPerSecond = 1;
+        let mineralsPerSecond = 0;
+        let plantsPerSecond = 0;
+        let energyPerSecond = 0;
+
+        let resourceGenerationInterval;
+        let autosaveInterval;
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize Game
+        function initGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                loadFromSave(JSON.parse(savedGame));
+            } else {
+                startNewGame();
+            }
+        }
+
+        // Start New Game
+        function startNewGame() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
+            biomes = [];
+            resetUpgrades();
+            waterPerSecond = 1;
+            mineralsPerSecond = 0;
+            plantsPerSecond = 0;
+            energyPerSecond = 0;
+            updateResourcesUI();
+            generateUpgradesUI();
+            displayBiomes();
+            startResourceGeneration();
+            startAutosave();
+            showNotification("New game started! Welcome to Pixel Planet.");
+        }
+
+        // Toggle Load Menu
+        function toggleLoadMenu() {
+            const loadMenu = document.getElementById('load-menu');
+            loadMenu.style.display = loadMenu.style.display === 'none' || loadMenu.style.display === '' ? 'flex' : 'none';
+        }
+
+        // Generate Resources Manually
+        function generateResources() {
+            resources.water += 10;
+            resources.minerals += 5;
+            resources.plants += 3;
+            resources.energy += 2;
+            updateResourcesUI();
+            showNotification("Resources generated!");
+        }
+
+        // Update Resources UI
+        function updateResourcesUI() {
+            document.getElementById('water').innerText = `💧 Water: ${resources.water}`;
+            document.getElementById('minerals').innerText = `⛏ Minerals: ${resources.minerals}`;
+            document.getElementById('plants').innerText = `🌱 Plants: ${resources.plants}`;
+            document.getElementById('energy').innerText = `⚡ Energy: ${resources.energy}`;
+        }
+
+        // Generate Upgrades UI
+        function generateUpgradesUI() {
+            const upgradesDiv = document.getElementById('upgrades');
+            upgradesDiv.innerHTML = ''; // Clear existing upgrades
+
+            for (let key in upgrades) {
+                const upgrade = upgrades[key];
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.className = 'upgrade';
+
+                const name = document.createElement('span');
+                name.innerText = `${upgrade.name}`;
+                upgradeDiv.appendChild(name);
+
+                const description = document.createElement('span');
+                description.innerText = `${upgrade.description}`;
+                upgradeDiv.appendChild(description);
+
+                const cost = document.createElement('span');
+                cost.innerText = `Cost: ${upgrade.cost} 💧`;
+                upgradeDiv.appendChild(cost);
+
+                const button = document.createElement('button');
+                button.className = 'upgrade-button';
+                button.innerText = upgrade.purchased ? 'Purchased' : 'Buy';
+                button.disabled = upgrade.purchased || resources.water < upgrade.cost;
+                button.onclick = () => buyUpgrade(key);
+                upgradeDiv.appendChild(button);
+
+                upgradesDiv.appendChild(upgradeDiv);
+            }
+        }
+
+        // Buy Upgrade
+        function buyUpgrade(upgradeName) {
+            const upgrade = upgrades[upgradeName];
+            if (!upgrade) return;
+
+            if (resources.water >= upgrade.cost) {
+                resources.water -= upgrade.cost;
+                upgrade.effect();
+                upgrade.purchased = true;
+                updateResourcesUI();
+                generateUpgradesUI();
+                showNotification(`Upgrade "${upgrade.name}" purchased!`);
+            } else {
+                showNotification("Not enough Water to purchase this upgrade!");
+            }
+        }
+
+        // Reset Upgrades (for new game)
+        function resetUpgrades() {
+            for (let key in upgrades) {
+                upgrades[key].purchased = false;
+            }
+        }
+
+        // Save Game
+        function saveGame() {
+            const saveData = {
+                resources,
+                biomes,
+                upgrades,
+                waterPerSecond,
+                mineralsPerSecond,
+                plantsPerSecond,
+                energyPerSecond,
+                lastUpdateTime: Date.now()
+            };
+            localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
+            showNotification("Game saved!");
+        }
+
+        // Load Game
+        function loadGame() {
+            const saveCode = document.getElementById('loadCode').value.trim();
+            if (saveCode && saveCode.startsWith('PixelPlanet=')) {
+                try {
+                    const saveData = saveCode.replace('PixelPlanet=', '').replace('==', '');
+                    const gameState = JSON.parse(atob(saveData));
+                    loadFromSave(gameState);
+                    showNotification('Game loaded successfully!');
+                } catch (error) {
+                    showNotification('Failed to load game. Invalid save code.');
+                    console.error(error);
+                }
+            } else {
+                showNotification('Invalid save code format.');
+            }
+        }
+
+        // Load from Save Data
+        function loadFromSave(gameState) {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resources = gameState.resources;
+            biomes = gameState.biomes;
+            upgrades = gameState.upgrades;
+            waterPerSecond = gameState.waterPerSecond;
+            mineralsPerSecond = gameState.mineralsPerSecond;
+            plantsPerSecond = gameState.plantsPerSecond;
+            energyPerSecond = gameState.energyPerSecond;
+            updateResourcesUI();
+            generateUpgradesUI();
+            displayBiomes();
+            handleOfflineResourceGeneration(gameState.lastUpdateTime);
+            startResourceGeneration();
+            startAutosave();
+        }
+
+        // Start Resource Generation
+        function startResourceGeneration() {
+            clearInterval(resourceGenerationInterval);
+            resourceGenerationInterval = setInterval(() => {
+                resources.water += waterPerSecond;
+                resources.minerals += mineralsPerSecond;
+                resources.plants += plantsPerSecond;
+                resources.energy += energyPerSecond;
+                updateResourcesUI();
+            }, 1000);
+        }
+
+        // Autosave Functionality
+        function startAutosave() {
+            clearInterval(autosaveInterval);
+            autosaveInterval = setInterval(() => {
+                saveGame();
+            }, 300000); // Autosave every 5 minutes
+        }
+
+        // Handle Offline Resource Generation
+        function handleOfflineResourceGeneration(lastSaveTime) {
+            const currentTime = Date.now();
+            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
+            if (offlineDuration > 0) {
+                resources.water += offlineDuration * waterPerSecond;
+                resources.minerals += offlineDuration * mineralsPerSecond;
+                resources.plants += offlineDuration * plantsPerSecond;
+                resources.energy += offlineDuration * energyPerSecond;
+                updateResourcesUI();
+                showNotification(`You were offline for ${offlineDuration} seconds. Resources have been updated.`);
+            }
+        }
+
+        // Unlock Terraform (New Biome)
+        function unlockTerraform() {
+            const terraformCost = 500;
+            if (resources.water >= terraformCost) {
+                resources.water -= terraformCost;
+                unlockNewBiome();
+                updateResourcesUI();
+                showNotification("Planet terraformed! New biome unlocked.");
+            } else {
+                showNotification("Not enough Water to terraform the planet!");
+            }
+        }
+
+        // Unlock New Biome
+        function unlockNewBiome() {
+            const newBiome = generateRandomBiome();
+            biomes.push(newBiome);
+            displayBiomes();
+        }
+
+        // Generate Random Biome
+        function generateRandomBiome() {
+            const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna"];
+            const randomName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
+            return { name: randomName, id: biomes.length + 1 };
+        }
+
+        // Display Biomes
+        function displayBiomes() {
+            const biomesDiv = document.getElementById('biomes');
+            biomesDiv.innerHTML = ''; // Clear existing biomes
+
+            biomes.forEach(biome => {
+                const biomeDiv = document.createElement('div');
+                biomeDiv.className = 'biome';
+                biomeDiv.innerText = `🌿 ${biome.name} Biome`;
+                biomesDiv.appendChild(biomeDiv);
+            });
+        }
+
+        // Detect Device Type for UI Adjustments
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            if (/Mobi|Android/i.test(ua)) {
+                document.body.style.fontSize = '1em';
+            } else if (/iPad|Tablet/i.test(ua)) {
+                document.body.style.fontSize = '1.1em';
+            } else {
+                document.body.style.fontSize = '1.2em';
+            }
+        }
+
+        // Initialize the game on window load
+        window.onload = () => {
+            detectDevice();
+            initGame();
+            // Save to localStorage every 1 minute
+            setInterval(() => {
+                saveGame();
+            }, 60000); // Save every 1 minute
+        };
+
+        // Ensure all buttons are accessible via keyboard and touch
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'BUTTON') {
+                    activeElement.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
