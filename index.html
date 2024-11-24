@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pixel Planet</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Pixel Planet</title>
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline';">
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7M919FPNB"></script>
     <script>
@@ -10,361 +14,94 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
-        // Prevent duplicate GA initialization
         if (!window.gaInitialized) {
             gtag('config', 'G-E7M919FPNB');
             window.gaInitialized = true;
         }
     </script>
-    <!-- Styles -->
     <style>
+        /* CSS Variables for Theming */
         :root {
-            --bg-color: #f0f0f0;
+            --background-color: #f0f0f0;
             --text-color: #333;
-            --button-bg-color: #4CAF50;
+            --button-bg-color: #008CBA;
             --button-text-color: #fff;
-            --upgrade-bg-color: #fff;
-            --biome-bg-color: #e0e0e0;
-            --achievement-unlocked-bg: #4CAF50;
-            --modal-bg-color: rgba(0,0,0,0.5);
+            --modal-bg-color: rgba(0, 0, 0, 0.5);
             --modal-content-bg: #fff;
-            --theme-toggle-bg: #333;
-            --theme-toggle-text: #fff;
+            --upgrade-bg-color: #e0e0e0;
         }
 
-        /* Dark Theme */
-        .dark-theme {
-            --bg-color: #2c3e50;
-            --text-color: #ecf0f1;
-            --button-bg-color: #e74c3c;
-            --button-text-color: #fff;
-            --upgrade-bg-color: #34495e;
-            --biome-bg-color: #3c6382;
-            --achievement-unlocked-bg: #27ae60;
-            --modal-content-bg: #2c3e50;
+        body.dark-theme {
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --button-bg-color: #1f8ef1;
+            --modal-content-bg: #1e1e1e;
+            --upgrade-bg-color: #2c2c2c;
         }
 
-        /* Light Theme */
-        .light-theme {
-            --bg-color: #ffffff;
-            --text-color: #2c3e50;
-            --button-bg-color: #2980b9;
-            --button-text-color: #fff;
-            --upgrade-bg-color: #ecf0f1;
-            --biome-bg-color: #bdc3c7;
-            --achievement-unlocked-bg: #27ae60;
+        body.light-theme {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --button-bg-color: #008CBA;
             --modal-content-bg: #ffffff;
+            --upgrade-bg-color: #e0e0e0;
         }
 
+        /* Global Styles */
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: Arial, sans-serif;
-            transition: background-color 0.5s, color 0.5s;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Header Elements */
+        /* Credits */
         #credits {
             position: fixed;
             bottom: 10px;
             left: 10px;
-            font-size: 0.8em;
+            font-size: 0.9em;
             color: var(--text-color);
         }
 
         #credits a {
-            color: #3498db;
+            color: var(--button-bg-color);
             text-decoration: none;
         }
 
-        #credits a:hover {
-            text-decoration: underline;
-        }
-
+        /* Version Number */
         #version {
             position: fixed;
             bottom: 10px;
             right: 10px;
-            font-size: 0.8em;
+            font-size: 0.9em;
             color: var(--text-color);
         }
 
-        /* Help and Share Buttons */
-        #help-button, #share-button {
-            position: fixed;
-            top: 10px;
-            padding: 10px 15px;
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
+        /* Buttons */
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            z-index: 1000;
-        }
-
-        #help-button:hover, #share-button:hover {
-            background-color: #555555;
-        }
-
-        #help-button {
-            left: 10px;
-        }
-
-        #share-button {
-            right: 10px;
-        }
-
-        /* Notification */
-        #notification {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            display: none;
-            z-index: 1001;
-            transition: opacity 0.5s;
-        }
-
-        /* Main Menu */
-        #main-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            gap: 20px;
-        }
-
-        #main-menu h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-
-        #main-menu button {
-            padding: 15px 25px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 8px;
             background-color: var(--button-bg-color);
             color: var(--button-text-color);
             cursor: pointer;
             transition: background-color 0.3s;
-            width: 200px;
         }
 
-        #main-menu button:hover {
-            background-color: #555555;
+        button:hover:not(:disabled) {
+            background-color: #005f6a;
         }
 
-        #language-selector {
-            margin-top: 10px;
-            color: var(--text-color);
-        }
-
-        #language-selector select {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background-color: var(--upgrade-bg-color);
-            color: var(--text-color);
-        }
-
-        /* Game Interface */
-        #game {
-            padding: 20px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        #resources {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .resource {
-            background-color: var(--upgrade-bg-color);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            width: 180px;
-            text-align: center;
-            transition: background-color 0.5s, color 0.5s;
-        }
-
-        .resource span {
-            font-weight: bold;
-        }
-
-        #biomes, #upgrades, #achievements, #events, #quests, #story {
-            width: 90%;
-            max-width: 1000px;
-        }
-
-        /* Sections */
-        .section {
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .section h3 {
-            margin-bottom: 10px;
-            text-align: left;
-            width: 100%;
-        }
-
-        /* Upgrades, Achievements, Events, Quests */
-        .upgrade, .achievement, .event, .quest, .biome {
-            background-color: var(--upgrade-bg-color);
-            border: 1px solid #555;
-            border-radius: 8px;
-            padding: 15px;
-            width: 220px;
-            text-align: left;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .upgrade-button {
-            background-color: #008CBA;
-            color: #fff;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .upgrade-button:hover:not(:disabled) {
-            background-color: #007bb5;
-        }
-
-        .upgrade-button:disabled {
+        button:disabled {
             background-color: #888;
             cursor: not-allowed;
         }
 
-        .achievement.unlocked {
-            background-color: var(--achievement-unlocked-bg);
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        /* Scrollable Containers */
-        #biomes, #upgrades, #achievements, #events, #quests {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            border: 2px solid #555;
-            border-radius: 8px;
-            background-color: var(--biome-bg-color);
-        }
-
-        /* Leaderboard */
-        #leaderboard {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            background-color: var(--upgrade-bg-color);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1004;
-            animation: fadeInLeaderboard 0.5s ease-in-out;
-        }
-
-        @keyframes fadeInLeaderboard {
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
-
-        #leaderboard h3 {
-            margin-bottom: 10px;
-        }
-
-        #leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        #leaderboard-table th, #leaderboard-table td {
-            border: 1px solid #555;
-            padding: 8px;
-            text-align: center;
-        }
-
-        #leaderboard-table th {
-            background-color: #555;
-            color: #fff;
-        }
-
-        #leaderboard-close {
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #leaderboard-close:hover {
-            background-color: #c0392b;
-        }
-
-        /* Social Sharing Buttons */
-        .social-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .social-button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #555;
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .social-button:hover {
-            background-color: #777;
-        }
-
-        .social-buttons a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* Modals */
+        /* Modal Styles */
         .modal {
             display: none; /* Hidden by default */
             position: fixed;
@@ -375,6 +112,7 @@
             height: 100%; 
             overflow: auto; 
             background-color: var(--modal-bg-color); 
+            animation: fadeIn 0.5s;
         }
 
         .modal-content {
@@ -382,13 +120,14 @@
             margin: 5% auto; 
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; 
+            width: 90%; 
             max-width: 700px;
             border-radius: 10px;
             color: var(--text-color);
             text-align: left;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             position: relative;
+            animation: slideIn 0.5s;
         }
 
         .close-modal {
@@ -450,10 +189,15 @@
             to { opacity: 1; }
         }
 
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         /* Tooltip */
         .tooltip {
             visibility: hidden;
-            width: 120px;
+            width: 160px;
             background-color: var(--upgrade-bg-color);
             color: var(--text-color);
             text-align: center;
@@ -463,7 +207,7 @@
             z-index: 1;
             bottom: 125%; /* Position above the button */
             left: 50%;
-            margin-left: -60px;
+            margin-left: -80px;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -473,12 +217,135 @@
             visibility: visible;
             opacity: 1;
         }
+
+        /* Leaderboard Styles */
+        #leaderboard {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        #leaderboard-table th, #leaderboard-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #leaderboard-table th {
+            background-color: var(--upgrade-bg-color);
+        }
+
+        /* Social Sharing Buttons */
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Menu Styles */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #main-menu h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        #language-selector {
+            margin-top: 20px;
+        }
+
+        /* Game Interface Styles */
+        #game {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        #resources {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .resource {
+            background-color: var(--upgrade-bg-color);
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+            margin: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Control Buttons */
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Notification Styles */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--upgrade-bg-color);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1006;
+        }
+
+        /* Accessibility Enhancements */
+        button:focus {
+            outline: 2px solid #555;
+        }
+
     </style>
 </head>
 <body>
     <!-- Credits -->
     <div id="credits">
-        Made By <a href="https://staticquasar931.github.io/Pixel-Planet/" target="_blank" rel="noopener noreferrer">Static</a>
+        Made By <a href="https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet" target="_blank" rel="noopener noreferrer">Static</a>
     </div>
 
     <!-- Version Number -->
@@ -517,20 +384,23 @@
 
     <!-- Leaderboard Section -->
     <div id="leaderboard" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
-        <h3>🏅 Leaderboard</h3>
-        <table id="leaderboard-table">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Total Resources</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Leaderboard entries will be dynamically generated -->
-            </tbody>
-        </table>
-        <button id="leaderboard-close" onclick="closeLeaderboard()" aria-label="Close Leaderboard">Close Leaderboard</button>
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLeaderboard()" aria-label="Close Leaderboard">&times;</span>
+            <h3 id="leaderboard-title">🏅 Leaderboard</h3>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Total Resources</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Leaderboard entries will be dynamically generated -->
+                </tbody>
+            </table>
+            <button id="leaderboard-close" onclick="closeLeaderboard()" aria-label="Close Leaderboard">Close Leaderboard</button>
+        </div>
     </div>
 
     <!-- Social Sharing Buttons -->
@@ -566,7 +436,7 @@
     <div id="game">
         <h2>Your Planet</h2>
         <div id="resources">
-            <div class="resource" id="water">💧 Water: 0 / 1000 (Per Second: <span id="water-rate">1.0</span>)</div>
+            <div class="resource" id="water">💧 Water: 0 / 1K (Per Second: <span id="water-rate">1.0</span>)</div>
             <div class="resource" id="minerals">⛏ Minerals: 0 / 500 (Per Second: <span id="minerals-rate">0.0</span>)</div>
             <div class="resource" id="plants">🌱 Plants: 0 / 300 (Per Second: <span id="plants-rate">0.0</span>)</div>
             <div class="resource" id="energy">⚡ Energy: 0 / 200 (Per Second: <span id="energy-rate">0.0</span>)</div>
@@ -622,7 +492,7 @@
         </div>
 
         <!-- Control Buttons -->
-        <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <div class="control-buttons">
             <button onclick="saveGame()" aria-label="Save Game">💾 Save Game</button>
             <button onclick="unlockTerraform()" aria-label="Terraform Planet">🌍 Terraform Planet</button>
             <button onclick="resetGame()" id="reset-button" aria-label="Reset Game">🗑️ Reset Game</button>
@@ -640,6 +510,19 @@
             <a href="#" id="share-reddit-game" target="_blank" aria-label="Share on Reddit">
                 <button class="social-button">👽 Reddit</button>
             </a>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeFeedback()" aria-label="Close Feedback Modal">&times;</span>
+            <h2 id="feedback-modal-title">📝 Feedback</h2>
+            <form id="feedback-form">
+                <label for="feedback">Your Feedback:</label>
+                <textarea id="feedback" name="feedback" rows="4" cols="50" required></textarea>
+                <button type="submit" aria-label="Submit Feedback">Submit</button>
+            </form>
         </div>
     </div>
 
@@ -705,10 +588,10 @@
                 name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -722,16 +605,11 @@
         // Leaderboard Functions
         function showLeaderboard() {
             updateLeaderboard();
-            document.getElementById('leaderboard').style.display = 'flex';
+            openModal('leaderboard');
         }
 
         function closeLeaderboard() {
-            const leaderboard = document.getElementById('leaderboard');
-            leaderboard.style.animation = 'fadeOutLeaderboard 0.5s forwards';
-            setTimeout(() => {
-                leaderboard.style.display = 'none';
-                leaderboard.style.animation = '';
-            }, 500);
+            closeModal('leaderboard');
         }
 
         function updateLeaderboard() {
@@ -819,7 +697,8 @@
                 "InvalidPlayerName": "❌ Invalid name entered. Using default name 'Player'.",
                 "AllBiomesUnlocked": "🌟 Congratulations! You've unlocked all available biomes!",
                 "AlienEncounterReward": "👽 Alien technology received! Energy +100.",
-                "ResourcePlundered": "🚨 Pirates plundered your resources! Water -50, Minerals -30."
+                "ResourcePlundered": "🚨 Pirates plundered your resources! Water -50, Minerals -30.",
+                "FeedbackSubmitted": "✅ Thank you for your feedback!"
             },
             es: {
                 "ResourceGenerated": "🔄 ¡Recursos generados!",
@@ -849,7 +728,8 @@
                 "InvalidPlayerName": "❌ Nombre inválido ingresado. Usando el nombre predeterminado 'Player'.",
                 "AllBiomesUnlocked": "🌟 ¡Felicidades! ¡Has desbloqueado todos los biomas disponibles!",
                 "AlienEncounterReward": "👽 ¡Tecnología alienígena recibida! Energía +100.",
-                "ResourcePlundered": "🚨 ¡Piratas saquearon tus recursos! Agua -50, Minerales -30."
+                "ResourcePlundered": "🚨 ¡Piratas saquearon tus recursos! Agua -50, Minerales -30.",
+                "FeedbackSubmitted": "✅ ¡Gracias por tus comentarios!"
             }
             // Add more languages as needed
         };
@@ -868,11 +748,14 @@
         }
 
         function applyTranslations() {
-            // Translate button texts
+            // Translate button texts and labels
             document.querySelectorAll('button').forEach(button => {
-                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
+                const key = button.getAttribute('aria-label').replace(/-/g, ' ').trim();
                 if (translations[currentLanguage][key]) {
-                    button.innerText = translations[currentLanguage][key];
+                    // Avoid changing the text of modals and tooltips
+                    if (!button.classList.contains('social-button') && !button.classList.contains('close-modal')) {
+                        button.innerText = translations[currentLanguage][key];
+                    }
                 }
             });
 
@@ -884,17 +767,21 @@
                 }
             });
 
-            // Translate Help and Share buttons
+            // Translate Help and Share buttons specifically
             const helpButton = document.getElementById('help-button');
             const shareButton = document.getElementById('share-button');
             if (translations[currentLanguage]["Help"]) {
-                helpButton.innerText = translations[currentLanguage]["Help"];
+                helpButton.innerText = `❓ ${translations[currentLanguage]["Help"]}`;
             }
             if (translations[currentLanguage]["Share"]) {
-                shareButton.innerText = translations[currentLanguage]["Share"];
+                shareButton.innerText = `📤 ${translations[currentLanguage]["Share"]}`;
             }
 
-            // Translate other dynamic elements if needed
+            // Translate other static texts if necessary
+            const mainMenuTitle = document.querySelector('#main-menu h1');
+            if (translations[currentLanguage]["Pixel Planet"]) {
+                mainMenuTitle.innerText = `🌍 ${translations[currentLanguage]["Pixel Planet"]}`;
+            }
         }
 
         function updateDynamicContentLanguage() {
@@ -915,8 +802,6 @@
                     }
                 });
             });
-
-            // Update other dynamic content like tooltips if necessary
         }
 
         // Load Language on Init
@@ -1249,18 +1134,6 @@
                 }
             },
             {
-                name: "Technology Upgrade",
-                description: "Technology Upgrade! Your resource generation rates have been enhanced.",
-                effect: () => {
-                    waterPerSecond = Math.min(waterPerSecond + 2, MAX_RESOURCE_RATE.waterPerSecond);
-                    mineralsPerSecond = Math.min(mineralsPerSecond + 1, MAX_RESOURCE_RATE.mineralsPerSecond);
-                    plantsPerSecond = Math.min(plantsPerSecond + 1, MAX_RESOURCE_RATE.plantsPerSecond);
-                    energyPerSecond = Math.min(energyPerSecond + 0.5, MAX_RESOURCE_RATE.energyPerSecond);
-                    updateResourcesUI();
-                }
-            },
-            // Additional diverse events
-            {
                 name: "Solar Flare",
                 description: "A solar flare disrupts energy generation temporarily.",
                 effect: () => {
@@ -1315,6 +1188,11 @@
                     if (quest.reward) quest.reward();
                     showNotification("QuestCompleted", [quest.name, quest.rewardDescription]);
                     generateQuestsUI();
+                    trackGAEvent('quest_completed', {
+                        'event_category': 'Quest',
+                        'event_label': quest.name,
+                        'value': quest.rewardDescription
+                    });
                     debouncedSaveGame();
                 }
             }
@@ -1381,7 +1259,7 @@
         function loadFromSave(gameState) {
             try {
                 document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('game').style.display = 'flex';
+                document.getElementById('game').style.display = 'block';
                 resources = gameState.resources;
                 storage = gameState.storage;
                 biomes = gameState.biomes;
@@ -1428,7 +1306,7 @@
             }
             clearAllIntervals();
             document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game').style.display = 'flex';
+            document.getElementById('game').style.display = 'block';
             resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
             storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
             biomes = [];
@@ -1537,42 +1415,41 @@
                 upgradesRow.style.justifyContent = 'flex-start';
 
                 categories[category].forEach(upgrade => {
-                    // Only display upgrade if affordable
-                    if (resources.water >= upgrade.cost) {
-                        const upgradeDiv = document.createElement('div');
-                        upgradeDiv.className = 'upgrade';
+                    // Only display upgrade if affordable or already purchased
+                    const isAffordable = resources.water >= upgrade.cost;
+                    const upgradeDiv = document.createElement('div');
+                    upgradeDiv.className = 'upgrade';
 
-                        const name = document.createElement('span');
-                        name.innerText = `${upgrade.name}`;
-                        upgradeDiv.appendChild(name);
+                    const name = document.createElement('span');
+                    name.innerText = `${upgrade.name}`;
+                    upgradeDiv.appendChild(name);
 
-                        const description = document.createElement('span');
-                        description.innerText = `${upgrade.description}`;
-                        upgradeDiv.appendChild(description);
+                    const description = document.createElement('span');
+                    description.innerText = `${upgrade.description}`;
+                    upgradeDiv.appendChild(description);
 
-                        const cost = document.createElement('span');
-                        cost.innerText = `Cost: ${upgrade.cost} 💧`;
-                        upgradeDiv.appendChild(cost);
+                    const cost = document.createElement('span');
+                    cost.innerText = `Cost: ${formatNumber(upgrade.cost)} 💧`;
+                    upgradeDiv.appendChild(cost);
 
-                        const button = document.createElement('button');
-                        button.className = 'upgrade-button';
-                        button.innerText = `Buy (Level ${upgrade.level})`;
-                        button.disabled = resources.water < upgrade.cost;
-                        button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
-                        button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
-                        button.onclick = () => buyUpgrade(upgrade.key);
-                        button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
+                    const button = document.createElement('button');
+                    button.className = 'upgrade-button';
+                    button.innerText = `Buy (Level ${upgrade.level})`;
+                    button.disabled = !isAffordable;
+                    button.style.backgroundColor = isAffordable ? varCSS('--button-bg-color') : '#888';
+                    button.style.cursor = isAffordable ? 'pointer' : 'not-allowed';
+                    button.onclick = () => buyUpgrade(upgrade.key);
+                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
 
-                        // Add tooltip
-                        const tooltip = document.createElement('span');
-                        tooltip.className = 'tooltip';
-                        tooltip.innerText = upgrade.description;
-                        button.appendChild(tooltip);
+                    // Add tooltip
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerText = upgrade.description;
+                    button.appendChild(tooltip);
 
-                        upgradeDiv.appendChild(button);
+                    upgradeDiv.appendChild(button);
 
-                        upgradesRow.appendChild(upgradeDiv);
-                    }
+                    upgradesRow.appendChild(upgradeDiv);
                 });
 
                 categoryDiv.appendChild(upgradesRow);
@@ -1680,7 +1557,7 @@
         // Display Story Milestones
         function generateStoryUI() {
             const storyDiv = document.getElementById('story');
-            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
+            storyDiv.innerHTML = ''; // Reset story section
 
             for (let key in storyMilestones) {
                 const milestone = storyMilestones[key];
@@ -1717,13 +1594,23 @@
             biomes.forEach((biome, index) => {
                 const biomeDiv = document.createElement('div');
                 biomeDiv.className = 'biome';
-                let bonusText = '';
-                for (let key in biome.bonuses) {
-                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+                biomeDiv.innerText = `${biome.name} Biome\n${formatBiomeBonuses(biome.bonuses)}`;
+
+                if (index === biomes.length - 1) { // Newly unlocked biome
+                    biomeDiv.style.animation = 'highlightBiome 2s ease-in-out';
                 }
-                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}`;
+
                 biomesDiv.appendChild(biomeDiv);
             });
+        }
+
+        // Format Biome Bonuses
+        function formatBiomeBonuses(bonuses) {
+            let bonusText = '';
+            for (let key in bonuses) {
+                bonusText += `+${bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+            }
+            return bonusText;
         }
 
         // Unlock Terraform (New Biome)
@@ -1753,6 +1640,7 @@
             biomes.push(newBiome);
             displayBiomes();
             generateStoryUI();
+            checkQuests();
         }
 
         // Generate Random Biome
@@ -1761,8 +1649,9 @@
             let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
 
             if (availableBiomes.length === 0) {
-                // All biomes unlocked, recycle or notify player
-                availableBiomes = biomeNames; // Allow duplicates if desired
+                // All biomes unlocked, notify player
+                showNotification("AllBiomesUnlocked");
+                return { name: "No New Biome", id: biomes.length + 1, bonuses: {} };
             }
 
             const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
@@ -1863,7 +1752,7 @@
         }
 
         // Notifications and Modals
-        function openConfirmationModal(messageKey, onConfirm) {
+        async function openConfirmationModal(messageKey, onConfirm) {
             return new Promise((resolve) => {
                 const modal = document.createElement('div');
                 modal.className = 'modal';
@@ -1981,6 +1870,7 @@
             modalContent.appendChild(messagePara);
             modalContent.appendChild(okBtn);
             modal.appendChild(modalContent);
+
             document.body.appendChild(modal);
 
             // Focus management
@@ -2026,49 +1916,92 @@
 
         // Function to open help modal
         function openHelp() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'block';
-            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) firstFocusable.focus();
-
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', trapTabKeyTutorial);
+            openModal('tutorial-modal');
         }
 
         // Function to close help modal
         function closeTutorial() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'none';
-            // Remove event listener when modal is closed
-            modal.removeEventListener('keydown', trapTabKeyTutorial);
+            closeModal('tutorial-modal');
         }
 
-        function trapTabKeyTutorial(e) {
+        // Generic Modal Functions
+        function openModal(modalId) {
+            closeAllModals();
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) firstFocusable.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', trapTabKey);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            modal.removeEventListener('keydown', trapTabKey);
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+                modal.removeEventListener('keydown', trapTabKey);
+            });
+        }
+
+        function trapTabKey(e) {
+            const modal = e.currentTarget;
             const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-            const modal = document.getElementById('tutorial-modal');
-            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
             const focusableContent = modal.querySelectorAll(focusableElements);
-            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+            const firstElement = focusableContent[0];
+            const lastElement = focusableContent[focusableContent.length - 1];
 
             if (e.key === 'Tab') {
                 if (e.shiftKey) { // Shift + Tab
-                    if (document.activeElement === firstFocusableElement) {
+                    if (document.activeElement === firstElement) {
                         e.preventDefault();
-                        lastFocusableElement.focus();
+                        lastElement.focus();
                     }
                 } else { // Tab
-                    if (document.activeElement === lastFocusableElement) {
+                    if (document.activeElement === lastElement) {
                         e.preventDefault();
-                        firstFocusableElement.focus();
+                        firstElement.focus();
                     }
                 }
             }
 
             if (e.key === 'Escape') {
                 e.preventDefault();
-                closeTutorial();
+                closeAllModals();
             }
         }
+
+        // Function to buy upgrades already handled
+
+        // Reset Upgrades already handled
+
+        // Achievements UI and Check already handled
+
+        // Quests UI and Check already handled
+
+        // Story UI and Check already handled
+
+        // Display Biomes already handled
+
+        // Unlock Terraform and New Biome already handled
+
+        // Event System already handled
+
+        // Feedback Modal Handling
+        document.getElementById('feedback-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const feedback = sanitizeInput(document.getElementById('feedback').value);
+            // Send feedback via email or backend service
+            // Example using EmailJS or similar service
+            // After successful submission:
+            showNotification("FeedbackSubmitted");
+            closeModal('feedback-modal');
+        });
 
         // Page Visibility Handling
         document.addEventListener("visibilitychange", function() {
@@ -2107,6 +2040,10 @@
 
         // Initialize Game
         function initGame() {
+            loadLanguage();
+            updateSocialSharing();
+            detectDevice();
+
             const savedGame = localStorage.getItem('PixelPlanetSave');
             if (savedGame) {
                 const parsedSave = JSON.parse(savedGame);
@@ -2120,7 +2057,15 @@
             } else {
                 startNewGame();
             }
-            detectDevice();
+
+            // Show Continue button if a saved game exists
+            if (savedGame) {
+                document.getElementById('continue-button').style.display = 'inline-block';
+            }
+
+            // Update version number display
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
+            document.getElementById('version').innerText = `Version ${savedVersion}`;
         }
 
         // Calculate Total Resources
@@ -2180,31 +2125,10 @@
             });
         }
 
-        // Language Support already handled
-
         // Leaderboard and Social Sharing Integration
-        function updateSocialSharing() {
-            const currentPlayer = {
-                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
-                totalResources: calculateTotalResources()
-            };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
-            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
-
-            document.getElementById('share-twitter').href = twitterURL;
-            document.getElementById('share-facebook').href = facebookURL;
-            document.getElementById('share-reddit').href = redditURL;
-
-            document.getElementById('share-twitter-game').href = twitterURL;
-            document.getElementById('share-facebook-game').href = facebookURL;
-            document.getElementById('share-reddit-game').href = redditURL;
-        }
+        // Already handled in updateSocialSharing()
 
         // Notification Messages and Translations already handled
-
-        // Function to show translated notifications is already defined
 
         // Function to buy upgrades already handled
 
@@ -2316,8 +2240,6 @@
             clearInterval(eventInterval);
         }
 
-        // Leaderboard Functions already handled
-
         // Tracking GA Events
         function trackGAEvent(eventName, eventParams) {
             if (typeof gtag === 'function') {
@@ -2327,18 +2249,12 @@
 
         // Initialize Language and Social Sharing
         document.addEventListener("DOMContentLoaded", function() {
-            loadLanguage();
-            updateSocialSharing();
-
+            // Language is already loaded in initGame()
             // Show Continue button if a saved game exists
             const savedGame = localStorage.getItem('PixelPlanetSave');
             if (savedGame) {
                 document.getElementById('continue-button').style.display = 'inline-block';
             }
-
-            // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
-            document.getElementById('version').innerText = `Version ${savedVersion}`;
         });
 
         // Accessibility Enhancements are already integrated
