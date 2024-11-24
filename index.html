@@ -966,7 +966,7 @@
             }
 
             // Open share URL in new tab
-            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank');
+            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank', 'noopener,noreferrer');
 
             // Reward the player
             resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
@@ -1201,7 +1201,7 @@
                 description: "Collect 100 Water",
                 condition: () => resources.water >= 100,
                 unlocked: false,
-                reward: () => { resources.water += 50; },
+                reward: () => { resources.water = Math.min(resources.water + 50, storage.water, MAX_RESOURCES.water); },
                 rewardDescription: "Water +50",
             },
             firstMineral: {
@@ -1209,7 +1209,7 @@
                 description: "Collect 50 Minerals",
                 condition: () => resources.minerals >= 50,
                 unlocked: false,
-                reward: () => { resources.minerals += 25; },
+                reward: () => { resources.minerals = Math.min(resources.minerals + 25, storage.minerals, MAX_RESOURCES.minerals); },
                 rewardDescription: "Minerals +25",
             },
             reach1000Water: {
@@ -1217,7 +1217,7 @@
                 description: "Collect 1,000 Water",
                 condition: () => resources.water >= 1000,
                 unlocked: false,
-                reward: () => { resources.water += 200; },
+                reward: () => { resources.water = Math.min(resources.water + 200, storage.water, MAX_RESOURCES.water); },
                 rewardDescription: "Water +200",
             },
             reach500Minerals: {
@@ -1225,7 +1225,7 @@
                 description: "Collect 500 Minerals",
                 condition: () => resources.minerals >= 500,
                 unlocked: false,
-                reward: () => { resources.energy += 50; },
+                reward: () => { resources.energy = Math.min(resources.energy + 50, storage.energy, MAX_RESOURCES.energy); },
                 rewardDescription: "Energy +50",
             },
             // Add more achievements as needed
@@ -1236,7 +1236,7 @@
                 name: "Daily Harvest",
                 description: "Collect 50 Plants today",
                 condition: () => resources.plants >= 50,
-                reward: () => { resources.water += 100; },
+                reward: () => { resources.water = Math.min(resources.water + 100, storage.water, MAX_RESOURCES.water); },
                 rewardDescription: "Water +100",
                 completed: false,
             },
@@ -1244,7 +1244,7 @@
                 name: "Mineral Mastery",
                 description: "Collect 300 Minerals this week",
                 condition: () => resources.minerals >= 300,
-                reward: () => { resources.energy += 50; },
+                reward: () => { resources.energy = Math.min(resources.energy + 50, storage.energy, MAX_RESOURCES.energy); },
                 rewardDescription: "Energy +50",
                 completed: false,
             },
@@ -1252,7 +1252,7 @@
                 name: "Weekly Energy Boost",
                 description: "Collect 500 Energy this week",
                 condition: () => resources.energy >= 500,
-                reward: () => { energyPerSecond += 5; },
+                reward: () => { energyPerSecond = Math.min(energyPerSecond + 5, MAX_RESOURCE_RATE.energyPerSecond); },
                 rewardDescription: "Energy Production +5/sec",
                 completed: false,
             },
@@ -1260,7 +1260,7 @@
                 name: "Daily Mineral Drive",
                 description: "Collect 100 Minerals today",
                 condition: () => resources.minerals >= 100,
-                reward: () => { mineralsPerSecond += 2; },
+                reward: () => { mineralsPerSecond = Math.min(mineralsPerSecond + 2, MAX_RESOURCE_RATE.mineralsPerSecond); },
                 rewardDescription: "Minerals Production +2/sec",
                 completed: false,
             },
@@ -1378,7 +1378,7 @@
         function saveGame() {
             try {
                 const saveData = {
-                    version: incrementVersion(),
+                    version: "0.4", // Fixed version number
                     resources,
                     storage,
                     biomes,
@@ -1973,15 +1973,6 @@
             }
         }
 
-        // Increment Version Number
-        function incrementVersion() {
-            let currentVersion = parseFloat(localStorage.getItem('PixelPlanetVersion')) || 0.3;
-            currentVersion = (Math.round((currentVersion + 0.1) * 10) / 10).toFixed(1);
-            localStorage.setItem('PixelPlanetVersion', currentVersion);
-            document.getElementById('version').innerText = `Version ${currentVersion}`;
-            return currentVersion;
-        }
-
         // Change Theme
         function toggleTheme() {
             const currentTheme = localStorage.getItem('PixelPlanetTheme') || 'default';
@@ -2152,7 +2143,7 @@
             }
 
             // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.3';
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.4';
             document.getElementById('version').innerText = `Version ${savedVersion}`;
         });
 
@@ -2238,14 +2229,83 @@
         }
 
         // Function to confirm action without using alert/confirm
-        function confirmAction(message, callback) {
-            openConfirmationModal(message, callback);
+        function confirmModal(message, onConfirm) {
+            return new Promise((resolve) => {
+                openConfirmationModal(message, () => {
+                    onConfirm();
+                    resolve(true);
+                });
+            });
         }
 
         // Function to alert message without using alert
+        function openAlertModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Alert Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const okBtn = document.createElement('button');
+            okBtn.innerText = 'OK';
+            okBtn.onclick = () => { document.body.removeChild(modal); };
+            okBtn.setAttribute('aria-label', 'OK');
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(okBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            okBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to open alert modal
         function alertMessage(message) {
             openAlertModal(message);
         }
+
+        // Leaderboard and Social Sharing Integration
+        // (Already handled in respective scripts)
 
         // Initialize Device Detection
         detectDevice();
