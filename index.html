@@ -5,17 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Pixel Planet</title>
     <style>
+        /* CSS Variables for Theming */
+        :root {
+            --background-color: #1e1e1e;
+            --text-color: #ffffff;
+            --button-color: #4CAF50;
+            --button-hover-color: #45a049;
+            --upgrade-bg-color: #333;
+            --achievement-unlocked-bg: #4CAF50;
+            --event-bg-color: #444;
+            --biome-bg-color: #2e2e2e;
+            --notification-bg-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --button-color: #bb86fc;
+            --button-hover-color: #3700b3;
+            --upgrade-bg-color: #1f1f1f;
+            --achievement-unlocked-bg: #03dac6;
+            --event-bg-color: #333;
+            --biome-bg-color: #1e1e1e;
+            --notification-bg-color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --background-color: #f0f0f0;
+            --text-color: #000000;
+            --button-color: #4CAF50;
+            --button-hover-color: #45a049;
+            --upgrade-bg-color: #ffffff;
+            --achievement-unlocked-bg: #4CAF50;
+            --event-bg-color: #e0e0e0;
+            --biome-bg-color: #f9f9f9;
+            --notification-bg-color: rgba(255, 255, 255, 0.9);
+        }
+
         /* General Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            background-color: var(--background-color);
+            color: var(--text-color);
             text-align: center;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         /* Notification */
@@ -23,13 +63,15 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #fff;
+            background-color: var(--notification-bg-color);
+            color: var(--text-color);
             padding: 15px 20px;
             border-radius: 5px;
             display: none;
             z-index: 1000;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            max-width: 300px;
+            word-wrap: break-word;
         }
 
         @keyframes fadein {
@@ -53,7 +95,7 @@
         }
 
         /* Headings */
-        h1, h2, h3 {
+        h1, h2, h3, h4 {
             margin: 10px 0;
         }
 
@@ -63,15 +105,16 @@
             margin: 10px;
             border: none;
             border-radius: 8px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: var(--button-color);
+            color: var(--text-color);
             font-size: 1em;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
+            min-width: 150px;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: var(--button-hover-color);
             transform: scale(1.05);
         }
 
@@ -79,8 +122,14 @@
             transform: scale(0.95);
         }
 
+        button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* Resources and Upgrades */
-        .resource, .upgrade {
+        .resource, .upgrade, .achievement, .event, .biome, .quest {
             font-size: 1.2em;
             margin: 10px 0;
         }
@@ -92,8 +141,11 @@
             border: 2px solid #444;
             display: inline-block;
             border-radius: 8px;
-            background-color: #2e2e2e;
+            background-color: var(--biome-bg-color);
             width: 150px;
+            white-space: pre-line;
+            word-wrap: break-word;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         /* Upgrades Section */
@@ -107,13 +159,14 @@
         }
 
         .upgrade {
-            background-color: #333;
+            background-color: var(--upgrade-bg-color);
             border: 1px solid #555;
             border-radius: 8px;
             padding: 15px;
             margin: 10px;
             width: 220px;
             text-align: left;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         .upgrade span {
@@ -140,18 +193,19 @@
         }
 
         .achievement {
-            background-color: #333;
+            background-color: var(--upgrade-bg-color);
             border: 1px solid #555;
             border-radius: 8px;
             padding: 15px;
             margin: 10px;
             width: 220px;
             text-align: left;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         .achievement.unlocked {
-            background-color: #4CAF50;
-            color: white;
+            background-color: var(--achievement-unlocked-bg);
+            color: #ffffff;
         }
 
         /* Events Section */
@@ -165,24 +219,53 @@
         }
 
         .event {
-            background-color: #444;
+            background-color: var(--event-bg-color);
             border: 1px solid #666;
             border-radius: 8px;
             padding: 15px;
             margin: 10px;
             width: 220px;
             text-align: left;
+            white-space: pre-line;
+            word-wrap: break-word;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        /* Quests Section */
+        #quests {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quest {
+            background-color: var(--upgrade-bg-color);
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            width: 220px;
+            text-align: left;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        /* Theme Selector */
+        #theme-selector {
+            margin-top: 10px;
         }
 
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .upgrade, .achievement, .event, .biome {
+            .upgrade, .achievement, .event, .biome, .quest {
                 width: 45%;
             }
         }
 
         @media (max-width: 768px) {
-            .upgrade, .achievement, .event, .biome {
+            .upgrade, .achievement, .event, .biome, .quest {
                 width: 70%;
             }
         }
@@ -193,7 +276,7 @@
                 font-size: 1em;
             }
 
-            .upgrade, .achievement, .event, .biome {
+            .upgrade, .achievement, .event, .biome, .quest {
                 width: 90%;
             }
         }
@@ -209,6 +292,17 @@
     <!-- Notification -->
     <div id="notification" aria-live="polite"></div>
 
+    <!-- Theme Selector -->
+    <div id="theme-selector">
+        <label for="theme">🎨 Choose Theme:</label>
+        <select id="theme" onchange="changeTheme(this.value)">
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <!-- Add more themes as needed -->
+        </select>
+    </div>
+
     <!-- Main Menu -->
     <div id="main-menu">
         <h1>🌍 Pixel Planet</h1>
@@ -219,38 +313,53 @@
     <div id="game" style="display: none;">
         <h2>Your Planet</h2>
         <div id="resources">
-            <div class="resource" id="water">💧 Water: 0</div>
-            <div class="resource" id="minerals">⛏ Minerals: 0</div>
-            <div class="resource" id="plants">🌱 Plants: 0</div>
-            <div class="resource" id="energy">⚡ Energy: 0</div>
+            <div class="resource" id="water">💧 Water: 0 / 1000</div>
+            <div class="resource" id="minerals">⛏ Minerals: 0 / 500</div>
+            <div class="resource" id="plants">🌱 Plants: 0 / 300</div>
+            <div class="resource" id="energy">⚡ Energy: 0 / 200</div>
         </div>
-        <button onclick="generateResources()">Generate Resources</button>
+        <button onclick="generateResources()">🔄 Generate Resources</button>
 
         <!-- Biomes Section -->
         <div id="biomes"></div>
 
         <!-- Upgrades Section -->
-        <h3>Upgrades</h3>
+        <h3>💼 Upgrades</h3>
         <div id="upgrades">
             <!-- Upgrades will be dynamically generated -->
         </div>
 
         <!-- Achievements Section -->
-        <h3>Achievements</h3>
+        <h3>🏆 Achievements</h3>
         <div id="achievements">
             <!-- Achievements will be dynamically generated -->
         </div>
 
         <!-- Events Section -->
-        <h3>Events</h3>
+        <h3>🎉 Events</h3>
         <div id="events">
             <!-- Events will be dynamically generated -->
         </div>
 
+        <!-- Quests Section -->
+        <h3>🎯 Quests</h3>
+        <div id="quests">
+            <!-- Quests will be dynamically generated -->
+        </div>
+
         <!-- Control Buttons -->
-        <button onclick="saveGame()">Save Game</button>
-        <button onclick="unlockTerraform()">Terraform Planet</button>
+        <button onclick="saveGame()">💾 Save Game</button>
+        <button onclick="unlockTerraform()">🌍 Terraform Planet</button>
+        <button onclick="toggleMusic()">🎵 Toggle Music</button>
+        <button onclick="toggleSound()">🔊 Toggle Sound Effects</button>
     </div>
+
+    <!-- Audio Elements -->
+    <audio id="background-music" src="https://example.com/path_to_music.mp3" loop autoplay></audio>
+    <audio id="upgrade-sound" src="https://example.com/path_to_upgrade_sound.mp3"></audio>
+    <audio id="event-sound" src="https://example.com/path_to_event_sound.mp3"></audio>
+    <audio id="achievement-sound" src="https://example.com/path_to_achievement_sound.mp3"></audio>
+    <audio id="quest-sound" src="https://example.com/path_to_quest_sound.mp3"></audio>
 
     <script>
         // Game State
@@ -261,56 +370,85 @@
             energy: 0
         };
 
+        let storage = {
+            water: 1000,
+            minerals: 500,
+            plants: 300,
+            energy: 200
+        };
+
         let biomes = [];
 
         let upgrades = {
             waterBoost: {
                 name: "🔧 Improve Water Collection",
                 description: "+10 Water per second",
+                baseCost: 100,
                 cost: 100,
-                effect: () => { waterPerSecond += 10; },
+                effect: (level) => { waterPerSecond += 10; },
+                level: 0,
                 purchased: false,
                 category: "Resource Boost"
             },
             mineralsBoost: {
                 name: "🔧 Improve Mineral Extraction",
                 description: "+5 Minerals per second",
+                baseCost: 200,
                 cost: 200,
-                effect: () => { mineralsPerSecond += 5; },
+                effect: (level) => { mineralsPerSecond += 5; },
+                level: 0,
                 purchased: false,
                 category: "Resource Boost"
             },
             plantBoost: {
                 name: "🔧 Enhance Plant Growth",
                 description: "+3 Plants per second",
+                baseCost: 150,
                 cost: 150,
-                effect: () => { plantsPerSecond += 3; },
+                effect: (level) => { plantsPerSecond += 3; },
+                level: 0,
                 purchased: false,
                 category: "Resource Boost"
             },
             energyBoost: {
                 name: "🔧 Boost Energy Generation",
                 description: "+2 Energy per second",
+                baseCost: 120,
                 cost: 120,
-                effect: () => { energyPerSecond += 2; },
+                effect: (level) => { energyPerSecond += 2; },
+                level: 0,
                 purchased: false,
                 category: "Resource Boost"
             },
             waterEfficiency: {
                 name: "⚙️ Water Efficiency",
                 description: "Reduce Water consumption by 10%",
+                baseCost: 300,
                 cost: 300,
-                effect: () => { waterConsumption *= 0.9; },
+                effect: (level) => { waterConsumption *= 0.9; },
+                level: 0,
                 purchased: false,
                 category: "Efficiency Improvement"
             },
             mineralEfficiency: {
                 name: "⚙️ Mineral Efficiency",
                 description: "Reduce Mineral consumption by 10%",
+                baseCost: 350,
                 cost: 350,
-                effect: () => { mineralConsumption *= 0.9; },
+                effect: (level) => { mineralConsumption *= 0.9; },
+                level: 0,
                 purchased: false,
                 category: "Efficiency Improvement"
+            },
+            waterStorage: {
+                name: "🏗️ Expand Water Storage",
+                description: "Increase Water storage capacity by 500",
+                baseCost: 300,
+                cost: 300,
+                effect: (level) => { storage.water += 500; },
+                level: 0,
+                purchased: false,
+                category: "Storage Upgrade"
             },
             // Add more upgrades as needed
         };
@@ -332,37 +470,180 @@
                 name: "First Water",
                 description: "Collect 100 Water",
                 condition: () => resources.water >= 100,
-                unlocked: false
+                unlocked: false,
+                reward: () => { resources.water += 50; },
+                sound: 'achievement-sound'
             },
             firstMineral: {
                 name: "First Mineral",
                 description: "Collect 50 Minerals",
                 condition: () => resources.minerals >= 50,
-                unlocked: false
+                unlocked: false,
+                reward: () => { resources.minerals += 25; },
+                sound: 'achievement-sound'
+            },
+            reach1000Water: {
+                name: "Water Master",
+                description: "Collect 1,000 Water",
+                condition: () => resources.water >= 1000,
+                unlocked: false,
+                reward: () => { resources.water += 200; },
+                sound: 'achievement-sound'
+            },
+            reach500Minerals: {
+                name: "Mineral Tycoon",
+                description: "Collect 500 Minerals",
+                condition: () => resources.minerals >= 500,
+                unlocked: false,
+                reward: () => { resources.energy += 50; },
+                sound: 'achievement-sound'
             },
             // Add more achievements as needed
         };
 
-        let events = [];
+        let quests = {
+            dailyHarvest: {
+                name: "Daily Harvest",
+                description: "Collect 50 Plants today",
+                condition: () => resources.plants >= 50,
+                reward: () => { resources.water += 100; },
+                completed: false,
+                sound: 'quest-sound'
+            },
+            mineralMastery: {
+                name: "Mineral Mastery",
+                description: "Collect 300 Minerals this week",
+                condition: () => resources.minerals >= 300,
+                reward: () => { resources.energy += 50; },
+                completed: false,
+                sound: 'quest-sound'
+            },
+            // Add more quests as needed
+        };
 
-        // Notifications
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.innerText = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
+        let storyMilestones = {
+            unlockFirstBiome: {
+                condition: () => biomes.length >= 1,
+                text: "🌟 You've unlocked your first biome! Explore and harness its resources to expand your planet.",
+                unlocked: false
+            },
+            reach500Water: {
+                condition: () => resources.water >= 500,
+                text: "💧 With ample water, your planet begins to flourish. New possibilities emerge!",
+                unlocked: false
+            },
+            // Add more story milestones as needed
+        };
+
+        // Events
+        const eventTypes = [
+            {
+                name: "Resource Boom",
+                description: "🌟 A sudden boom increases your Water and Minerals!",
+                effect: () => {
+                    resources.water += 50;
+                    resources.minerals += 25;
+                    playSound('event-sound');
+                }
+            },
+            {
+                name: "Drought",
+                description: "🔥 A drought decreases your Water supply!",
+                effect: () => {
+                    resources.water = Math.max(0, resources.water - 30);
+                    playSound('event-sound');
+                }
+            },
+            {
+                name: "Mineral Surge",
+                description: "⚒️ Mineral Surge! You received an extra 40 Minerals!",
+                effect: () => {
+                    resources.minerals += 40;
+                    playSound('event-sound');
+                }
+            },
+            {
+                name: "Plant Overgrowth",
+                description: "🌱 Plant Overgrowth! You received an extra 20 Plants!",
+                effect: () => {
+                    resources.plants += 20;
+                    playSound('event-sound');
+                }
+            },
+            // Add more events as needed
+        ];
+
+        // Quests Completion and Reset
+        function checkQuests() {
+            for (let key in quests) {
+                const quest = quests[key];
+                if (!quest.completed && quest.condition()) {
+                    quest.completed = true;
+                    quest.reward();
+                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: +${quest.reward().name}`);
+                    playSound(quest.sound);
+                    generateQuestsUI();
+                    saveGame();
+                }
+            }
         }
 
-        // Initialize Game
-        function initGame() {
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                loadFromSave(JSON.parse(savedGame));
-            } else {
-                startNewGame();
+        function resetQuests() {
+            for (let key in quests) {
+                quests[key].completed = false;
             }
+            generateQuestsUI();
+        }
+
+        // Save Game
+        function saveGame() {
+            const saveData = {
+                resources,
+                storage,
+                biomes,
+                upgrades,
+                waterPerSecond,
+                mineralsPerSecond,
+                plantsPerSecond,
+                energyPerSecond,
+                achievements,
+                quests,
+                storyMilestones,
+                lastUpdateTime: Date.now()
+            };
+            localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
+            showNotification("💾 Game saved!");
+        }
+
+        // Load from Save Data
+        function loadFromSave(gameState) {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resources = gameState.resources;
+            storage = gameState.storage;
+            biomes = gameState.biomes;
+            upgrades = gameState.upgrades;
+            waterPerSecond = gameState.waterPerSecond;
+            mineralsPerSecond = gameState.mineralsPerSecond;
+            plantsPerSecond = gameState.plantsPerSecond;
+            energyPerSecond = gameState.energyPerSecond;
+            achievements = gameState.achievements;
+            quests = gameState.quests;
+            storyMilestones = gameState.storyMilestones;
+            updateResourcesUI();
+            generateUpgradesUI();
+            generateAchievementsUI();
+            generateQuestsUI();
+            displayBiomes();
+            handleOfflineResourceGeneration(gameState.lastUpdateTime);
+            startResourceGeneration();
+            startAutosave();
+            startEventSystem();
+            scheduleQuestReset();
+            checkAchievements();
+            checkQuests();
+            generateStoryUI();
+            showNotification("✅ Game loaded successfully!");
         }
 
         // Start New Game
@@ -370,9 +651,11 @@
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game').style.display = 'flex';
             resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
+            storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
             biomes = [];
             resetUpgrades();
             resetAchievements();
+            resetQuests();
             waterPerSecond = 1;
             mineralsPerSecond = 0;
             plantsPerSecond = 0;
@@ -380,30 +663,48 @@
             updateResourcesUI();
             generateUpgradesUI();
             generateAchievementsUI();
+            generateQuestsUI();
             displayBiomes();
             startResourceGeneration();
             startAutosave();
             startEventSystem();
-            showNotification("New game started! Welcome to Pixel Planet.");
+            scheduleQuestReset();
+            showNotification("🚀 New game started! Welcome to Pixel Planet.");
+            playSound('achievement-sound');
+            saveGame();
         }
 
         // Generate Resources Manually
         function generateResources() {
-            resources.water += 10;
-            resources.minerals += 5;
-            resources.plants += 3;
-            resources.energy += 2;
+            addResource('water', 10);
+            addResource('minerals', 5);
+            addResource('plants', 3);
+            addResource('energy', 2);
             updateResourcesUI();
             checkAchievements();
-            showNotification("Resources generated!");
+            checkQuests();
+            showNotification("🔄 Resources generated!");
+            playSound('event-sound');
+            saveGame();
+        }
+
+        // Add Resource with Storage Limit
+        function addResource(resource, amount) {
+            resources[resource] = Math.min(resources[resource] + amount, storage[resource]);
         }
 
         // Update Resources UI
         function updateResourcesUI() {
-            document.getElementById('water').innerText = `💧 Water: ${resources.water}`;
-            document.getElementById('minerals').innerText = `⛏ Minerals: ${resources.minerals}`;
-            document.getElementById('plants').innerText = `🌱 Plants: ${resources.plants}`;
-            document.getElementById('energy').innerText = `⚡ Energy: ${resources.energy}`;
+            const waterElem = document.getElementById('water');
+            const mineralsElem = document.getElementById('minerals');
+            const plantsElem = document.getElementById('plants');
+            const energyElem = document.getElementById('energy');
+
+            waterElem.innerText = `💧 Water: ${resources.water} / ${storage.water}`;
+            mineralsElem.innerText = `⛏ Minerals: ${resources.minerals} / ${storage.minerals}`;
+            plantsElem.innerText = `🌱 Plants: ${resources.plants} / ${storage.plants}`;
+            energyElem.innerText = `⚡ Energy: ${resources.energy} / ${storage.energy}`;
+
             generateUpgradesUI(); // Update upgrade button states based on new resource counts
         }
 
@@ -468,14 +769,17 @@
 
             if (resources.water >= upgrade.cost) {
                 resources.water -= upgrade.cost;
-                upgrade.effect();
+                upgrade.level += 1;
+                upgrade.effect(upgrade.level);
                 upgrade.purchased = true;
                 updateResourcesUI();
                 generateAchievementsUI();
                 checkAchievements();
-                showNotification(`Upgrade "${upgrade.name}" purchased!`);
+                showNotification(`🔧 Upgrade "${upgrade.name}" purchased!`);
+                playSound(upgrade.sound || 'upgrade-sound');
+                saveGame();
             } else {
-                showNotification("Not enough Water to purchase this upgrade!");
+                showNotification("❌ Not enough Water to purchase this upgrade!");
             }
         }
 
@@ -483,10 +787,11 @@
         function resetUpgrades() {
             for (let key in upgrades) {
                 upgrades[key].purchased = false;
+                upgrades[key].level = 0;
             }
         }
 
-        // Generate Achievements UI
+        // Achievements UI
         function generateAchievementsUI() {
             const achievementsDiv = document.getElementById('achievements');
             achievementsDiv.innerHTML = ''; // Clear existing achievements
@@ -511,14 +816,17 @@
             }
         }
 
-        // Check Achievements
+        // Check and Unlock Achievements
         function checkAchievements() {
             for (let key in achievements) {
                 const achievement = achievements[key];
                 if (!achievement.unlocked && achievement.condition()) {
                     achievement.unlocked = true;
+                    if (achievement.reward) achievement.reward();
+                    showNotification(`🏆 Achievement Unlocked: ${achievement.name}`);
+                    playSound(achievement.sound);
                     generateAchievementsUI();
-                    showNotification(`Achievement Unlocked: ${achievement.name}`);
+                    saveGame();
                 }
             }
         }
@@ -530,65 +838,138 @@
             }
         }
 
-        // Save Game
-        function saveGame() {
-            const saveData = {
-                resources,
-                biomes,
-                upgrades,
-                waterPerSecond,
-                mineralsPerSecond,
-                plantsPerSecond,
-                energyPerSecond,
-                achievements,
-                lastUpdateTime: Date.now()
-            };
-            localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
-            showNotification("Game saved!");
+        // Quests UI
+        function generateQuestsUI() {
+            const questsDiv = document.getElementById('quests');
+            questsDiv.innerHTML = ''; // Clear existing quests
+
+            for (let key in quests) {
+                const quest = quests[key];
+                const questDiv = document.createElement('div');
+                questDiv.className = 'quest';
+                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
+                questsDiv.appendChild(questDiv);
+            }
         }
 
-        // Load from Save Data
-        function loadFromSave(gameState) {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game').style.display = 'flex';
-            resources = gameState.resources;
-            biomes = gameState.biomes;
-            upgrades = gameState.upgrades;
-            waterPerSecond = gameState.waterPerSecond;
-            mineralsPerSecond = gameState.mineralsPerSecond;
-            plantsPerSecond = gameState.plantsPerSecond;
-            energyPerSecond = gameState.energyPerSecond;
-            achievements = gameState.achievements;
-            updateResourcesUI();
-            generateUpgradesUI();
-            generateAchievementsUI();
-            displayBiomes();
-            handleOfflineResourceGeneration(gameState.lastUpdateTime);
-            startResourceGeneration();
-            startAutosave();
-            startEventSystem();
-            showNotification("Game loaded successfully!");
+        // Check and Unlock Quests
+        function checkQuests() {
+            for (let key in quests) {
+                const quest = quests[key];
+                if (!quest.completed && quest.condition()) {
+                    quest.completed = true;
+                    quest.reward();
+                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: +${quest.reward.name}`);
+                    playSound(quest.sound);
+                    generateQuestsUI();
+                    saveGame();
+                }
+            }
         }
+
+        // Reset Quests (for new game)
+        function resetQuests() {
+            for (let key in quests) {
+                quests[key].completed = false;
+            }
+            generateQuestsUI();
+        }
+
+        // Achievements UI and Rewards
+        function generateAchievementsUI() {
+            const achievementsDiv = document.getElementById('achievements');
+            achievementsDiv.innerHTML = ''; // Clear existing achievements
+
+            for (let key in achievements) {
+                const achievement = achievements[key];
+                const achievementDiv = document.createElement('div');
+                achievementDiv.className = 'achievement';
+                if (achievement.unlocked) {
+                    achievementDiv.classList.add('unlocked');
+                }
+
+                const name = document.createElement('span');
+                name.innerText = `${achievement.name}`;
+                achievementDiv.appendChild(name);
+
+                const description = document.createElement('span');
+                description.innerText = `${achievement.description}`;
+                achievementDiv.appendChild(description);
+
+                achievementsDiv.appendChild(achievementDiv);
+            }
+        }
+
+        // Display Story Milestones
+        function generateStoryUI() {
+            const storyDiv = document.getElementById('story');
+            if (!storyDiv) return;
+            storyDiv.innerHTML = ''; // Clear existing story
+
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (milestone.unlocked) {
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = milestone.text;
+                    storyDiv.appendChild(paragraph);
+                }
+            }
+        }
+
+        // Check and Unlock Story Milestones
+        function checkStoryMilestones() {
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (!milestone.unlocked && milestone.condition()) {
+                    milestone.unlocked = true;
+                    showNotification(`📖 Story Update: ${milestone.text}`);
+                    generateStoryUI();
+                    playSound('achievement-sound');
+                    saveGame();
+                }
+            }
+        }
+
+        // Add Story Checks to Existing Functions
+        function updateResourcesUI() {
+            const waterElem = document.getElementById('water');
+            const mineralsElem = document.getElementById('minerals');
+            const plantsElem = document.getElementById('plants');
+            const energyElem = document.getElementById('energy');
+
+            waterElem.innerText = `💧 Water: ${resources.water} / ${storage.water}`;
+            mineralsElem.innerText = `⛏ Minerals: ${resources.minerals} / ${storage.minerals}`;
+            plantsElem.innerText = `🌱 Plants: ${resources.plants} / ${storage.plants}`;
+            energyElem.innerText = `⚡ Energy: ${resources.energy} / ${storage.energy}`;
+
+            generateUpgradesUI(); // Update upgrade button states based on new resource counts
+
+            checkStoryMilestones(); // Check for story milestones
+        }
+
+        // Save on Window Unload
+        window.addEventListener('beforeunload', saveGame);
 
         // Start Resource Generation
         function startResourceGeneration() {
             clearInterval(resourceGenerationInterval);
             resourceGenerationInterval = setInterval(() => {
-                resources.water += waterPerSecond;
-                resources.minerals += mineralsPerSecond;
-                resources.plants += plantsPerSecond;
-                resources.energy += energyPerSecond;
+                addResource('water', waterPerSecond);
+                addResource('minerals', mineralsPerSecond);
+                addResource('plants', plantsPerSecond);
+                addResource('energy', energyPerSecond);
                 updateResourcesUI();
                 checkAchievements();
+                checkQuests();
             }, 1000);
         }
 
-        // Autosave Functionality
+        // Start Autosave Functionality
         function startAutosave() {
             clearInterval(autosaveInterval);
             autosaveInterval = setInterval(() => {
                 saveGame();
-            }, 300000); // Autosave every 5 minutes
+            }, 60000); // Autosave every 1 minute
         }
 
         // Handle Offline Resource Generation
@@ -596,26 +977,32 @@
             const currentTime = Date.now();
             const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
             if (offlineDuration > 0) {
-                resources.water += offlineDuration * waterPerSecond;
-                resources.minerals += offlineDuration * mineralsPerSecond;
-                resources.plants += offlineDuration * plantsPerSecond;
-                resources.energy += offlineDuration * energyPerSecond;
+                const multiplier = 1; // Adjust as needed
+                addResource('water', offlineDuration * waterPerSecond * multiplier);
+                addResource('minerals', offlineDuration * mineralsPerSecond * multiplier);
+                addResource('plants', offlineDuration * plantsPerSecond * multiplier);
+                addResource('energy', offlineDuration * energyPerSecond * multiplier);
                 updateResourcesUI();
-                showNotification(`You were offline for ${offlineDuration} seconds. Resources have been updated.`);
+                showNotification(`⏰ You were offline for ${offlineDuration} seconds. Resources have been updated.`);
                 checkAchievements();
+                checkQuests();
+                saveGame();
             }
         }
 
         // Unlock Terraform (New Biome)
         function unlockTerraform() {
-            const terraformCost = 500;
+            const terraformBaseCost = 500;
+            const terraformCost = terraformBaseCost * (biomes.length + 1);
             if (resources.water >= terraformCost) {
                 resources.water -= terraformCost;
                 unlockNewBiome();
                 updateResourcesUI();
-                showNotification("Planet terraformed! New biome unlocked.");
+                showNotification(`🌍 Planet terraformed! New biome unlocked.`);
+                playSound('achievement-sound');
+                saveGame();
             } else {
-                showNotification("Not enough Water to terraform the planet!");
+                showNotification("❌ Not enough Water to terraform the planet!");
             }
         }
 
@@ -624,13 +1011,50 @@
             const newBiome = generateRandomBiome();
             biomes.push(newBiome);
             displayBiomes();
+            generateStoryUI();
         }
 
         // Generate Random Biome
         function generateRandomBiome() {
             const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna"];
             const randomName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
-            return { name: randomName, id: biomes.length + 1 };
+            let resourceBonus = {};
+
+            switch(randomName) {
+                case "Forest":
+                    resourceBonus = { plantsPerSecond: 2 };
+                    break;
+                case "Desert":
+                    resourceBonus = { mineralsPerSecond: 3 };
+                    break;
+                case "Ocean":
+                    resourceBonus = { waterPerSecond: 5 };
+                    break;
+                case "Mountain":
+                    resourceBonus = { mineralsPerSecond: 4 };
+                    break;
+                case "Swamp":
+                    resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
+                    break;
+                case "Tundra":
+                    resourceBonus = { energyPerSecond: 2 };
+                    break;
+                case "Savanna":
+                    resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
+                    break;
+                default:
+                    resourceBonus = {};
+            }
+
+            // Apply bonuses
+            for (let key in resourceBonus) {
+                if (key === "waterPerSecond") waterPerSecond += resourceBonus[key];
+                if (key === "mineralsPerSecond") mineralsPerSecond += resourceBonus[key];
+                if (key === "plantsPerSecond") plantsPerSecond += resourceBonus[key];
+                if (key === "energyPerSecond") energyPerSecond += resourceBonus[key];
+            }
+
+            return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus };
         }
 
         // Display Biomes
@@ -641,7 +1065,11 @@
             biomes.forEach(biome => {
                 const biomeDiv = document.createElement('div');
                 biomeDiv.className = 'biome';
-                biomeDiv.innerText = `🌿 ${biome.name} Biome`;
+                let bonusText = '';
+                for (let key in biome.bonuses) {
+                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+                }
+                biomeDiv.innerText = `🌿 ${biome.name} Biome\n${bonusText}`;
                 biomesDiv.appendChild(biomeDiv);
             });
         }
@@ -655,36 +1083,112 @@
         }
 
         function triggerRandomEvent() {
-            const eventTypes = ["Resource Boom", "Drought", "Mineral Surge", "Plant Overgrowth"];
             const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-
-            switch(randomEvent) {
-                case "Resource Boom":
-                    resources.water += 50;
-                    resources.minerals += 25;
-                    showNotification("🌟 Resource Boom! You received an extra 50 Water and 25 Minerals!");
-                    break;
-                case "Drought":
-                    resources.water = Math.max(0, resources.water - 30);
-                    showNotification("🔥 Drought! You lost 30 Water.");
-                    break;
-                case "Mineral Surge":
-                    resources.minerals += 40;
-                    showNotification("⚒️ Mineral Surge! You received an extra 40 Minerals!");
-                    break;
-                case "Plant Overgrowth":
-                    resources.plants += 20;
-                    showNotification("🌱 Plant Overgrowth! You received an extra 20 Plants!");
-                    break;
-                default:
-                    break;
-            }
-
+            randomEvent.effect();
+            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
+            displayEvents(randomEvent);
             updateResourcesUI();
             checkAchievements();
+            checkQuests();
+            saveGame();
         }
 
-        // Detect Device Type for UI Adjustments
+        function displayEvents(event) {
+            const eventsDiv = document.getElementById('events');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.innerText = `${event.name}: ${event.description}`;
+            eventsDiv.prepend(eventDiv); // Add to top
+            // Limit the number of displayed events
+            if (eventsDiv.children.length > 5) {
+                eventsDiv.removeChild(eventsDiv.lastChild);
+            }
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Sound Controls
+        let soundEffectsMuted = false;
+
+        function toggleMusic() {
+            const music = document.getElementById('background-music');
+            music.muted = !music.muted;
+            showNotification(music.muted ? "🔇 Music Muted" : "🔊 Music Unmuted");
+        }
+
+        function toggleSound() {
+            soundEffectsMuted = !soundEffectsMuted;
+            showNotification(soundEffectsMuted ? "🔇 Sound Effects Muted" : "🔊 Sound Effects Unmuted");
+        }
+
+        function playSound(soundId) {
+            if (soundEffectsMuted) return;
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play();
+            }
+        }
+
+        // Theme Selection
+        function changeTheme(theme) {
+            document.body.className = ''; // Reset existing classes
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            // Add more themes as needed
+            showNotification(`🖌️ Theme changed to ${theme}`);
+        }
+
+        // Initialize Game
+        function initGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                loadFromSave(JSON.parse(savedGame));
+            } else {
+                startNewGame();
+            }
+        }
+
+        // Handle Offline Resource Generation
+        function handleOfflineResourceGeneration(lastSaveTime) {
+            const currentTime = Date.now();
+            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
+            if (offlineDuration > 0) {
+                const multiplier = 1; // Adjust as needed
+                addResource('water', offlineDuration * waterPerSecond * multiplier);
+                addResource('minerals', offlineDuration * mineralsPerSecond * multiplier);
+                addResource('plants', offlineDuration * plantsPerSecond * multiplier);
+                addResource('energy', offlineDuration * energyPerSecond * multiplier);
+                updateResourcesUI();
+                showNotification(`⏰ You were offline for ${offlineDuration} seconds. Resources have been updated.`);
+                checkAchievements();
+                checkQuests();
+                saveGame();
+            }
+        }
+
+        // Schedule Quest Reset (Daily and Weekly)
+        function scheduleQuestReset() {
+            const now = new Date();
+            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
+            setTimeout(function(){
+                resetQuests();
+                scheduleQuestReset();
+            }, millisTillMidnight);
+        }
+
+        // Device Detection for UI Adjustments
         function detectDevice() {
             const ua = navigator.userAgent;
             if (/Mobi|Android/i.test(ua)) {
@@ -696,17 +1200,7 @@
             }
         }
 
-        // Initialize the game on window load
-        window.onload = () => {
-            detectDevice();
-            initGame();
-            // Save to localStorage every 1 minute
-            setInterval(() => {
-                saveGame();
-            }, 60000); // Save every 1 minute
-        };
-
-        // Ensure all buttons are accessible via keyboard and touch
+        // Keyboard Navigation Accessibility
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 const activeElement = document.activeElement;
@@ -715,6 +1209,14 @@
                 }
             }
         });
+
+        // Initialize the game on window load
+        window.onload = () => {
+            detectDevice();
+            initGame();
+            startAutosave();
+            scheduleQuestReset();
+        };
     </script>
 </body>
 </html>
