@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Pixel Planet</title>
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXXXX-X"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7M919FPNB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'UA-XXXXXXXXX-X');
+      gtag('config', 'G-E7M919FPNB');
     </script>
     <style>
         /* CSS Variables for Theming */
@@ -168,7 +168,7 @@
             transform: scale(0.95);
         }
 
-        /* Social Sharing Button */
+        /* Share Button */
         #share-button {
             position: fixed;
             top: 10px;
@@ -418,6 +418,17 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Story Section */
+        #story {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
         /* Theme Selector */
         #theme-selector {
             margin-top: 10px;
@@ -479,6 +490,8 @@
             margin-top: 20px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .social-buttons a {
@@ -1348,10 +1361,10 @@
                 name: "Technology Upgrade",
                 description: "Technology Upgrade! Your resource generation rates have been enhanced.",
                 effect: () => {
-                    waterPerSecond += 2;
-                    mineralsPerSecond += 1;
-                    plantsPerSecond += 1;
-                    energyPerSecond += 0.5;
+                    waterPerSecond = Math.min(waterPerSecond + 2, MAX_RESOURCE_RATE.waterPerSecond);
+                    mineralsPerSecond = Math.min(mineralsPerSecond + 1, MAX_RESOURCE_RATE.mineralsPerSecond);
+                    plantsPerSecond = Math.min(plantsPerSecond + 1, MAX_RESOURCE_RATE.plantsPerSecond);
+                    energyPerSecond = Math.min(energyPerSecond + 0.5, MAX_RESOURCE_RATE.energyPerSecond);
                 }
             }
             // Add more events as needed
