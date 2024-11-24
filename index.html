@@ -148,7 +148,7 @@
         #help-button {
             position: fixed;
             top: 10px;
-            right: 60px;
+            right: 120px;
             background-color: #f39c12;
             color: #ffffff;
             padding: 10px 15px;
@@ -617,12 +617,12 @@
 
         @media (max-width: 480px) {
             button {
-                width: 80%;
+                width: 90%;
                 font-size: 1em;
             }
 
             .upgrade, .achievement, .event, .biome, .quest {
-                width: 90%;
+                width: 100%;
             }
 
             #leaderboard-table th, #leaderboard-table td {
@@ -677,6 +677,21 @@
         .close-modal:focus {
             color: #000;
             text-decoration: none;
+        }
+
+        /* Leaderboard Table Scroll on Small Screens */
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+            display: block;
+        }
+
+        /* Highlight animation for upgrades */
+        .highlight {
+            border-color: #f1c40f;
+            box-shadow: 0 0 10px #f1c40f;
+            transition: border-color 0.5s, box-shadow 0.5s;
         }
     </style>
 </head>
@@ -822,7 +837,7 @@
             <button onclick="toggleTheme()" aria-label="Toggle Theme">🎨 Toggle Theme</button>
         </div>
 
-        <!-- Social Sharing Buttons (Moved to less invasive spot) -->
+        <!-- Social Sharing Buttons (Consolidated) -->
         <div class="social-buttons">
             <a href="#" id="share-twitter-game" target="_blank" aria-label="Share on Twitter">
                 <button class="social-button">🐦 Twitter</button>
@@ -839,197 +854,24 @@
     <!-- Notification -->
     <div id="notification"></div>
 
-    <!-- Leaderboard Script -->
+    <!-- JavaScript -->
     <script>
-        // Function to show leaderboard
-        function showLeaderboard() {
-            updateLeaderboard();
-            document.getElementById('leaderboard').style.display = 'flex';
+        // === Utility Functions ===
+
+        // Sanitize user input to prevent XSS
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
         }
 
-        // Function to close leaderboard
-        function closeLeaderboard() {
-            const leaderboard = document.getElementById('leaderboard');
-            leaderboard.classList.add('fadeOut');
-            setTimeout(() => {
-                leaderboard.style.display = 'none';
-                leaderboard.classList.remove('fadeOut');
-            }, 500);
+        // Validate player name (3-16 characters, alphanumerics, spaces, underscores, hyphens)
+        function validatePlayerName(name) {
+            const regex = /^[a-zA-Z0-9 _-]{3,16}$/;
+            return regex.test(name);
         }
 
-        // Function to update leaderboard
-        function updateLeaderboard() {
-            const leaderboardBody = document.querySelector('#leaderboard-table tbody');
-            leaderboardBody.innerHTML = ''; // Clear existing entries
-
-            // Retrieve leaderboard data from localStorage
-            let leaderboard = JSON.parse(localStorage.getItem('PixelPlanetLeaderboard')) || [];
-
-            // Current player data
-            const currentPlayer = {
-                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
-                totalResources: calculateTotalResources()
-            };
-
-            // Add current player to leaderboard if not already present
-            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
-                leaderboard.push(currentPlayer);
-            } else {
-                // Update totalResources if player already exists
-                leaderboard = leaderboard.map(player => {
-                    if (player.name === currentPlayer.name) {
-                        return currentPlayer;
-                    }
-                    return player;
-                });
-            }
-
-            // Sort leaderboard by totalResources descending
-            leaderboard.sort((a, b) => b.totalResources - a.totalResources);
-
-            // Keep top 10
-            leaderboard = leaderboard.slice(0, 10);
-
-            // Save updated leaderboard
-            localStorage.setItem('PixelPlanetLeaderboard', JSON.stringify(leaderboard));
-
-            // Populate leaderboard table
-            leaderboard.forEach((player, index) => {
-                const row = document.createElement('tr');
-
-                const rankCell = document.createElement('td');
-                rankCell.innerText = index + 1;
-                row.appendChild(rankCell);
-
-                const nameCell = document.createElement('td');
-                nameCell.innerText = player.name;
-                row.appendChild(nameCell);
-
-                const resourcesCell = document.createElement('td');
-                resourcesCell.innerText = player.totalResources.toFixed(1);
-                row.appendChild(resourcesCell);
-
-                leaderboardBody.appendChild(row);
-            });
-        }
-
-        // Function to calculate total resources
-        function calculateTotalResources() {
-            return resources.water + resources.minerals + resources.plants + resources.energy;
-        }
-    </script>
-
-    <!-- Social Sharing Script -->
-    <script>
-        // Function to update social sharing URLs
-        function updateSocialSharing() {
-            const currentPlayer = {
-                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
-                totalResources: calculateTotalResources()
-            };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
-            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
-
-            document.getElementById('share-twitter').href = twitterURL;
-            document.getElementById('share-facebook').href = facebookURL;
-            document.getElementById('share-reddit').href = redditURL;
-
-            document.getElementById('share-twitter-game').href = twitterURL;
-            document.getElementById('share-facebook-game').href = facebookURL;
-            document.getElementById('share-reddit-game').href = redditURL;
-        }
-
-        // Function to handle sharing with reward and cooldown
-        function shareGame() {
-            const lastShare = localStorage.getItem('PixelPlanetLastShare');
-            const now = Date.now();
-            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (lastShare && now - lastShare < cooldown) {
-                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
-                showNotification(`⏳ You can share again in ${remaining} minutes.`);
-                return;
-            }
-
-            // Prompt for player name if not set
-            let playerName = localStorage.getItem('PixelPlanetPlayerName');
-            if (!playerName || playerName === 'Player') {
-                playerName = prompt("Enter your name for the leaderboard:");
-                if (playerName) {
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                } else {
-                    playerName = 'Player';
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                }
-            }
-
-            // Open share URL in new tab
-            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank', 'noopener,noreferrer');
-
-            // Reward the player
-            resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
-            updateResourcesUI();
-            showNotification("🎁 Thanks for sharing! Energy +10.");
-            localStorage.setItem('PixelPlanetLastShare', now);
-            saveGame();
-        }
-
-        // Update social sharing URLs on load
-        window.onload = updateSocialSharing;
-    </script>
-
-    <!-- Help Modal Script -->
-    <script>
-        function openHelp() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'block';
-            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) firstFocusable.focus();
-
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', trapTabKeyTutorial);
-        }
-
-        function closeHelp() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'none';
-            // Remove event listener when modal is closed
-            modal.removeEventListener('keydown', trapTabKeyTutorial);
-        }
-
-        function trapTabKeyTutorial(e) {
-            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-            const modal = document.getElementById('tutorial-modal');
-            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
-            const focusableContent = modal.querySelectorAll(focusableElements);
-            const lastFocusableElement = focusableContent[focusableContent.length - 1];
-
-            if (e.key === 'Tab') {
-                if (e.shiftKey) { // Shift + Tab
-                    if (document.activeElement === firstFocusableElement) {
-                        e.preventDefault();
-                        lastFocusableElement.focus();
-                    }
-                } else { // Tab
-                    if (document.activeElement === lastFocusableElement) {
-                        e.preventDefault();
-                        firstFocusableElement.focus();
-                    }
-                }
-            }
-
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeHelp();
-            }
-        }
-    </script>
-
-    <!-- Main Game Script -->
-    <script>
-        // Game State
+        // === Game State ===
         let resources = {
             water: 0,
             minerals: 0,
@@ -1047,7 +889,7 @@
         let biomes = [];
 
         let upgrades = {
-            // Existing Upgrades
+            // Resource Boost Upgrades
             waterBoost: {
                 name: "🔧 Improve Water Collection",
                 description: "+10 Water per second",
@@ -1084,6 +926,7 @@
                 level: 0,
                 category: "Resource Boost"
             },
+            // Efficiency Improvements
             waterEfficiency: {
                 name: "⚙️ Water Efficiency",
                 description: "Reduce Water consumption by 10%",
@@ -1106,6 +949,7 @@
                 level: 0,
                 category: "Efficiency Improvement"
             },
+            // Storage Upgrades
             waterStorage: {
                 name: "🏗️ Expand Water Storage",
                 description: "Increase Water storage capacity by 500",
@@ -1142,7 +986,7 @@
                 level: 0,
                 category: "Storage Upgrade"
             },
-            // New Upgrades
+            // Automation Upgrades
             autoWater: {
                 name: "🤖 Automate Water Collection",
                 description: "Automatically collect 1 Water per second",
@@ -1353,765 +1197,86 @@
             // Add more events as needed
         ];
 
-        // Quests Completion and Reset
-        function checkQuests() {
-            for (let key in quests) {
-                const quest = quests[key];
-                if (!quest.completed && quest.condition()) {
-                    quest.completed = true;
-                    quest.reward();
-                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: ${quest.rewardDescription}`);
-                    generateQuestsUI();
-                    saveGame();
-                }
-            }
+        // === Functions ===
+
+        // Function to show leaderboard
+        function showLeaderboard() {
+            updateLeaderboard();
+            document.getElementById('leaderboard').style.display = 'flex';
         }
 
-        function resetQuests() {
-            for (let key in quests) {
-                quests[key].completed = false;
-            }
-            generateQuestsUI();
-        }
-
-        // Save Game
-        function saveGame() {
-            try {
-                const saveData = {
-                    version: "0.4", // Fixed version number
-                    resources,
-                    storage,
-                    biomes,
-                    upgrades,
-                    waterPerSecond,
-                    mineralsPerSecond,
-                    plantsPerSecond,
-                    energyPerSecond,
-                    achievements,
-                    quests,
-                    storyMilestones,
-                    lastUpdateTime: Date.now()
-                };
-                localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
-                showNotification("💾 Game saved!");
-            } catch (error) {
-                console.error("Error saving game:", error);
-                showNotification("⚠️ Error saving game.");
-            }
-        }
-
-        // Load from Save Data
-        function loadFromSave(gameState) {
-            try {
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('game').style.display = 'flex';
-                resources = gameState.resources;
-                storage = gameState.storage;
-                biomes = gameState.biomes;
-                upgrades = gameState.upgrades;
-                waterPerSecond = gameState.waterPerSecond;
-                mineralsPerSecond = gameState.mineralsPerSecond;
-                plantsPerSecond = gameState.plantsPerSecond;
-                energyPerSecond = gameState.energyPerSecond;
-                achievements = gameState.achievements;
-                quests = gameState.quests;
-                storyMilestones = gameState.storyMilestones;
-                updateResourcesUI();
-                generateUpgradesUI();
-                generateAchievementsUI();
-                generateQuestsUI();
-                displayBiomes();
-                handleOfflineResourceGeneration(gameState.lastUpdateTime);
-                startResourceGeneration();
-                startResourceConsumption();
-                startAutosave();
-                startEventSystem();
-                scheduleQuestReset();
-                checkAchievements();
-                checkQuests();
-                generateStoryUI();
-                loadTheme();
-                updateSocialSharing();
-                showNotification("✅ Game loaded successfully!");
-                // Show Continue button only if there is a saved game
-                document.getElementById('continue-button').style.display = 'none';
-            } catch (error) {
-                console.error("Error loading game:", error);
-                showNotification("⚠️ Error loading game. Starting a new game.");
-                startNewGame(false);
-            }
-        }
-
-        // Start New Game
-        function startNewGame(confirmStart=true) {
-            if (confirmStart && !confirmModal("Are you sure you want to start a new game? All progress will be lost.")) {
-                return;
-            }
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game').style.display = 'flex';
-            resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
-            storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
-            biomes = [];
-            resetUpgrades();
-            resetAchievements();
-            resetQuests();
-            waterPerSecond = 1;
-            mineralsPerSecond = 0;
-            plantsPerSecond = 0;
-            energyPerSecond = 0;
-            waterConsumption = 1;
-            mineralConsumption = 1;
-            updateResourcesUI();
-            generateUpgradesUI();
-            generateAchievementsUI();
-            generateQuestsUI();
-            displayBiomes();
-            generateStoryUI();
-            startResourceGeneration();
-            startResourceConsumption();
-            startAutosave();
-            startEventSystem();
-            scheduleQuestReset();
-            updateSocialSharing();
-            showNotification("🚀 New game started! Welcome to Pixel Planet.");
-            saveGame();
-        }
-
-        // Continue Game
-        function continueGame() {
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                loadFromSave(parsedSave);
-            } else {
-                showNotification("❌ No saved game found.");
-            }
-        }
-
-        // Generate Resources Manually
-        function generateResources() {
-            addResource('water', 10);
-            addResource('minerals', 5);
-            addResource('plants', 3);
-            addResource('energy', 2);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-            showNotification("🔄 Resources generated!");
-            saveGame();
-        }
-
-        // Add Resource with Storage Limit and Caps
-        function addResource(resource, amount) {
-            if (!MAX_RESOURCES.hasOwnProperty(resource)) return;
-            resources[resource] = Math.min(resources[resource] + amount, storage[resource], MAX_RESOURCES[resource]);
-            saveGame(); // Save whenever resources change
-        }
-
-        // Update Resources UI
-        function updateResourcesUI() {
-            const waterElem = document.getElementById('water');
-            const mineralsElem = document.getElementById('minerals');
-            const plantsElem = document.getElementById('plants');
-            const energyElem = document.getElementById('energy');
-
-            waterElem.innerHTML = `💧 Water: ${resources.water} / ${storage.water} (Per Second: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
-            mineralsElem.innerHTML = `⛏ Minerals: ${resources.minerals} / ${storage.minerals} (Per Second: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
-            plantsElem.innerHTML = `🌱 Plants: ${resources.plants} / ${storage.plants} (Per Second: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
-            energyElem.innerHTML = `⚡ Energy: ${resources.energy} / ${storage.energy} (Per Second: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
-
-            generateUpgradesUI(); // Update upgrade button states based on new resource counts
-
-            checkStoryMilestones(); // Check for story milestones
-        }
-
-        // Generate Upgrades UI
-        function generateUpgradesUI() {
-            const upgradesDiv = document.getElementById('upgrades');
-            upgradesDiv.innerHTML = ''; // Clear existing upgrades
-
-            // Sort upgrades by category
-            const categories = {};
-            for (let key in upgrades) {
-                const upgrade = upgrades[key];
-                if (!categories[upgrade.category]) {
-                    categories[upgrade.category] = [];
-                }
-                categories[upgrade.category].push({ key, ...upgrade });
-            }
-
-            for (let category in categories) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.style.width = '100%';
-                categoryDiv.style.textAlign = 'left';
-                categoryDiv.style.marginBottom = '10px';
-                const categoryTitle = document.createElement('h4');
-                categoryTitle.innerText = category;
-                categoryDiv.appendChild(categoryTitle);
-
-                // Create a flex container for upgrades to align left to right
-                const upgradesRow = document.createElement('div');
-                upgradesRow.style.display = 'flex';
-                upgradesRow.style.flexWrap = 'wrap';
-                upgradesRow.style.gap = '20px';
-                upgradesRow.style.justifyContent = 'flex-start';
-
-                categories[category].forEach(upgrade => {
-                    // Only display upgrade if affordable
-                    if (resources.water >= upgrade.cost) {
-                        const upgradeDiv = document.createElement('div');
-                        upgradeDiv.className = 'upgrade';
-
-                        const name = document.createElement('span');
-                        name.innerText = `${upgrade.name}`;
-                        upgradeDiv.appendChild(name);
-
-                        const description = document.createElement('span');
-                        description.innerText = `${upgrade.description}`;
-                        upgradeDiv.appendChild(description);
-
-                        const cost = document.createElement('span');
-                        cost.innerText = `Cost: ${upgrade.cost} 💧`;
-                        upgradeDiv.appendChild(cost);
-
-                        const button = document.createElement('button');
-                        button.className = 'upgrade-button';
-                        button.innerText = `Buy (Level ${upgrade.level})`;
-                        button.disabled = resources.water < upgrade.cost;
-                        button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
-                        button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
-                        button.onclick = () => buyUpgrade(upgrade.key);
-                        button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
-
-                        // Add tooltip
-                        const tooltip = document.createElement('span');
-                        tooltip.className = 'tooltip';
-                        tooltip.innerText = upgrade.description;
-                        button.appendChild(tooltip);
-
-                        upgradeDiv.appendChild(button);
-
-                        upgradesRow.appendChild(upgradeDiv);
-                    }
-                });
-
-                categoryDiv.appendChild(upgradesRow);
-                upgradesDiv.appendChild(categoryDiv);
-            }
-        }
-
-        // Buy Upgrade
-        function buyUpgrade(upgradeKey) {
-            const upgrade = upgrades[upgradeKey];
-            if (!upgrade) return;
-
-            if (resources.water >= upgrade.cost) {
-                resources.water -= upgrade.cost;
-                upgrade.level += 1;
-                upgrade.effect(upgrade.level);
-                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.5, upgrade.level));
-                updateResourcesUI();
-                generateAchievementsUI();
-                checkAchievements();
-                showNotification(`🔧 Upgrade "${upgrade.name}" purchased! Level: ${upgrade.level}`);
-                saveGame();
-            } else {
-                showNotification("❌ Not enough Water to purchase this upgrade!");
-            }
-        }
-
-        // Reset Upgrades (for new game)
-        function resetUpgrades() {
-            for (let key in upgrades) {
-                upgrades[key].level = 0;
-                upgrades[key].cost = upgrades[key].baseCost;
-            }
-        }
-
-        // Achievements UI
-        function generateAchievementsUI() {
-            const achievementsDiv = document.getElementById('achievements');
-            achievementsDiv.innerHTML = ''; // Clear existing achievements
-
-            for (let key in achievements) {
-                const achievement = achievements[key];
-                const achievementDiv = document.createElement('div');
-                achievementDiv.className = 'achievement';
-                if (achievement.unlocked) {
-                    achievementDiv.classList.add('unlocked');
-                }
-
-                const name = document.createElement('span');
-                name.innerText = `${achievement.name}`;
-                achievementDiv.appendChild(name);
-
-                const description = document.createElement('span');
-                description.innerText = `${achievement.description}`;
-                achievementDiv.appendChild(description);
-
-                achievementsDiv.appendChild(achievementDiv);
-            }
-        }
-
-        // Check and Unlock Achievements
-        function checkAchievements() {
-            for (let key in achievements) {
-                const achievement = achievements[key];
-                if (!achievement.unlocked && achievement.condition()) {
-                    achievement.unlocked = true;
-                    if (achievement.reward) achievement.reward();
-                    showNotification(`🏆 Achievement Unlocked: ${achievement.name} - Reward: ${achievement.rewardDescription}`);
-                    generateAchievementsUI();
-                    saveGame();
-                }
-            }
-        }
-
-        // Reset Achievements (for new game)
-        function resetAchievements() {
-            for (let key in achievements) {
-                achievements[key].unlocked = false;
-            }
-        }
-
-        // Quests UI
-        function generateQuestsUI() {
-            const questsDiv = document.getElementById('quests');
-            questsDiv.innerHTML = ''; // Clear existing quests
-
-            for (let key in quests) {
-                const quest = quests[key];
-                const questDiv = document.createElement('div');
-                questDiv.className = 'quest';
-                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
-                questsDiv.appendChild(questDiv);
-            }
-        }
-
-        // Display Story Milestones
-        function generateStoryUI() {
-            const storyDiv = document.getElementById('story');
-            if (!storyDiv) return; // If no story section, exit
-
-            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
-
-            for (let key in storyMilestones) {
-                const milestone = storyMilestones[key];
-                if (milestone.unlocked) {
-                    const paragraph = document.createElement('p');
-                    paragraph.innerText = milestone.text;
-                    storyDiv.appendChild(paragraph);
-                }
-            }
-        }
-
-        // Check and Unlock Story Milestones
-        function checkStoryMilestones() {
-            for (let key in storyMilestones) {
-                const milestone = storyMilestones[key];
-                if (!milestone.unlocked && milestone.condition()) {
-                    milestone.unlocked = true;
-                    showNotification(`📖 Story Update: ${milestone.text}`);
-                    generateStoryUI();
-                    saveGame();
-                }
-            }
-        }
-
-        // Display Biomes
-        function displayBiomes() {
-            const biomesDiv = document.getElementById('biomes');
-            biomesDiv.innerHTML = ''; // Clear existing biomes
-
-            biomes.forEach(biome => {
-                const biomeDiv = document.createElement('div');
-                biomeDiv.className = 'biome';
-                let bonusText = '';
-                for (let key in biome.bonuses) {
-                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
-                }
-                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}`;
-                biomesDiv.appendChild(biomeDiv);
-            });
-        }
-
-        // Unlock Terraform (New Biome)
-        function unlockTerraform() {
-            const terraformBaseCost = 500;
-            const terraformCost = terraformBaseCost * (biomes.length + 1);
-            if (resources.water >= terraformCost) {
-                confirmAction(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`, () => {
-                    resources.water -= terraformCost;
-                    unlockNewBiome();
-                    updateResourcesUI();
-                    showNotification(`🌍 Planet terraformed! New biome unlocked.`);
-                    saveGame();
-                });
-            } else {
-                showNotification("❌ Not enough Water to terraform the planet!");
-            }
-        }
-
-        // Unlock New Biome
-        function unlockNewBiome() {
-            const newBiome = generateRandomBiome();
-            biomes.push(newBiome);
-            displayBiomes();
-            generateStoryUI();
-        }
-
-        // Generate Random Biome
-        function generateRandomBiome() {
-            const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna", "Volcano", "Jungle", "Iceberg", "Canyon"];
-            let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
-
-            if (availableBiomes.length === 0) {
-                // All biomes unlocked, recycle or notify player
-                availableBiomes = biomeNames; // Allow duplicates if desired
-            }
-
-            const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
-            let resourceBonus = {};
-
-            switch(randomName) {
-                case "Forest":
-                    resourceBonus = { plantsPerSecond: 2 };
-                    break;
-                case "Desert":
-                    resourceBonus = { mineralsPerSecond: 3 };
-                    break;
-                case "Ocean":
-                    resourceBonus = { waterPerSecond: 5 };
-                    break;
-                case "Mountain":
-                    resourceBonus = { mineralsPerSecond: 4 };
-                    break;
-                case "Swamp":
-                    resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
-                    break;
-                case "Tundra":
-                    resourceBonus = { energyPerSecond: 2 };
-                    break;
-                case "Savanna":
-                    resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
-                    break;
-                case "Volcano":
-                    resourceBonus = { energyPerSecond: 5 };
-                    break;
-                case "Jungle":
-                    resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
-                    break;
-                case "Iceberg":
-                    resourceBonus = { waterPerSecond: 6 };
-                    break;
-                case "Canyon":
-                    resourceBonus = { mineralsPerSecond: 5 };
-                    break;
-                default:
-                    resourceBonus = {};
-            }
-
-            // Apply bonuses with caps
-            for (let key in resourceBonus) {
-                if (key === "waterPerSecond") {
-                    waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
-                }
-                if (key === "mineralsPerSecond") {
-                    mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
-                }
-                if (key === "plantsPerSecond") {
-                    plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
-                }
-                if (key === "energyPerSecond") {
-                    energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
-                }
-            }
-
-            return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus };
-        }
-
-        // Event System
-        function startEventSystem() {
-            if (eventInterval) clearInterval(eventInterval);
-            eventInterval = setInterval(() => {
-                triggerRandomEvent();
-            }, 600000); // Trigger an event every 10 minutes
-        }
-
-        function triggerRandomEvent() {
-            const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-            randomEvent.effect();
-            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
-            displayEvents(randomEvent);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-            saveGame();
-        }
-
-        function displayEvents(event) {
-            const eventsDiv = document.getElementById('events');
-            const eventDiv = document.createElement('div');
-            eventDiv.className = 'event';
-            eventDiv.innerText = `${event.name}: ${event.description}`;
-            eventsDiv.prepend(eventDiv); // Add to top
-
-            // Limit the number of displayed events to 5
-            while (eventsDiv.children.length > 5) {
-                eventsDiv.removeChild(eventsDiv.lastChild);
-            }
-        }
-
-        // Notifications
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.innerText = message;
-            notification.style.display = 'block';
+        // Function to close leaderboard
+        function closeLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.classList.add('fadeOut');
             setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
+                leaderboard.style.display = 'none';
+                leaderboard.classList.remove('fadeOut');
+            }, 500);
         }
 
-        // Save Game on Window Unload
-        window.addEventListener('beforeunload', saveGame);
+        // Function to update leaderboard
+        function updateLeaderboard() {
+            const leaderboardBody = document.querySelector('#leaderboard-table tbody');
+            leaderboardBody.innerHTML = ''; // Clear existing entries
 
-        // Start Resource Generation
-        function startResourceGeneration() {
-            if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
-            resourceGenerationInterval = setInterval(() => {
-                addResource('water', waterPerSecond);
-                addResource('minerals', mineralsPerSecond);
-                addResource('plants', plantsPerSecond);
-                addResource('energy', energyPerSecond);
-                updateResourcesUI();
-                checkAchievements();
-                checkQuests();
-            }, 1000);
-        }
+            // Retrieve leaderboard data from localStorage
+            let leaderboard = JSON.parse(localStorage.getItem('PixelPlanetLeaderboard')) || [];
 
-        // Start Resource Consumption
-        function startResourceConsumption() {
-            if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
-            resourceConsumptionInterval = setInterval(() => {
-                consumeResources();
-            }, 5000); // Consume resources every 5 seconds
-        }
+            // Current player data
+            const currentPlayer = {
+                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
+                totalResources: calculateTotalResources()
+            };
 
-        function consumeResources() {
-            resources.water = Math.max(0, resources.water - waterConsumption);
-            resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-        }
-
-        // Start Autosave Functionality
-        function startAutosave() {
-            if (autosaveInterval) clearInterval(autosaveInterval);
-            autosaveInterval = setInterval(() => {
-                saveGame();
-            }, 30000); // Autosave every 30 seconds
-        }
-
-        // Handle Offline Resource Generation
-        function handleOfflineResourceGeneration(lastSaveTime) {
-            const currentTime = Date.now();
-            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
-            const maxOfflineSeconds = 86400; // 24 hours
-            const effectiveDuration = Math.min(offlineDuration, maxOfflineSeconds);
-            if (effectiveDuration > 0) {
-                const multiplier = 1; // Adjust as needed
-                addResource('water', effectiveDuration * waterPerSecond * multiplier);
-                addResource('minerals', effectiveDuration * mineralsPerSecond * multiplier);
-                addResource('plants', effectiveDuration * plantsPerSecond * multiplier);
-                addResource('energy', effectiveDuration * energyPerSecond * multiplier);
-                updateResourcesUI();
-                showNotification(`⏰ You were offline for ${effectiveDuration} seconds. Resources have been updated.`);
-                checkAchievements();
-                checkQuests();
-                saveGame();
-            }
-        }
-
-        // Schedule Quest Reset (Daily)
-        function scheduleQuestReset() {
-            const now = new Date();
-            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
-            setTimeout(function(){
-                resetQuests();
-                scheduleQuestReset();
-            }, millisTillMidnight);
-        }
-
-        // Device Detection for UI Adjustments
-        function detectDevice() {
-            const ua = navigator.userAgent;
-            if (/Mobi|Android/i.test(ua)) {
-                document.body.style.fontSize = '1em';
-            } else if (/iPad|Tablet/i.test(ua)) {
-                document.body.style.fontSize = '1.1em';
+            // Add current player to leaderboard if not already present
+            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
+                leaderboard.push(currentPlayer);
             } else {
-                document.body.style.fontSize = '1.2em';
+                // Update totalResources if player already exists
+                leaderboard = leaderboard.map(player => {
+                    if (player.name === currentPlayer.name) {
+                        return currentPlayer;
+                    }
+                    return player;
+                });
             }
-        }
 
-        // Initialize Game
-        function initGame() {
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.4") {
-                    // Handle version upgrades if necessary
-                    // For simplicity, start a new game if versions do not match
-                    showNotification("🔄 Game version mismatch. Starting a new game.");
-                    startNewGame(false);
-                } else {
-                    loadFromSave(parsedSave);
-                }
-            } else {
-                startNewGame();
-            }
-        }
+            // Sort leaderboard by totalResources descending
+            leaderboard.sort((a, b) => b.totalResources - a.totalResources);
 
-        // Change Theme
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem('PixelPlanetTheme') || 'default';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            changeTheme(newTheme);
-        }
+            // Keep top 10
+            leaderboard = leaderboard.slice(0, 10);
 
-        function changeTheme(theme) {
-            document.body.className = ''; // Reset existing classes
-            if (theme === 'dark') {
-                document.body.classList.add('dark-theme');
-            } else if (theme === 'light') {
-                document.body.classList.add('light-theme');
-            } else {
-                // Default theme
-                document.body.classList.remove('dark-theme', 'light-theme');
-            }
-            showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
-            // Save theme selection
-            localStorage.setItem('PixelPlanetTheme', theme);
-        }
+            // Save updated leaderboard
+            localStorage.setItem('PixelPlanetLeaderboard', JSON.stringify(leaderboard));
 
-        // Load Theme
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('PixelPlanetTheme');
-            if (savedTheme) {
-                changeTheme(savedTheme);
-                document.getElementById('theme').value = savedTheme;
-            }
-        }
+            // Populate leaderboard table
+            leaderboard.forEach((player, index) => {
+                const row = document.createElement('tr');
 
-        // Reset Game
-        function resetGame() {
-            confirmAction("Are you sure you want to reset the game? All progress will be lost.", () => {
-                localStorage.removeItem('PixelPlanetSave');
-                localStorage.removeItem('PixelPlanetLeaderboard');
-                localStorage.removeItem('PixelPlanetVersion');
-                localStorage.removeItem('PixelPlanetPlayerName');
-                startNewGame(false); // Pass false to avoid double confirmation
-                showNotification("🗑️ Game has been reset.");
+                const rankCell = document.createElement('td');
+                rankCell.innerText = index + 1;
+                row.appendChild(rankCell);
+
+                const nameCell = document.createElement('td');
+                nameCell.innerHTML = sanitizeInput(player.name);
+                row.appendChild(nameCell);
+
+                const resourcesCell = document.createElement('td');
+                resourcesCell.innerText = player.totalResources.toFixed(1);
+                row.appendChild(resourcesCell);
+
+                leaderboardBody.appendChild(row);
             });
         }
 
-        // Language Support
-        const translations = {
-            en: {
-                "Start New Game": "🚀 Start New Game",
-                "Continue Game": "🔄 Continue Game",
-                "Leaderboard": "🏅 Leaderboard",
-                "Language": "🌐 Language:",
-                "Generate Resources": "🔄 Generate Resources",
-                "Terraform Planet": "🌍 Terraform Planet",
-                "Save Game": "💾 Save Game",
-                "Reset Game": "🗑️ Reset Game",
-                "Toggle Theme": "🎨 Toggle Theme",
-                "Achievements": "🏆 Achievements",
-                "Quests": "🎯 Quests",
-                "Events": "🎉 Events",
-                "Biomes": "🌿 Biomes",
-                "Your Planet": "Your Planet",
-                "Close Leaderboard": "Close Leaderboard",
-                "Close": "Close",
-                "Tutorial": "📖 Tutorial",
-                "Got It!": "Got It!",
-                "Share": "📤 Share"
-                // Add more translations as needed
-            },
-            es: {
-                "Start New Game": "🚀 Iniciar Nuevo Juego",
-                "Continue Game": "🔄 Continuar Juego",
-                "Leaderboard": "🏅 Tabla de Clasificación",
-                "Language": "🌐 Idioma:",
-                "Generate Resources": "🔄 Generar Recursos",
-                "Terraform Planet": "🌍 Terraformar Planeta",
-                "Save Game": "💾 Guardar Juego",
-                "Reset Game": "🗑️ Reiniciar Juego",
-                "Toggle Theme": "🎨 Cambiar Tema",
-                "Achievements": "🏆 Logros",
-                "Quests": "🎯 Misiones",
-                "Events": "🎉 Eventos",
-                "Biomes": "🌿 Biomas",
-                "Your Planet": "Tu Planeta",
-                "Close Leaderboard": "Cerrar Tabla de Clasificación",
-                "Close": "Cerrar",
-                "Tutorial": "📖 Tutorial",
-                "Got It!": "¡Entendido!",
-                "Share": "📤 Compartir"
-                // Add more translations as needed
-            }
-            // Add more languages as needed
-        };
-
-        let currentLanguage = 'en';
-
-        function changeLanguage(lang) {
-            currentLanguage = lang;
-            localStorage.setItem('PixelPlanetLanguage', lang);
-            applyTranslations();
+        // Function to calculate total resources
+        function calculateTotalResources() {
+            return resources.water + resources.minerals + resources.plants + resources.energy;
         }
 
-        function applyTranslations() {
-            // Translate button texts
-            document.querySelectorAll('button').forEach(button => {
-                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
-                if (translations[currentLanguage][key]) {
-                    button.innerText = translations[currentLanguage][key];
-                }
-            });
-
-            // Translate labels
-            document.querySelectorAll('label').forEach(label => {
-                const key = label.innerText.replace(':', '').trim();
-                if (translations[currentLanguage][key]) {
-                    label.innerText = `${translations[currentLanguage][key]}:`;
-                }
-            });
-
-            // Translate Help and Share buttons
-            const helpButton = document.getElementById('help-button');
-            const shareButton = document.getElementById('share-button');
-            if (translations[currentLanguage]["Help"]) {
-                helpButton.innerText = translations[currentLanguage]["Help"];
-            }
-            if (translations[currentLanguage]["Share"]) {
-                shareButton.innerText = translations[currentLanguage]["Share"];
-            }
-
-            // Update other elements if necessary
-        }
-
-        // Load Language on Init
-        function loadLanguage() {
-            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
-            currentLanguage = savedLanguage;
-            document.getElementById('language').value = savedLanguage;
-            applyTranslations();
-        }
-
-        // Leaderboard and Social Sharing Integration
+        // Function to update social sharing URLs
         function updateSocialSharing() {
             const currentPlayer = {
                 name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
@@ -2131,27 +1296,114 @@
             document.getElementById('share-reddit-game').href = redditURL;
         }
 
-        // Initialize Language and Social Sharing
-        document.addEventListener("DOMContentLoaded", function() {
-            loadLanguage();
-            updateSocialSharing();
+        // Function to handle sharing with reward and cooldown
+        async function shareGame() {
+            const lastShare = localStorage.getItem('PixelPlanetLastShare');
+            const now = Date.now();
+            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
 
-            // Show Continue button if a saved game exists
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                document.getElementById('continue-button').style.display = 'inline-block';
+            if (lastShare && now - lastShare < cooldown) {
+                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
+                showNotification(`⏳ You can share again in ${remaining} minutes.`);
+                return;
             }
 
-            // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.4';
-            document.getElementById('version').innerText = `Version ${savedVersion}`;
-        });
+            // Prompt for player name if not set
+            let playerName = localStorage.getItem('PixelPlanetPlayerName');
+            if (!playerName || playerName === 'Player') {
+                playerName = prompt("Enter your name for the leaderboard (3-16 characters):");
+                while (playerName && !validatePlayerName(playerName)) {
+                    playerName = prompt("Invalid name. Please enter a valid name (3-16 characters, alphanumerics, spaces, underscores, hyphens):");
+                }
+                if (playerName) {
+                    playerName = sanitizeInput(playerName);
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                } else {
+                    playerName = 'Player';
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                }
+            }
 
-        // Accessibility Enhancements
-        // Ensure all buttons can be focused and navigated via keyboard
-        // ARIA roles and labels are already implemented
+            // Open share URL in new tab with security attributes
+            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank', 'noopener,noreferrer');
 
-        // Confirmation Modal
+            // Reward the player
+            resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
+            updateResourcesUI();
+            showNotification("🎁 Thanks for sharing! Energy +10.");
+            localStorage.setItem('PixelPlanetLastShare', now);
+            saveGame();
+        }
+
+        // Function to show leaderboard
+        function showLeaderboard() {
+            updateLeaderboard();
+            document.getElementById('leaderboard').style.display = 'flex';
+        }
+
+        // Function to close leaderboard
+        function closeLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.classList.add('fadeOut');
+            setTimeout(() => {
+                leaderboard.style.display = 'none';
+                leaderboard.classList.remove('fadeOut');
+            }, 500);
+        }
+
+        // Function to open help/tutorial modal
+        function openHelp() {
+            const modal = document.getElementById('tutorial-modal');
+            modal.style.display = 'block';
+            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) firstFocusable.focus();
+
+            // Store the element that had focus
+            previousActiveElement = document.activeElement;
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', trapTabKeyTutorial);
+        }
+
+        // Function to close help/tutorial modal
+        function closeHelp() {
+            const modal = document.getElementById('tutorial-modal');
+            modal.style.display = 'none';
+            // Remove event listener when modal is closed
+            modal.removeEventListener('keydown', trapTabKeyTutorial);
+            // Return focus to the previous element
+            if (previousActiveElement) previousActiveElement.focus();
+        }
+
+        // Function to trap focus within the tutorial modal
+        function trapTabKeyTutorial(e) {
+            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+            const modal = document.getElementById('tutorial-modal');
+            const focusableContent = modal.querySelectorAll(focusableElements);
+            const firstFocusableElement = focusableContent[0];
+            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+
+            if (e.key === 'Tab') {
+                if (e.shiftKey) { // Shift + Tab
+                    if (document.activeElement === firstFocusableElement) {
+                        e.preventDefault();
+                        lastFocusableElement.focus();
+                    }
+                } else { // Tab
+                    if (document.activeElement === lastFocusableElement) {
+                        e.preventDefault();
+                        firstFocusableElement.focus();
+                    }
+                }
+            }
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeHelp();
+            }
+        }
+
+        // Function to confirm action using custom modal
         function openConfirmationModal(message, onConfirm) {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -2228,17 +1480,16 @@
             });
         }
 
-        // Function to confirm action without using alert/confirm
-        function confirmModal(message, onConfirm) {
+        // Function to confirm action and return a Promise
+        function confirmModal(message) {
             return new Promise((resolve) => {
                 openConfirmationModal(message, () => {
-                    onConfirm();
                     resolve(true);
                 });
             });
         }
 
-        // Function to alert message without using alert
+        // Function to show alert using custom modal (if needed)
         function openAlertModal(message) {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -2299,16 +1550,1917 @@
             });
         }
 
-        // Function to open alert modal
+        // Function to alert message using custom modal
         function alertMessage(message) {
             openAlertModal(message);
         }
 
-        // Leaderboard and Social Sharing Integration
-        // (Already handled in respective scripts)
+        // Function to start new game
+        async function startNewGame(confirmStart=true) {
+            if (confirmStart) {
+                const confirmed = await confirmModal("Are you sure you want to start a new game? All progress will be lost.");
+                if (!confirmed) return;
+            }
+
+            // Prompt for player name before starting
+            let playerName = prompt("Enter your name for the leaderboard (3-16 characters):");
+            while (playerName && !validatePlayerName(playerName)) {
+                playerName = prompt("Invalid name. Please enter a valid name (3-16 characters, alphanumerics, spaces, underscores, hyphens):");
+            }
+            if (playerName) {
+                playerName = sanitizeInput(playerName);
+                localStorage.setItem('PixelPlanetPlayerName', playerName);
+            } else {
+                playerName = 'Player';
+                localStorage.setItem('PixelPlanetPlayerName', playerName);
+            }
+
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
+            storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
+            biomes = [];
+            resetUpgrades();
+            resetAchievements();
+            resetQuests();
+            waterPerSecond = 1;
+            mineralsPerSecond = 0;
+            plantsPerSecond = 0;
+            energyPerSecond = 0;
+            waterConsumption = 1;
+            mineralConsumption = 1;
+            updateResourcesUI();
+            generateUpgradesUI();
+            generateAchievementsUI();
+            generateQuestsUI();
+            displayBiomes();
+            generateStoryUI();
+            startResourceGeneration();
+            startResourceConsumption();
+            startAutosave();
+            startEventSystem();
+            scheduleQuestReset();
+            loadTheme();
+            updateSocialSharing();
+            showNotification("🚀 New game started! Welcome to Pixel Planet.");
+            saveGame();
+        }
+
+        // Function to continue game
+        function continueGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                loadFromSave(parsedSave);
+            } else {
+                showNotification("❌ No saved game found.");
+            }
+        }
+
+        // Function to load game from save data
+        function loadFromSave(gameState) {
+            try {
+                // Validate gameState structure
+                if (!gameState.resources || !gameState.upgrades) throw new Error("Invalid save data.");
+
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                resources = gameState.resources;
+                storage = gameState.storage;
+                biomes = gameState.biomes;
+                upgrades = gameState.upgrades;
+                waterPerSecond = gameState.waterPerSecond;
+                mineralsPerSecond = gameState.mineralsPerSecond;
+                plantsPerSecond = gameState.plantsPerSecond;
+                energyPerSecond = gameState.energyPerSecond;
+                achievements = gameState.achievements;
+                quests = gameState.quests;
+                storyMilestones = gameState.storyMilestones;
+                updateResourcesUI();
+                generateUpgradesUI();
+                generateAchievementsUI();
+                generateQuestsUI();
+                displayBiomes();
+                handleOfflineResourceGeneration(gameState.lastUpdateTime);
+                startResourceGeneration();
+                startResourceConsumption();
+                startAutosave();
+                startEventSystem();
+                scheduleQuestReset();
+                checkAchievements();
+                checkQuests();
+                generateStoryUI();
+                loadTheme();
+                updateSocialSharing();
+                showNotification("✅ Game loaded successfully!");
+                // Hide Continue button after loading
+                document.getElementById('continue-button').style.display = 'none';
+            } catch (error) {
+                console.error("Error loading game:", error);
+                showNotification("⚠️ Error loading game. Starting a new game.");
+                startNewGame(false);
+            }
+        }
+
+        // Function to generate resources manually
+        function generateResources() {
+            addResource('water', 10);
+            addResource('minerals', 5);
+            addResource('plants', 3);
+            addResource('energy', 2);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            showNotification("🔄 Resources generated!");
+            saveGame();
+        }
+
+        // Function to add resources with storage limits and caps
+        function addResource(resource, amount) {
+            if (!MAX_RESOURCES.hasOwnProperty(resource)) return;
+            resources[resource] = Math.min(resources[resource] + amount, storage[resource], MAX_RESOURCES[resource]);
+            saveGame(); // Save whenever resources change
+        }
+
+        // Function to update resources UI
+        function updateResourcesUI() {
+            const waterElem = document.getElementById('water');
+            const mineralsElem = document.getElementById('minerals');
+            const plantsElem = document.getElementById('plants');
+            const energyElem = document.getElementById('energy');
+
+            waterElem.innerHTML = `💧 Water: ${resources.water} / ${storage.water} (Per Second: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
+            mineralsElem.innerHTML = `⛏ Minerals: ${resources.minerals} / ${storage.minerals} (Per Second: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
+            plantsElem.innerHTML = `🌱 Plants: ${resources.plants} / ${storage.plants} (Per Second: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
+            energyElem.innerHTML = `⚡ Energy: ${resources.energy} / ${storage.energy} (Per Second: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
+
+            generateUpgradesUI(); // Update upgrade button states based on new resource counts
+
+            checkStoryMilestones(); // Check for story milestones
+        }
+
+        // Function to generate Upgrades UI
+        function generateUpgradesUI() {
+            const upgradesDiv = document.getElementById('upgrades');
+            upgradesDiv.innerHTML = ''; // Clear existing upgrades
+
+            // Sort upgrades by category
+            const categories = {};
+            for (let key in upgrades) {
+                const upgrade = upgrades[key];
+                if (!categories[upgrade.category]) {
+                    categories[upgrade.category] = [];
+                }
+                categories[upgrade.category].push({ key, ...upgrade });
+            }
+
+            for (let category in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.width = '100%';
+                categoryDiv.style.textAlign = 'left';
+                categoryDiv.style.marginBottom = '10px';
+                const categoryTitle = document.createElement('h4');
+                categoryTitle.innerText = category;
+                categoryDiv.appendChild(categoryTitle);
+
+                // Create a flex container for upgrades to align left to right
+                const upgradesRow = document.createElement('div');
+                upgradesRow.style.display = 'flex';
+                upgradesRow.style.flexWrap = 'wrap';
+                upgradesRow.style.gap = '20px';
+                upgradesRow.style.justifyContent = 'flex-start';
+
+                categories[category].forEach(upgrade => {
+                    const upgradeDiv = document.createElement('div');
+                    upgradeDiv.className = 'upgrade';
+
+                    const name = document.createElement('span');
+                    name.innerText = `${upgrade.name}`;
+                    upgradeDiv.appendChild(name);
+
+                    const description = document.createElement('span');
+                    description.innerText = `${upgrade.description}`;
+                    upgradeDiv.appendChild(description);
+
+                    const cost = document.createElement('span');
+                    cost.innerText = `Cost: ${upgrade.cost} 💧`;
+                    upgradeDiv.appendChild(cost);
+
+                    const button = document.createElement('button');
+                    button.className = 'upgrade-button';
+                    button.innerText = `Buy (Level ${upgrade.level})`;
+                    button.disabled = resources.water < upgrade.cost;
+                    button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
+                    button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
+                    button.onclick = () => buyUpgrade(upgrade.key);
+                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
+
+                    // Add tooltip
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerText = upgrade.description;
+                    button.appendChild(tooltip);
+
+                    upgradeDiv.appendChild(button);
+
+                    upgradesRow.appendChild(upgradeDiv);
+                });
+
+                categoryDiv.appendChild(upgradesRow);
+                upgradesDiv.appendChild(categoryDiv);
+            }
+        }
+
+        // Function to buy an upgrade
+        function buyUpgrade(upgradeKey) {
+            const upgrade = upgrades[upgradeKey];
+            if (!upgrade) return;
+
+            if (resources.water >= upgrade.cost) {
+                resources.water -= upgrade.cost;
+                upgrade.level += 1;
+                upgrade.effect(upgrade.level);
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.5, upgrade.level));
+                updateResourcesUI();
+                generateAchievementsUI();
+                checkAchievements();
+                showNotification(`🔧 Upgrade "${upgrade.name}" purchased! Level: ${upgrade.level}`);
+                // Highlight the upgrade div briefly
+                const upgradesDiv = document.getElementById('upgrades');
+                const upgradeElements = upgradesDiv.getElementsByClassName('upgrade');
+                for (let elem of upgradeElements) {
+                    const btn = elem.querySelector('button');
+                    if (btn && btn.getAttribute('aria-label') === `Buy upgrade ${upgrade.name}`) {
+                        elem.classList.add('highlight');
+                        setTimeout(() => {
+                            elem.classList.remove('highlight');
+                        }, 1000);
+                        break;
+                    }
+                }
+                saveGame();
+            } else {
+                showNotification("❌ Not enough Water to purchase this upgrade!");
+            }
+        }
+
+        // Function to reset upgrades (for new game)
+        function resetUpgrades() {
+            for (let key in upgrades) {
+                upgrades[key].level = 0;
+                upgrades[key].cost = upgrades[key].baseCost;
+            }
+        }
+
+        // Function to generate Achievements UI
+        function generateAchievementsUI() {
+            const achievementsDiv = document.getElementById('achievements');
+            achievementsDiv.innerHTML = ''; // Clear existing achievements
+
+            for (let key in achievements) {
+                const achievement = achievements[key];
+                const achievementDiv = document.createElement('div');
+                achievementDiv.className = 'achievement';
+                if (achievement.unlocked) {
+                    achievementDiv.classList.add('unlocked');
+                }
+
+                const name = document.createElement('span');
+                name.innerText = `${achievement.name}`;
+                achievementDiv.appendChild(name);
+
+                const description = document.createElement('span');
+                description.innerText = `${achievement.description}`;
+                achievementDiv.appendChild(description);
+
+                achievementsDiv.appendChild(achievementDiv);
+            }
+        }
+
+        // Function to check and unlock achievements
+        function checkAchievements() {
+            for (let key in achievements) {
+                const achievement = achievements[key];
+                if (!achievement.unlocked && achievement.condition()) {
+                    achievement.unlocked = true;
+                    if (achievement.reward) achievement.reward();
+                    showNotification(`🏆 Achievement Unlocked: ${achievement.name} - Reward: ${achievement.rewardDescription}`);
+                    generateAchievementsUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to reset achievements (for new game)
+        function resetAchievements() {
+            for (let key in achievements) {
+                achievements[key].unlocked = false;
+            }
+        }
+
+        // Function to generate Quests UI
+        function generateQuestsUI() {
+            const questsDiv = document.getElementById('quests');
+            questsDiv.innerHTML = ''; // Clear existing quests
+
+            for (let key in quests) {
+                const quest = quests[key];
+                const questDiv = document.createElement('div');
+                questDiv.className = 'quest';
+                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
+                questsDiv.appendChild(questDiv);
+            }
+        }
+
+        // Function to check and complete quests
+        function checkQuests() {
+            for (let key in quests) {
+                const quest = quests[key];
+                if (!quest.completed && quest.condition()) {
+                    quest.completed = true;
+                    if (quest.reward) quest.reward();
+                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: ${quest.rewardDescription}`);
+                    generateQuestsUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to reset quests (daily/weekly)
+        function resetQuests() {
+            for (let key in quests) {
+                quests[key].completed = false;
+            }
+            generateQuestsUI();
+        }
+
+        // Function to generate Story UI
+        function generateStoryUI() {
+            const storyDiv = document.getElementById('story');
+            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
+
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (milestone.unlocked) {
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = milestone.text;
+                    storyDiv.appendChild(paragraph);
+                }
+            }
+        }
+
+        // Function to check and unlock Story Milestones
+        function checkStoryMilestones() {
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (!milestone.unlocked && milestone.condition()) {
+                    milestone.unlocked = true;
+                    showNotification(`📖 Story Update: ${milestone.text}`);
+                    generateStoryUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to display Biomes
+        function displayBiomes() {
+            const biomesDiv = document.getElementById('biomes');
+            biomesDiv.innerHTML = ''; // Clear existing biomes
+
+            biomes.forEach(biome => {
+                const biomeDiv = document.createElement('div');
+                biomeDiv.className = 'biome';
+                let bonusText = '';
+                for (let key in biome.bonuses) {
+                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+                }
+                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}\n${biome.description}`;
+                biomesDiv.appendChild(biomeDiv);
+            });
+        }
+
+        // Function to unlock Terraform (new biome)
+        async function unlockTerraform() {
+            const terraformBaseCost = 500;
+            const terraformCost = terraformBaseCost * (biomes.length + 1);
+            if (resources.water >= terraformCost) {
+                const confirmed = await confirmModal(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
+                if (!confirmed) return;
+
+                resources.water -= terraformCost;
+                unlockNewBiome();
+                updateResourcesUI();
+                showNotification(`🌍 Planet terraformed! New biome unlocked.`);
+                saveGame();
+            } else {
+                showNotification("❌ Not enough Water to terraform the planet!");
+            }
+        }
+
+        // Function to unlock a new biome
+        function unlockNewBiome() {
+            const newBiome = generateRandomBiome();
+            biomes.push(newBiome);
+            displayBiomes();
+            generateStoryUI();
+        }
+
+        // Function to generate a random biome
+        function generateRandomBiome() {
+            const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna", "Volcano", "Jungle", "Iceberg", "Canyon"];
+            let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
+
+            if (availableBiomes.length === 0) {
+                showNotification("🎉 Congratulations! You've unlocked all available biomes.");
+                return;
+            }
+
+            const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
+            let resourceBonus = {};
+            let biomeDescription = "";
+
+            switch(randomName) {
+                case "Forest":
+                    resourceBonus = { plantsPerSecond: 2 };
+                    biomeDescription = "A lush forest teeming with plant life.";
+                    break;
+                case "Desert":
+                    resourceBonus = { mineralsPerSecond: 3 };
+                    biomeDescription = "An arid desert with abundant minerals.";
+                    break;
+                case "Ocean":
+                    resourceBonus = { waterPerSecond: 5 };
+                    biomeDescription = "A vast ocean providing ample water resources.";
+                    break;
+                case "Mountain":
+                    resourceBonus = { mineralsPerSecond: 4 };
+                    biomeDescription = "Majestic mountains rich in minerals.";
+                    break;
+                case "Swamp":
+                    resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
+                    biomeDescription = "A mysterious swamp with diverse plant life.";
+                    break;
+                case "Tundra":
+                    resourceBonus = { energyPerSecond: 2 };
+                    biomeDescription = "A cold tundra harnessing energy resources.";
+                    break;
+                case "Savanna":
+                    resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
+                    biomeDescription = "A sprawling savanna with balanced resources.";
+                    break;
+                case "Volcano":
+                    resourceBonus = { energyPerSecond: 5 };
+                    biomeDescription = "An active volcano generating significant energy.";
+                    break;
+                case "Jungle":
+                    resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
+                    biomeDescription = "A dense jungle brimming with plant and water resources.";
+                    break;
+                case "Iceberg":
+                    resourceBonus = { waterPerSecond: 6 };
+                    biomeDescription = "A massive iceberg providing a steady water supply.";
+                    break;
+                case "Canyon":
+                    resourceBonus = { mineralsPerSecond: 5 };
+                    biomeDescription = "A deep canyon rich in mineral deposits.";
+                    break;
+                default:
+                    resourceBonus = {};
+                    biomeDescription = "A unique biome with special resources.";
+            }
+
+            // Apply bonuses with caps
+            for (let key in resourceBonus) {
+                if (key === "waterPerSecond") {
+                    waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
+                }
+                if (key === "mineralsPerSecond") {
+                    mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
+                }
+                if (key === "plantsPerSecond") {
+                    plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
+                }
+                if (key === "energyPerSecond") {
+                    energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
+                }
+            }
+
+            return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus, description: biomeDescription };
+        }
+
+        // Function to start the event system
+        function startEventSystem() {
+            if (eventInterval) clearInterval(eventInterval);
+            eventInterval = setInterval(() => {
+                triggerRandomEvent();
+            }, 600000); // Trigger an event every 10 minutes
+        }
+
+        // Function to trigger a random event
+        function triggerRandomEvent() {
+            const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            randomEvent.effect();
+            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
+            displayEvents(randomEvent);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            saveGame();
+        }
+
+        // Function to display events
+        function displayEvents(event) {
+            const eventsDiv = document.getElementById('events');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.innerText = `${event.name}: ${event.description}`;
+            eventsDiv.prepend(eventDiv); // Add to top
+
+            // Limit the number of displayed events to 5
+            while (eventsDiv.children.length > 5) {
+                eventsDiv.removeChild(eventsDiv.lastChild);
+            }
+        }
+
+        // Function to show notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to save game
+        function saveGame() {
+            try {
+                const saveData = {
+                    version: "0.4", // Fixed version number
+                    resources,
+                    storage,
+                    biomes,
+                    upgrades,
+                    waterPerSecond,
+                    mineralsPerSecond,
+                    plantsPerSecond,
+                    energyPerSecond,
+                    achievements,
+                    quests,
+                    storyMilestones,
+                    lastUpdateTime: Date.now()
+                };
+                localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
+                showNotification("💾 Game saved!");
+            } catch (error) {
+                console.error("Error saving game:", error);
+                showNotification("⚠️ Error saving game.");
+            }
+        }
+
+        // Function to load game from localStorage
+        function loadFromSave(gameState) {
+            try {
+                // Validate gameState structure
+                if (!gameState.resources || !gameState.upgrades) throw new Error("Invalid save data.");
+
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                resources = gameState.resources;
+                storage = gameState.storage;
+                biomes = gameState.biomes;
+                upgrades = gameState.upgrades;
+                waterPerSecond = gameState.waterPerSecond;
+                mineralsPerSecond = gameState.mineralsPerSecond;
+                plantsPerSecond = gameState.plantsPerSecond;
+                energyPerSecond = gameState.energyPerSecond;
+                achievements = gameState.achievements;
+                quests = gameState.quests;
+                storyMilestones = gameState.storyMilestones;
+                updateResourcesUI();
+                generateUpgradesUI();
+                generateAchievementsUI();
+                generateQuestsUI();
+                displayBiomes();
+                handleOfflineResourceGeneration(gameState.lastUpdateTime);
+                startResourceGeneration();
+                startResourceConsumption();
+                startAutosave();
+                startEventSystem();
+                scheduleQuestReset();
+                checkAchievements();
+                checkQuests();
+                generateStoryUI();
+                loadTheme();
+                updateSocialSharing();
+                showNotification("✅ Game loaded successfully!");
+                // Hide Continue button after loading
+                document.getElementById('continue-button').style.display = 'none';
+            } catch (error) {
+                console.error("Error loading game:", error);
+                showNotification("⚠️ Error loading game. Starting a new game.");
+                startNewGame(false);
+            }
+        }
+
+        // Function to generate a new game
+        async function startNewGame(confirmStart=true) {
+            if (confirmStart) {
+                const confirmed = await confirmModal("Are you sure you want to start a new game? All progress will be lost.");
+                if (!confirmed) return;
+            }
+
+            // Prompt for player name before starting
+            let playerName = prompt("Enter your name for the leaderboard (3-16 characters):");
+            while (playerName && !validatePlayerName(playerName)) {
+                playerName = prompt("Invalid name. Please enter a valid name (3-16 characters, alphanumerics, spaces, underscores, hyphens):");
+            }
+            if (playerName) {
+                playerName = sanitizeInput(playerName);
+                localStorage.setItem('PixelPlanetPlayerName', playerName);
+            } else {
+                playerName = 'Player';
+                localStorage.setItem('PixelPlanetPlayerName', playerName);
+            }
+
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
+            storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
+            biomes = [];
+            resetUpgrades();
+            resetAchievements();
+            resetQuests();
+            waterPerSecond = 1;
+            mineralsPerSecond = 0;
+            plantsPerSecond = 0;
+            energyPerSecond = 0;
+            waterConsumption = 1;
+            mineralConsumption = 1;
+            updateResourcesUI();
+            generateUpgradesUI();
+            generateAchievementsUI();
+            generateQuestsUI();
+            displayBiomes();
+            generateStoryUI();
+            startResourceGeneration();
+            startResourceConsumption();
+            startAutosave();
+            startEventSystem();
+            scheduleQuestReset();
+            loadTheme();
+            updateSocialSharing();
+            showNotification("🚀 New game started! Welcome to Pixel Planet.");
+            saveGame();
+        }
+
+        // Function to continue game
+        function continueGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                loadFromSave(parsedSave);
+            } else {
+                showNotification("❌ No saved game found.");
+            }
+        }
+
+        // Function to generate resources manually
+        function generateResources() {
+            addResource('water', 10);
+            addResource('minerals', 5);
+            addResource('plants', 3);
+            addResource('energy', 2);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            showNotification("🔄 Resources generated!");
+            saveGame();
+        }
+
+        // Function to add resources with storage limits and caps
+        function addResource(resource, amount) {
+            if (!MAX_RESOURCES.hasOwnProperty(resource)) return;
+            resources[resource] = Math.min(resources[resource] + amount, storage[resource], MAX_RESOURCES[resource]);
+            saveGame(); // Save whenever resources change
+        }
+
+        // Function to update resources UI
+        function updateResourcesUI() {
+            const waterElem = document.getElementById('water');
+            const mineralsElem = document.getElementById('minerals');
+            const plantsElem = document.getElementById('plants');
+            const energyElem = document.getElementById('energy');
+
+            waterElem.innerHTML = `💧 Water: ${resources.water} / ${storage.water} (Per Second: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
+            mineralsElem.innerHTML = `⛏ Minerals: ${resources.minerals} / ${storage.minerals} (Per Second: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
+            plantsElem.innerHTML = `🌱 Plants: ${resources.plants} / ${storage.plants} (Per Second: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
+            energyElem.innerHTML = `⚡ Energy: ${resources.energy} / ${storage.energy} (Per Second: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
+
+            generateUpgradesUI(); // Update upgrade button states based on new resource counts
+
+            checkStoryMilestones(); // Check for story milestones
+        }
+
+        // Function to generate Upgrades UI
+        function generateUpgradesUI() {
+            const upgradesDiv = document.getElementById('upgrades');
+            upgradesDiv.innerHTML = ''; // Clear existing upgrades
+
+            // Sort upgrades by category
+            const categories = {};
+            for (let key in upgrades) {
+                const upgrade = upgrades[key];
+                if (!categories[upgrade.category]) {
+                    categories[upgrade.category] = [];
+                }
+                categories[upgrade.category].push({ key, ...upgrade });
+            }
+
+            for (let category in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.width = '100%';
+                categoryDiv.style.textAlign = 'left';
+                categoryDiv.style.marginBottom = '10px';
+                const categoryTitle = document.createElement('h4');
+                categoryTitle.innerText = category;
+                categoryDiv.appendChild(categoryTitle);
+
+                // Create a flex container for upgrades to align left to right
+                const upgradesRow = document.createElement('div');
+                upgradesRow.style.display = 'flex';
+                upgradesRow.style.flexWrap = 'wrap';
+                upgradesRow.style.gap = '20px';
+                upgradesRow.style.justifyContent = 'flex-start';
+
+                categories[category].forEach(upgrade => {
+                    const upgradeDiv = document.createElement('div');
+                    upgradeDiv.className = 'upgrade';
+
+                    const name = document.createElement('span');
+                    name.innerText = `${upgrade.name}`;
+                    upgradeDiv.appendChild(name);
+
+                    const description = document.createElement('span');
+                    description.innerText = `${upgrade.description}`;
+                    upgradeDiv.appendChild(description);
+
+                    const cost = document.createElement('span');
+                    cost.innerText = `Cost: ${upgrade.cost} 💧`;
+                    upgradeDiv.appendChild(cost);
+
+                    const button = document.createElement('button');
+                    button.className = 'upgrade-button';
+                    button.innerText = `Buy (Level ${upgrade.level})`;
+                    button.disabled = resources.water < upgrade.cost;
+                    button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
+                    button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
+                    button.onclick = () => buyUpgrade(upgrade.key);
+                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
+
+                    // Add tooltip
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerText = upgrade.description;
+                    button.appendChild(tooltip);
+
+                    upgradeDiv.appendChild(button);
+
+                    upgradesRow.appendChild(upgradeDiv);
+                });
+
+                categoryDiv.appendChild(upgradesRow);
+                upgradesDiv.appendChild(categoryDiv);
+            }
+        }
+
+        // Function to buy an upgrade
+        function buyUpgrade(upgradeKey) {
+            const upgrade = upgrades[upgradeKey];
+            if (!upgrade) return;
+
+            if (resources.water >= upgrade.cost) {
+                resources.water -= upgrade.cost;
+                upgrade.level += 1;
+                upgrade.effect(upgrade.level);
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.5, upgrade.level));
+                updateResourcesUI();
+                generateAchievementsUI();
+                checkAchievements();
+                showNotification(`🔧 Upgrade "${upgrade.name}" purchased! Level: ${upgrade.level}`);
+                // Highlight the upgrade div briefly
+                const upgradesDiv = document.getElementById('upgrades');
+                const upgradeElements = upgradesDiv.getElementsByClassName('upgrade');
+                for (let elem of upgradeElements) {
+                    const btn = elem.querySelector('button');
+                    if (btn && btn.getAttribute('aria-label') === `Buy upgrade ${upgrade.name}`) {
+                        elem.classList.add('highlight');
+                        setTimeout(() => {
+                            elem.classList.remove('highlight');
+                        }, 1000);
+                        break;
+                    }
+                }
+                saveGame();
+            } else {
+                showNotification("❌ Not enough Water to purchase this upgrade!");
+            }
+        }
+
+        // Function to reset upgrades (for new game)
+        function resetUpgrades() {
+            for (let key in upgrades) {
+                upgrades[key].level = 0;
+                upgrades[key].cost = upgrades[key].baseCost;
+            }
+        }
+
+        // Function to generate Achievements UI
+        function generateAchievementsUI() {
+            const achievementsDiv = document.getElementById('achievements');
+            achievementsDiv.innerHTML = ''; // Clear existing achievements
+
+            for (let key in achievements) {
+                const achievement = achievements[key];
+                const achievementDiv = document.createElement('div');
+                achievementDiv.className = 'achievement';
+                if (achievement.unlocked) {
+                    achievementDiv.classList.add('unlocked');
+                }
+
+                const name = document.createElement('span');
+                name.innerText = `${achievement.name}`;
+                achievementDiv.appendChild(name);
+
+                const description = document.createElement('span');
+                description.innerText = `${achievement.description}`;
+                achievementDiv.appendChild(description);
+
+                achievementsDiv.appendChild(achievementDiv);
+            }
+        }
+
+        // Function to check and unlock achievements
+        function checkAchievements() {
+            for (let key in achievements) {
+                const achievement = achievements[key];
+                if (!achievement.unlocked && achievement.condition()) {
+                    achievement.unlocked = true;
+                    if (achievement.reward) achievement.reward();
+                    showNotification(`🏆 Achievement Unlocked: ${achievement.name} - Reward: ${achievement.rewardDescription}`);
+                    generateAchievementsUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to reset achievements (for new game)
+        function resetAchievements() {
+            for (let key in achievements) {
+                achievements[key].unlocked = false;
+            }
+        }
+
+        // Function to generate Quests UI
+        function generateQuestsUI() {
+            const questsDiv = document.getElementById('quests');
+            questsDiv.innerHTML = ''; // Clear existing quests
+
+            for (let key in quests) {
+                const quest = quests[key];
+                const questDiv = document.createElement('div');
+                questDiv.className = 'quest';
+                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
+                questsDiv.appendChild(questDiv);
+            }
+        }
+
+        // Function to check and complete quests
+        function checkQuests() {
+            for (let key in quests) {
+                const quest = quests[key];
+                if (!quest.completed && quest.condition()) {
+                    quest.completed = true;
+                    if (quest.reward) quest.reward();
+                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: ${quest.rewardDescription}`);
+                    generateQuestsUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to reset quests (daily/weekly)
+        function resetQuests() {
+            for (let key in quests) {
+                quests[key].completed = false;
+            }
+            generateQuestsUI();
+        }
+
+        // Function to generate Story UI
+        function generateStoryUI() {
+            const storyDiv = document.getElementById('story');
+            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
+
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (milestone.unlocked) {
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = milestone.text;
+                    storyDiv.appendChild(paragraph);
+                }
+            }
+        }
+
+        // Function to check and unlock Story Milestones
+        function checkStoryMilestones() {
+            for (let key in storyMilestones) {
+                const milestone = storyMilestones[key];
+                if (!milestone.unlocked && milestone.condition()) {
+                    milestone.unlocked = true;
+                    showNotification(`📖 Story Update: ${milestone.text}`);
+                    generateStoryUI();
+                    saveGame();
+                }
+            }
+        }
+
+        // Function to display Biomes
+        function displayBiomes() {
+            const biomesDiv = document.getElementById('biomes');
+            biomesDiv.innerHTML = ''; // Clear existing biomes
+
+            biomes.forEach(biome => {
+                const biomeDiv = document.createElement('div');
+                biomeDiv.className = 'biome';
+                let bonusText = '';
+                for (let key in biome.bonuses) {
+                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+                }
+                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}\n${biome.description}`;
+                biomesDiv.appendChild(biomeDiv);
+            });
+        }
+
+        // Function to unlock Terraform (new biome)
+        async function unlockTerraform() {
+            const terraformBaseCost = 500;
+            const terraformCost = terraformBaseCost * (biomes.length + 1);
+            if (resources.water >= terraformCost) {
+                const confirmed = await confirmModal(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
+                if (!confirmed) return;
+
+                resources.water -= terraformCost;
+                unlockNewBiome();
+                updateResourcesUI();
+                showNotification(`🌍 Planet terraformed! New biome unlocked.`);
+                saveGame();
+            } else {
+                showNotification("❌ Not enough Water to terraform the planet!");
+            }
+        }
+
+        // Function to unlock a new biome
+        function unlockNewBiome() {
+            const newBiome = generateRandomBiome();
+            biomes.push(newBiome);
+            displayBiomes();
+            generateStoryUI();
+        }
+
+        // Function to generate a random biome
+        function generateRandomBiome() {
+            const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna", "Volcano", "Jungle", "Iceberg", "Canyon"];
+            let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
+
+            if (availableBiomes.length === 0) {
+                showNotification("🎉 Congratulations! You've unlocked all available biomes.");
+                return;
+            }
+
+            const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
+            let resourceBonus = {};
+            let biomeDescription = "";
+
+            switch(randomName) {
+                case "Forest":
+                    resourceBonus = { plantsPerSecond: 2 };
+                    biomeDescription = "A lush forest teeming with plant life.";
+                    break;
+                case "Desert":
+                    resourceBonus = { mineralsPerSecond: 3 };
+                    biomeDescription = "An arid desert with abundant minerals.";
+                    break;
+                case "Ocean":
+                    resourceBonus = { waterPerSecond: 5 };
+                    biomeDescription = "A vast ocean providing ample water resources.";
+                    break;
+                case "Mountain":
+                    resourceBonus = { mineralsPerSecond: 4 };
+                    biomeDescription = "Majestic mountains rich in minerals.";
+                    break;
+                case "Swamp":
+                    resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
+                    biomeDescription = "A mysterious swamp with diverse plant life.";
+                    break;
+                case "Tundra":
+                    resourceBonus = { energyPerSecond: 2 };
+                    biomeDescription = "A cold tundra harnessing energy resources.";
+                    break;
+                case "Savanna":
+                    resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
+                    biomeDescription = "A sprawling savanna with balanced resources.";
+                    break;
+                case "Volcano":
+                    resourceBonus = { energyPerSecond: 5 };
+                    biomeDescription = "An active volcano generating significant energy.";
+                    break;
+                case "Jungle":
+                    resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
+                    biomeDescription = "A dense jungle brimming with plant and water resources.";
+                    break;
+                case "Iceberg":
+                    resourceBonus = { waterPerSecond: 6 };
+                    biomeDescription = "A massive iceberg providing a steady water supply.";
+                    break;
+                case "Canyon":
+                    resourceBonus = { mineralsPerSecond: 5 };
+                    biomeDescription = "A deep canyon rich in mineral deposits.";
+                    break;
+                default:
+                    resourceBonus = {};
+                    biomeDescription = "A unique biome with special resources.";
+            }
+
+            // Apply bonuses with caps
+            for (let key in resourceBonus) {
+                if (key === "waterPerSecond") {
+                    waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
+                }
+                if (key === "mineralsPerSecond") {
+                    mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
+                }
+                if (key === "plantsPerSecond") {
+                    plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
+                }
+                if (key === "energyPerSecond") {
+                    energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
+                }
+            }
+
+            return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus, description: biomeDescription };
+        }
+
+        // Function to start the event system
+        function startEventSystem() {
+            if (eventInterval) clearInterval(eventInterval);
+            eventInterval = setInterval(() => {
+                triggerRandomEvent();
+            }, 600000); // Trigger an event every 10 minutes
+        }
+
+        // Function to trigger a random event
+        function triggerRandomEvent() {
+            const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            randomEvent.effect();
+            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
+            displayEvents(randomEvent);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            saveGame();
+        }
+
+        // Function to display events
+        function displayEvents(event) {
+            const eventsDiv = document.getElementById('events');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.innerText = `${event.name}: ${event.description}`;
+            eventsDiv.prepend(eventDiv); // Add to top
+
+            // Limit the number of displayed events to 5
+            while (eventsDiv.children.length > 5) {
+                eventsDiv.removeChild(eventsDiv.lastChild);
+            }
+        }
+
+        // Function to show notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to save game
+        function saveGame() {
+            try {
+                const saveData = {
+                    version: "0.4", // Fixed version number
+                    resources,
+                    storage,
+                    biomes,
+                    upgrades,
+                    waterPerSecond,
+                    mineralsPerSecond,
+                    plantsPerSecond,
+                    energyPerSecond,
+                    achievements,
+                    quests,
+                    storyMilestones,
+                    lastUpdateTime: Date.now()
+                };
+                localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
+                showNotification("💾 Game saved!");
+            } catch (error) {
+                console.error("Error saving game:", error);
+                showNotification("⚠️ Error saving game.");
+            }
+        }
+
+        // Function to load game from localStorage
+        function loadFromSave(gameState) {
+            try {
+                // Validate gameState structure
+                if (!gameState.resources || !gameState.upgrades) throw new Error("Invalid save data.");
+
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                resources = gameState.resources;
+                storage = gameState.storage;
+                biomes = gameState.biomes;
+                upgrades = gameState.upgrades;
+                waterPerSecond = gameState.waterPerSecond;
+                mineralsPerSecond = gameState.mineralsPerSecond;
+                plantsPerSecond = gameState.plantsPerSecond;
+                energyPerSecond = gameState.energyPerSecond;
+                achievements = gameState.achievements;
+                quests = gameState.quests;
+                storyMilestones = gameState.storyMilestones;
+                updateResourcesUI();
+                generateUpgradesUI();
+                generateAchievementsUI();
+                generateQuestsUI();
+                displayBiomes();
+                handleOfflineResourceGeneration(gameState.lastUpdateTime);
+                startResourceGeneration();
+                startResourceConsumption();
+                startAutosave();
+                startEventSystem();
+                scheduleQuestReset();
+                checkAchievements();
+                checkQuests();
+                generateStoryUI();
+                loadTheme();
+                updateSocialSharing();
+                showNotification("✅ Game loaded successfully!");
+                // Hide Continue button after loading
+                document.getElementById('continue-button').style.display = 'none';
+            } catch (error) {
+                console.error("Error loading game:", error);
+                showNotification("⚠️ Error loading game. Starting a new game.");
+                startNewGame(false);
+            }
+        }
+
+        // Function to handle offline resource generation
+        function handleOfflineResourceGeneration(lastSaveTime) {
+            const currentTime = Date.now();
+            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
+            const maxOfflineSeconds = 86400; // 24 hours
+            const effectiveDuration = Math.min(offlineDuration, maxOfflineSeconds);
+            if (effectiveDuration > 0) {
+                const multiplier = 1; // Adjust as needed
+                addResource('water', effectiveDuration * waterPerSecond * multiplier);
+                addResource('minerals', effectiveDuration * mineralsPerSecond * multiplier);
+                addResource('plants', effectiveDuration * plantsPerSecond * multiplier);
+                addResource('energy', effectiveDuration * energyPerSecond * multiplier);
+                updateResourcesUI();
+                showNotification(`⏰ You were offline for ${effectiveDuration} seconds. Resources have been updated.`);
+                checkAchievements();
+                checkQuests();
+                saveGame();
+            }
+        }
+
+        // Function to schedule quest reset (daily)
+        function scheduleQuestReset() {
+            const now = new Date();
+            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
+            setTimeout(function(){
+                resetQuests();
+                scheduleQuestReset();
+            }, millisTillMidnight);
+        }
+
+        // Function to detect device for UI adjustments
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            if (/Mobi|Android/i.test(ua)) {
+                document.body.style.fontSize = '1em';
+            } else if (/iPad|Tablet/i.test(ua)) {
+                document.body.style.fontSize = '1.1em';
+            } else {
+                document.body.style.fontSize = '1.2em';
+            }
+        }
+
+        // Function to initialize the game
+        function initGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                if (parsedSave.version !== "0.4") {
+                    // Handle version upgrades if necessary
+                    // For simplicity, start a new game if versions do not match
+                    showNotification("🔄 Game version mismatch. Starting a new game.");
+                    startNewGame(false);
+                } else {
+                    loadFromSave(parsedSave);
+                }
+            } else {
+                startNewGame();
+            }
+        }
+
+        // Function to toggle theme
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('PixelPlanetTheme') || 'default';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            changeTheme(newTheme);
+        }
+
+        // Function to change theme
+        function changeTheme(theme) {
+            document.body.className = ''; // Reset existing classes
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                // Default theme
+                document.body.classList.remove('dark-theme', 'light-theme');
+            }
+            showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+            // Save theme selection
+            localStorage.setItem('PixelPlanetTheme', theme);
+        }
+
+        // Function to load theme on game start
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('PixelPlanetTheme');
+            if (savedTheme) {
+                changeTheme(savedTheme);
+            }
+        }
+
+        // Function to reset game
+        async function resetGame() {
+            const confirmed = await confirmModal("Are you sure you want to reset the game? All progress will be lost.");
+            if (!confirmed) return;
+
+            localStorage.removeItem('PixelPlanetSave');
+            localStorage.removeItem('PixelPlanetLeaderboard');
+            localStorage.removeItem('PixelPlanetVersion');
+            localStorage.removeItem('PixelPlanetPlayerName');
+            startNewGame(false); // Pass false to avoid double confirmation
+            showNotification("🗑️ Game has been reset.");
+        }
+
+        // Function to handle language change
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('PixelPlanetLanguage', lang);
+            applyTranslations();
+        }
+
+        // Function to apply translations
+        function applyTranslations() {
+            // Translate button texts
+            document.querySelectorAll('button').forEach(button => {
+                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
+                if (translations[currentLanguage][key]) {
+                    button.innerText = `${translations[currentLanguage][key]}${key.startsWith("Buy") ? ` (Level ${getUpgradeLevelByName(translations[currentLanguage][key])})` : ''}`;
+                }
+            });
+
+            // Translate labels
+            document.querySelectorAll('label').forEach(label => {
+                const key = label.innerText.replace(':', '').trim();
+                if (translations[currentLanguage][key]) {
+                    label.innerText = `${translations[currentLanguage][key]}:`;
+                }
+            });
+
+            // Translate Help and Share buttons
+            const helpButton = document.getElementById('help-button');
+            const shareButton = document.getElementById('share-button');
+            if (translations[currentLanguage]["Help"]) {
+                helpButton.innerText = translations[currentLanguage]["Help"];
+            }
+            if (translations[currentLanguage]["Share"]) {
+                shareButton.innerText = translations[currentLanguage]["Share"];
+            }
+
+            // Update other elements if necessary
+        }
+
+        // Function to get upgrade level by name
+        function getUpgradeLevelByName(name) {
+            for (let key in upgrades) {
+                if (upgrades[key].name === name) {
+                    return upgrades[key].level;
+                }
+            }
+            return 0;
+        }
+
+        // Function to load language on init
+        function loadLanguage() {
+            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('language').value = savedLanguage;
+            applyTranslations();
+        }
+
+        // Function to update social sharing URLs
+        function updateSocialSharing() {
+            const currentPlayer = {
+                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
+                totalResources: calculateTotalResources()
+            };
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+
+            document.getElementById('share-twitter').href = twitterURL;
+            document.getElementById('share-facebook').href = facebookURL;
+            document.getElementById('share-reddit').href = redditURL;
+
+            document.getElementById('share-twitter-game').href = twitterURL;
+            document.getElementById('share-facebook-game').href = facebookURL;
+            document.getElementById('share-reddit-game').href = redditURL;
+        }
+
+        // Function to handle social sharing cooldown and rewards
+        async function shareGame() {
+            const lastShare = localStorage.getItem('PixelPlanetLastShare');
+            const now = Date.now();
+            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
+
+            if (lastShare && now - lastShare < cooldown) {
+                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
+                showNotification(`⏳ You can share again in ${remaining} minutes.`);
+                return;
+            }
+
+            // Prompt for player name if not set
+            let playerName = localStorage.getItem('PixelPlanetPlayerName');
+            if (!playerName || playerName === 'Player') {
+                playerName = prompt("Enter your name for the leaderboard (3-16 characters):");
+                while (playerName && !validatePlayerName(playerName)) {
+                    playerName = prompt("Invalid name. Please enter a valid name (3-16 characters, alphanumerics, spaces, underscores, hyphens):");
+                }
+                if (playerName) {
+                    playerName = sanitizeInput(playerName);
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                } else {
+                    playerName = 'Player';
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                }
+            }
+
+            // Open share URL in new tab with security attributes
+            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank', 'noopener,noreferrer');
+
+            // Reward the player
+            resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
+            updateResourcesUI();
+            showNotification("🎁 Thanks for sharing! Energy +10.");
+            localStorage.setItem('PixelPlanetLastShare', now);
+            saveGame();
+        }
+
+        // Function to handle modals and confirmations
+        function openConfirmationModal(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.display = 'flex';
+            buttonsDiv.style.justifyContent = 'space-between';
+            buttonsDiv.style.marginTop = '20px';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.innerText = 'Yes';
+            confirmBtn.onclick = () => {
+                onConfirm();
+                document.body.removeChild(modal);
+            };
+            confirmBtn.setAttribute('aria-label', 'Confirm');
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.innerText = 'No';
+            cancelBtn.onclick = () => { document.body.removeChild(modal); };
+            cancelBtn.setAttribute('aria-label', 'Cancel');
+
+            buttonsDiv.appendChild(confirmBtn);
+            buttonsDiv.appendChild(cancelBtn);
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(buttonsDiv);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            confirmBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to confirm action using Promise
+        function confirmModal(message) {
+            return new Promise((resolve) => {
+                openConfirmationModal(message, () => {
+                    resolve(true);
+                });
+            });
+        }
+
+        // Function to alert message using custom modal
+        function openAlertModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Alert Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const okBtn = document.createElement('button');
+            okBtn.innerText = 'OK';
+            okBtn.onclick = () => { document.body.removeChild(modal); };
+            okBtn.setAttribute('aria-label', 'OK');
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(okBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            okBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to alert message using custom modal
+        function alertMessage(message) {
+            openAlertModal(message);
+        }
+
+        // Function to start resource generation
+        function startResourceGeneration() {
+            if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
+            resourceGenerationInterval = setInterval(() => {
+                addResource('water', waterPerSecond);
+                addResource('minerals', mineralsPerSecond);
+                addResource('plants', plantsPerSecond);
+                addResource('energy', energyPerSecond);
+                updateResourcesUI();
+                checkAchievements();
+                checkQuests();
+            }, 1000);
+        }
+
+        // Function to start resource consumption
+        function startResourceConsumption() {
+            if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
+            resourceConsumptionInterval = setInterval(() => {
+                consumeResources();
+            }, 5000); // Consume resources every 5 seconds
+        }
+
+        // Function to consume resources
+        function consumeResources() {
+            resources.water = Math.max(0, resources.water - waterConsumption);
+            resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            showNotification("🔻 Resources have been consumed.");
+        }
+
+        // Function to start autosave
+        function startAutosave() {
+            if (autosaveInterval) clearInterval(autosaveInterval);
+            autosaveInterval = setInterval(() => {
+                saveGame();
+            }, 30000); // Autosave every 30 seconds
+        }
+
+        // Function to handle offline resource generation
+        function handleOfflineResourceGeneration(lastSaveTime) {
+            const currentTime = Date.now();
+            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
+            const maxOfflineSeconds = 86400; // 24 hours
+            const effectiveDuration = Math.min(offlineDuration, maxOfflineSeconds);
+            if (effectiveDuration > 0) {
+                const multiplier = 1; // Adjust as needed
+                addResource('water', effectiveDuration * waterPerSecond * multiplier);
+                addResource('minerals', effectiveDuration * mineralsPerSecond * multiplier);
+                addResource('plants', effectiveDuration * plantsPerSecond * multiplier);
+                addResource('energy', effectiveDuration * energyPerSecond * multiplier);
+                updateResourcesUI();
+                showNotification(`⏰ You were offline for ${effectiveDuration} seconds. Resources have been updated.`);
+                checkAchievements();
+                checkQuests();
+                saveGame();
+            }
+        }
+
+        // Function to schedule quest reset (daily)
+        function scheduleQuestReset() {
+            const now = new Date();
+            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
+            setTimeout(function(){
+                resetQuests();
+                scheduleQuestReset();
+            }, millisTillMidnight);
+        }
+
+        // Function to detect device for UI adjustments
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            if (/Mobi|Android/i.test(ua)) {
+                document.body.style.fontSize = '1em';
+            } else if (/iPad|Tablet/i.test(ua)) {
+                document.body.style.fontSize = '1.1em';
+            } else {
+                document.body.style.fontSize = '1.2em';
+            }
+        }
+
+        // Function to initialize the game
+        function initGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                if (parsedSave.version !== "0.4") {
+                    // Handle version upgrades if necessary
+                    // For simplicity, start a new game if versions do not match
+                    showNotification("🔄 Game version mismatch. Starting a new game.");
+                    startNewGame(false);
+                } else {
+                    loadFromSave(parsedSave);
+                }
+            } else {
+                startNewGame();
+            }
+        }
+
+        // Function to toggle theme
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('PixelPlanetTheme') || 'default';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            changeTheme(newTheme);
+        }
+
+        // Function to change theme
+        function changeTheme(theme) {
+            document.body.className = ''; // Reset existing classes
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                // Default theme
+                document.body.classList.remove('dark-theme', 'light-theme');
+            }
+            showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+            // Save theme selection
+            localStorage.setItem('PixelPlanetTheme', theme);
+        }
+
+        // Function to load theme on game start
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('PixelPlanetTheme');
+            if (savedTheme) {
+                changeTheme(savedTheme);
+            }
+        }
+
+        // Function to reset game
+        async function resetGame() {
+            const confirmed = await confirmModal("Are you sure you want to reset the game? All progress will be lost.");
+            if (!confirmed) return;
+
+            localStorage.removeItem('PixelPlanetSave');
+            localStorage.removeItem('PixelPlanetLeaderboard');
+            localStorage.removeItem('PixelPlanetVersion');
+            localStorage.removeItem('PixelPlanetPlayerName');
+            startNewGame(false); // Pass false to avoid double confirmation
+            showNotification("🗑️ Game has been reset.");
+        }
+
+        // Language Support
+        const translations = {
+            en: {
+                "Start New Game": "🚀 Start New Game",
+                "Continue Game": "🔄 Continue Game",
+                "Leaderboard": "🏅 Leaderboard",
+                "Language": "🌐 Language",
+                "Generate Resources": "🔄 Generate Resources",
+                "Terraform Planet": "🌍 Terraform Planet",
+                "Save Game": "💾 Save Game",
+                "Reset Game": "🗑️ Reset Game",
+                "Toggle Theme": "🎨 Toggle Theme",
+                "Achievements": "🏆 Achievements",
+                "Quests": "🎯 Quests",
+                "Events": "🎉 Events",
+                "Biomes": "🌿 Biomes",
+                "Your Planet": "Your Planet",
+                "Close Leaderboard": "Close Leaderboard",
+                "Close": "Close",
+                "Tutorial": "📖 Tutorial",
+                "Got It!": "Got It!",
+                "Share": "📤 Share",
+                "Buy": "Buy",
+                // Add more translations as needed
+            },
+            es: {
+                "Start New Game": "🚀 Iniciar Nuevo Juego",
+                "Continue Game": "🔄 Continuar Juego",
+                "Leaderboard": "🏅 Tabla de Clasificación",
+                "Language": "🌐 Idioma",
+                "Generate Resources": "🔄 Generar Recursos",
+                "Terraform Planet": "🌍 Terraformar Planeta",
+                "Save Game": "💾 Guardar Juego",
+                "Reset Game": "🗑️ Reiniciar Juego",
+                "Toggle Theme": "🎨 Cambiar Tema",
+                "Achievements": "🏆 Logros",
+                "Quests": "🎯 Misiones",
+                "Events": "🎉 Eventos",
+                "Biomes": "🌿 Biomas",
+                "Your Planet": "Tu Planeta",
+                "Close Leaderboard": "Cerrar Tabla de Clasificación",
+                "Close": "Cerrar",
+                "Tutorial": "📖 Tutorial",
+                "Got It!": "¡Entendido!",
+                "Share": "📤 Compartir",
+                "Buy": "Comprar",
+                // Add more translations as needed
+            }
+            // Add more languages as needed
+        };
+
+        let currentLanguage = 'en';
+
+        // Function to change language
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('PixelPlanetLanguage', lang);
+            applyTranslations();
+        }
+
+        // Function to apply translations
+        function applyTranslations() {
+            // Translate button texts
+            document.querySelectorAll('button').forEach(button => {
+                const originalText = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
+                if (translations[currentLanguage][originalText]) {
+                    const translatedText = translations[currentLanguage][originalText];
+                    if (originalText.startsWith("Buy")) {
+                        const levelMatch = button.innerText.match(/\(Level (\d+)\)/);
+                        const level = levelMatch ? levelMatch[1] : 0;
+                        button.innerText = `${translatedText} (Level ${level})`;
+                    } else {
+                        button.innerText = translations[currentLanguage][originalText];
+                    }
+                }
+            });
+
+            // Translate labels
+            document.querySelectorAll('label').forEach(label => {
+                const originalText = label.innerText.replace(':', '').trim();
+                if (translations[currentLanguage][originalText]) {
+                    label.innerText = `${translations[currentLanguage][originalText]}:`;
+                }
+            });
+
+            // Translate Help and Share buttons
+            const helpButton = document.getElementById('help-button');
+            const shareButton = document.getElementById('share-button');
+            if (translations[currentLanguage]["Help"]) {
+                helpButton.innerText = translations[currentLanguage]["Help"];
+            }
+            if (translations[currentLanguage]["Share"]) {
+                shareButton.innerText = translations[currentLanguage]["Share"];
+            }
+
+            // Update other elements if necessary
+        }
+
+        // Function to get upgrade level by name
+        function getUpgradeLevelByName(name) {
+            for (let key in upgrades) {
+                if (upgrades[key].name === name) {
+                    return upgrades[key].level;
+                }
+            }
+            return 0;
+        }
+
+        // Function to load language on init
+        function loadLanguage() {
+            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('language').value = savedLanguage;
+            applyTranslations();
+        }
+
+        // Function to initialize language and social sharing
+        function initializeLanguageAndSharing() {
+            loadLanguage();
+            updateSocialSharing();
+        }
+
+        // Event listener for DOM content loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            initializeLanguageAndSharing();
+
+            // Show Continue button if a saved game exists
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                document.getElementById('continue-button').style.display = 'inline-block';
+            }
+
+            // Update version number display
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.4';
+            document.getElementById('version').innerText = `Version ${savedVersion}`;
+        });
+
+        // Function to handle upgrading via automation
+        function startResourceGeneration() {
+            if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
+            resourceGenerationInterval = setInterval(() => {
+                addResource('water', waterPerSecond);
+                addResource('minerals', mineralsPerSecond);
+                addResource('plants', plantsPerSecond);
+                addResource('energy', energyPerSecond);
+                updateResourcesUI();
+                checkAchievements();
+                checkQuests();
+            }, 1000);
+        }
+
+        // Function to handle resource consumption
+        function startResourceConsumption() {
+            if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
+            resourceConsumptionInterval = setInterval(() => {
+                consumeResources();
+            }, 5000); // Consume resources every 5 seconds
+        }
+
+        // Function to consume resources
+        function consumeResources() {
+            resources.water = Math.max(0, resources.water - waterConsumption);
+            resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
+            showNotification("🔻 Resources have been consumed.");
+        }
+
+        // Function to start autosave
+        function startAutosave() {
+            if (autosaveInterval) clearInterval(autosaveInterval);
+            autosaveInterval = setInterval(() => {
+                saveGame();
+            }, 30000); // Autosave every 30 seconds
+        }
+
+        // Function to handle offline resource generation
+        function handleOfflineResourceGeneration(lastSaveTime) {
+            const currentTime = Date.now();
+            const offlineDuration = Math.floor((currentTime - lastSaveTime) / 1000); // in seconds
+            const maxOfflineSeconds = 86400; // 24 hours
+            const effectiveDuration = Math.min(offlineDuration, maxOfflineSeconds);
+            if (effectiveDuration > 0) {
+                const multiplier = 1; // Adjust as needed
+                addResource('water', effectiveDuration * waterPerSecond * multiplier);
+                addResource('minerals', effectiveDuration * mineralsPerSecond * multiplier);
+                addResource('plants', effectiveDuration * plantsPerSecond * multiplier);
+                addResource('energy', effectiveDuration * energyPerSecond * multiplier);
+                updateResourcesUI();
+                showNotification(`⏰ You were offline for ${effectiveDuration} seconds. Resources have been updated.`);
+                checkAchievements();
+                checkQuests();
+                saveGame();
+            }
+        }
+
+        // Function to schedule quest reset (daily)
+        function scheduleQuestReset() {
+            const now = new Date();
+            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
+            setTimeout(function(){
+                resetQuests();
+                scheduleQuestReset();
+            }, millisTillMidnight);
+        }
+
+        // Function to initialize device detection and adjust UI
+        function initializeDeviceDetection() {
+            detectDevice();
+        }
+
+        // Function to initialize language and social sharing
+        function initializeLanguageAndSharing() {
+            loadLanguage();
+            updateSocialSharing();
+        }
 
         // Initialize Device Detection
-        detectDevice();
+        initializeDeviceDetection();
 
         // Initialize Game
         initGame();
