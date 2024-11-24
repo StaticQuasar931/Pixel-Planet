@@ -10,59 +10,59 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
 
-        gtag('config', 'G-E7M919FPNB');
+        // Prevent duplicate GA initialization
+        if (!window.gaInitialized) {
+            gtag('config', 'G-E7M919FPNB');
+            window.gaInitialized = true;
+        }
     </script>
     <!-- Styles -->
     <style>
-        /* Root Variables */
         :root {
-            --bg-color: #1e1e1e;
-            --text-color: #ffffff;
-            --button-bg-color: #333333;
-            --button-text-color: #ffffff;
-            --upgrade-bg-color: #2e2e2e;
-            --biome-bg-color: #444444;
-            --modal-bg-color: rgba(0,0,0,0.7);
-            --modal-content-bg: #2e2e2e;
-            --achievement-unlocked-bg: #27ae60;
-            --event-bg-color: #8e44ad;
-        }
-
-        /* Light Theme */
-        .light-theme {
             --bg-color: #f0f0f0;
-            --text-color: #000000;
-            --button-bg-color: #dddddd;
-            --button-text-color: #000000;
-            --upgrade-bg-color: #ffffff;
-            --biome-bg-color: #eeeeee;
-            --modal-bg-color: rgba(255,255,255,0.9);
-            --modal-content-bg: #ffffff;
-            --achievement-unlocked-bg: #27ae60;
-            --event-bg-color: #8e44ad;
+            --text-color: #333;
+            --button-bg-color: #4CAF50;
+            --button-text-color: #fff;
+            --upgrade-bg-color: #fff;
+            --biome-bg-color: #e0e0e0;
+            --achievement-unlocked-bg: #4CAF50;
+            --modal-bg-color: rgba(0,0,0,0.5);
+            --modal-content-bg: #fff;
+            --theme-toggle-bg: #333;
+            --theme-toggle-text: #fff;
         }
 
         /* Dark Theme */
         .dark-theme {
-            --bg-color: #1e1e1e;
-            --text-color: #ffffff;
-            --button-bg-color: #333333;
-            --button-text-color: #ffffff;
-            --upgrade-bg-color: #2e2e2e;
-            --biome-bg-color: #444444;
-            --modal-bg-color: rgba(0,0,0,0.7);
-            --modal-content-bg: #2e2e2e;
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --button-bg-color: #e74c3c;
+            --button-text-color: #fff;
+            --upgrade-bg-color: #34495e;
+            --biome-bg-color: #3c6382;
             --achievement-unlocked-bg: #27ae60;
-            --event-bg-color: #8e44ad;
+            --modal-content-bg: #2c3e50;
+        }
+
+        /* Light Theme */
+        .light-theme {
+            --bg-color: #ffffff;
+            --text-color: #2c3e50;
+            --button-bg-color: #2980b9;
+            --button-text-color: #fff;
+            --upgrade-bg-color: #ecf0f1;
+            --biome-bg-color: #bdc3c7;
+            --achievement-unlocked-bg: #27ae60;
+            --modal-content-bg: #ffffff;
         }
 
         body {
-            margin: 0;
-            padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: Arial, sans-serif;
             transition: background-color 0.5s, color 0.5s;
+            margin: 0;
+            padding: 0;
         }
 
         /* Header Elements */
@@ -178,7 +178,7 @@
         /* Game Interface */
         #game {
             padding: 20px;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             gap: 20px;
@@ -215,6 +215,7 @@
         /* Sections */
         .section {
             margin-top: 20px;
+            width: 100%;
         }
 
         .section h3 {
@@ -467,7 +468,8 @@
             transition: opacity 0.3s;
         }
 
-        .upgrade-button:hover .tooltip {
+        .upgrade-button:hover .tooltip,
+        .upgrade-button:focus .tooltip {
             visibility: visible;
             opacity: 1;
         }
@@ -481,7 +483,7 @@
 
     <!-- Version Number -->
     <div id="version">
-        Version 0.5
+        Version 0.6
     </div>
 
     <!-- Help Button -->
@@ -561,7 +563,7 @@
     </div>
 
     <!-- Game Interface -->
-    <div id="game" style="display: none;">
+    <div id="game">
         <h2>Your Planet</h2>
         <div id="resources">
             <div class="resource" id="water">💧 Water: 0 / 1000 (Per Second: <span id="water-rate">1.0</span>)</div>
@@ -659,10 +661,26 @@
             }
         }
 
-        // Function to show notification
+        // Function to show notifications with queuing to prevent overlap
+        let notificationQueue = [];
+        let isNotificationVisible = false;
+
         function showNotification(messageKey, params = []) {
+            notificationQueue.push({ messageKey, params });
+            if (!isNotificationVisible) {
+                displayNextNotification();
+            }
+        }
+
+        function displayNextNotification() {
+            if (notificationQueue.length === 0) {
+                isNotificationVisible = false;
+                return;
+            }
+            isNotificationVisible = true;
+            const { messageKey, params } = notificationQueue.shift();
             const notification = document.getElementById('notification');
-            let message = translations[currentLanguage][messageKey] || messageKey;
+            let message = translations[currentLanguage][messageKey] || notificationMessages[currentLanguage][messageKey] || messageKey;
 
             // Replace placeholders with actual parameters
             params.forEach((param, index) => {
@@ -676,6 +694,7 @@
                 notification.style.opacity = '0';
                 setTimeout(() => {
                     notification.style.display = 'none';
+                    displayNextNotification();
                 }, 500);
             }, 3000);
         }
@@ -686,10 +705,10 @@
                 name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -698,42 +717,6 @@
             document.getElementById('share-twitter-game').href = twitterURL;
             document.getElementById('share-facebook-game').href = facebookURL;
             document.getElementById('share-reddit-game').href = redditURL;
-        }
-
-        // Function to share game with cooldown
-        function shareGame() {
-            const lastShare = localStorage.getItem('PixelPlanetLastShare');
-            const now = Date.now();
-            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (lastShare && now - lastShare < cooldown) {
-                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
-                showNotification("ShareCooldown", [remaining]);
-                return;
-            }
-
-            // Prompt for player name if not set
-            let playerName = localStorage.getItem('PixelPlanetPlayerName');
-            if (!playerName || playerName === 'Player') {
-                playerName = prompt("Enter your name for the leaderboard:");
-                if (playerName) {
-                    playerName = sanitizeInput(playerName);
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                } else {
-                    playerName = 'Player';
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                }
-            }
-
-            // Open share URL in new tab
-            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank');
-
-            // Reward the player
-            resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
-            updateResourcesUI();
-            showNotification("ShareReward");
-            localStorage.setItem('PixelPlanetLastShare', now);
-            debouncedSaveGame();
         }
 
         // Leaderboard Functions
@@ -806,55 +789,142 @@
             });
         }
 
-        // Notification Object
-        function openHelp() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'block';
-            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) firstFocusable.focus();
+        // Notification Messages
+        const notificationMessages = {
+            en: {
+                "ResourceGenerated": "🔄 Resources generated!",
+                "AchievementUnlocked": "🏆 Achievement Unlocked: {0} - Reward: {1}",
+                "QuestCompleted": "🎯 Quest Completed: {0} - Reward: {1}",
+                "GameSaved": "💾 Game saved!",
+                "SaveError": "⚠️ Error saving game.",
+                "LoadError": "⚠️ Error loading game. Starting a new game.",
+                "UpgradePurchased": "🔧 Upgrade Purchased: {0} - {1}",
+                "UpgradePurchaseFailed": "❌ Not enough Water to purchase this upgrade!",
+                "TerraformSuccess": "🌍 Planet terraformed! New biome unlocked.",
+                "TerraformFailed": "❌ Not enough Water to terraform the planet!",
+                "ShareReward": "🎁 Thanks for sharing! Energy +10.",
+                "SolarFlareImpact": "⚡ Solar Flare! Energy production decreased.",
+                "SolarFlareRestored": "⚡ Energy production restored after Solar Flare.",
+                "MeteorShowerImpact": "⛏ Meteor Shower! Mineral production increased.",
+                "MeteorShowerNormalized": "⛏ Mineral production normalized after Meteor Shower.",
+                "EventTriggered": "🎉 Event: {0} - {1}",
+                "NewGameStarted": "🚀 New game started! Welcome to Pixel Planet.",
+                "NoSavedGame": "❌ No saved game found.",
+                "ThemeChanged": "🖌️ Theme changed to {0}.",
+                "VersionMismatch": "🔄 Game version mismatch. Starting a new game.",
+                "GameReset": "🗑️ Game has been reset.",
+                "OfflineResources": "⏰ You were offline for {0} seconds. Resources have been updated.",
+                "InsufficientResources": "❌ Not enough {0} to purchase this upgrade!",
+                "LanguageUnsupported": "⚠️ The selected language '{0}' is unsupported. Defaulting to English.",
+                "InvalidPlayerName": "❌ Invalid name entered. Using default name 'Player'.",
+                "AllBiomesUnlocked": "🌟 Congratulations! You've unlocked all available biomes!",
+                "AlienEncounterReward": "👽 Alien technology received! Energy +100.",
+                "ResourcePlundered": "🚨 Pirates plundered your resources! Water -50, Minerals -30."
+            },
+            es: {
+                "ResourceGenerated": "🔄 ¡Recursos generados!",
+                "AchievementUnlocked": "🏆 Logro Desbloqueado: {0} - Recompensa: {1}",
+                "QuestCompleted": "🎯 Misión Completada: {0} - Recompensa: {1}",
+                "GameSaved": "💾 ¡Juego guardado!",
+                "SaveError": "⚠️ Error al guardar el juego.",
+                "LoadError": "⚠️ Error al cargar el juego. Iniciando un nuevo juego.",
+                "UpgradePurchased": "🔧 Actualización Comprada: {0} - {1}",
+                "UpgradePurchaseFailed": "❌ ¡No tienes suficiente Agua para comprar esta actualización!",
+                "TerraformSuccess": "🌍 ¡Planeta terraformado! Nuevo bioma desbloqueado.",
+                "TerraformFailed": "❌ ¡No tienes suficiente Agua para terraformar el planeta!",
+                "ShareReward": "🎁 ¡Gracias por compartir! Energía +10.",
+                "SolarFlareImpact": "⚡ ¡Explosión Solar! La producción de energía disminuyó.",
+                "SolarFlareRestored": "⚡ La producción de energía se restauró después de la Explosión Solar.",
+                "MeteorShowerImpact": "⛏ ¡Lluvia de Meteoros! La producción de minerales aumentó.",
+                "MeteorShowerNormalized": "⛏ La producción de minerales se normalizó después de la Lluvia de Meteoros.",
+                "EventTriggered": "🎉 Evento: {0} - {1}",
+                "NewGameStarted": "🚀 ¡Nuevo juego iniciado! Bienvenido a Pixel Planet.",
+                "NoSavedGame": "❌ No se encontró un juego guardado.",
+                "ThemeChanged": "🖌️ Tema cambiado a {0}.",
+                "VersionMismatch": "🔄 Incompatibilidad de versión del juego. Iniciando un nuevo juego.",
+                "GameReset": "🗑️ El juego ha sido reiniciado.",
+                "OfflineResources": "⏰ Estuviste desconectado por {0} segundos. Los recursos se han actualizado.",
+                "InsufficientResources": "❌ ¡No tienes suficiente {0} para comprar esta actualización!",
+                "LanguageUnsupported": "⚠️ El idioma seleccionado '{0}' no está soportado. Se usa Inglés por defecto.",
+                "InvalidPlayerName": "❌ Nombre inválido ingresado. Usando el nombre predeterminado 'Player'.",
+                "AllBiomesUnlocked": "🌟 ¡Felicidades! ¡Has desbloqueado todos los biomas disponibles!",
+                "AlienEncounterReward": "👽 ¡Tecnología alienígena recibida! Energía +100.",
+                "ResourcePlundered": "🚨 ¡Piratas saquearon tus recursos! Agua -50, Minerales -30."
+            }
+            // Add more languages as needed
+        };
 
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', trapTabKeyTutorial);
+        let currentLanguage = 'en';
+
+        function changeLanguage(lang) {
+            if (!translations.hasOwnProperty(lang)) {
+                showNotification("LanguageUnsupported", [lang]);
+                lang = 'en';
+            }
+            currentLanguage = lang;
+            localStorage.setItem('PixelPlanetLanguage', lang);
+            applyTranslations();
+            updateDynamicContentLanguage();
         }
 
-        function closeHelp() {
-            const modal = document.getElementById('tutorial-modal');
-            modal.style.display = 'none';
-            // Remove event listener when modal is closed
-            modal.removeEventListener('keydown', trapTabKeyTutorial);
-        }
-
-        function trapTabKeyTutorial(e) {
-            const focusableElements = 'button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])';
-            const modal = document.getElementById('tutorial-modal');
-            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
-            const focusableContent = modal.querySelectorAll(focusableElements);
-            const lastFocusableElement = focusableContent[focusableContent.length - 1];
-
-            if (e.key === 'Tab') {
-                if (e.shiftKey) /* shift + tab */ {
-                    if (document.activeElement === firstFocusableElement) {
-                        e.preventDefault();
-                        lastFocusableElement.focus();
-                    }
-                } else /* tab */ {
-                    if (document.activeElement === lastFocusableElement) {
-                        e.preventDefault();
-                        firstFocusableElement.focus();
-                    }
+        function applyTranslations() {
+            // Translate button texts
+            document.querySelectorAll('button').forEach(button => {
+                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
+                if (translations[currentLanguage][key]) {
+                    button.innerText = translations[currentLanguage][key];
                 }
+            });
+
+            // Translate labels
+            document.querySelectorAll('label').forEach(label => {
+                const key = label.innerText.replace(':', '').trim();
+                if (translations[currentLanguage][key]) {
+                    label.innerText = `${translations[currentLanguage][key]}:`;
+                }
+            });
+
+            // Translate Help and Share buttons
+            const helpButton = document.getElementById('help-button');
+            const shareButton = document.getElementById('share-button');
+            if (translations[currentLanguage]["Help"]) {
+                helpButton.innerText = translations[currentLanguage]["Help"];
+            }
+            if (translations[currentLanguage]["Share"]) {
+                shareButton.innerText = translations[currentLanguage]["Share"];
             }
 
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeHelp();
-            }
+            // Translate other dynamic elements if needed
         }
 
-        // Leaderboard Fade Out Animation
-        @keyframes fadeOutLeaderboard {
-            from { opacity: 1; }
-            to { opacity: 0; display: none; }
+        function updateDynamicContentLanguage() {
+            // Update modals if they are open
+            const openModals = document.querySelectorAll('.modal');
+            openModals.forEach(modal => {
+                const messagePara = modal.querySelector('p');
+                if (messagePara && messagePara.dataset.translationKey) {
+                    const key = messagePara.dataset.translationKey;
+                    messagePara.innerText = translations[currentLanguage][key] || key;
+                }
+
+                const buttons = modal.querySelectorAll('button');
+                buttons.forEach(button => {
+                    const key = button.innerText;
+                    if (translations[currentLanguage][key]) {
+                        button.innerText = translations[currentLanguage][key];
+                    }
+                });
+            });
+
+            // Update other dynamic content like tooltips if necessary
+        }
+
+        // Load Language on Init
+        function loadLanguage() {
+            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('language').value = savedLanguage;
+            applyTranslations();
         }
 
         // Function to sanitize inputs
@@ -1215,6 +1285,23 @@
                         updateResourcesUI();
                     }, 300000); // Normalize after 5 minutes
                 }
+            },
+            {
+                name: "Alien Encounter",
+                description: "Aliens visit your planet, offering advanced technology for free.",
+                effect: () => {
+                    resources.energy = Math.min(resources.energy + 100, storage.energy, MAX_RESOURCES.energy);
+                    showNotification("AlienEncounterReward");
+                }
+            },
+            {
+                name: "Resource Plunder",
+                description: "Pirates attack your planet, stealing some resources.",
+                effect: () => {
+                    resources.water = Math.max(0, resources.water - 50);
+                    resources.minerals = Math.max(0, resources.minerals - 30);
+                    showNotification("ResourcePlundered");
+                }
             }
             // Add more unique events as desired
         ];
@@ -1242,9 +1329,11 @@
 
         // Save Game
         function saveGame() {
+            if (isSaving) return;
+            isSaving = true;
             try {
                 const saveData = {
-                    version: "0.5", // Manually set the current version
+                    version: "0.6", // Updated version
                     resources,
                     storage,
                     biomes,
@@ -1258,11 +1347,19 @@
                     storyMilestones,
                     lastUpdateTime: Date.now()
                 };
+                localStorage.setItem('PixelPlanetSave_Temp', JSON.stringify(saveData));
                 localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
+                localStorage.removeItem('PixelPlanetSave_Temp');
                 showNotification("GameSaved");
             } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                    showNotification("SaveLimitExceeded");
+                } else {
+                    showNotification("SaveError");
+                }
                 console.error("Error saving game:", error);
-                showNotification("SaveError");
+            } finally {
+                isSaving = false;
             }
         }
 
@@ -1278,6 +1375,7 @@
         }
 
         const debouncedSaveGame = debounce(saveGame, 500); // 500ms delay
+        let isSaving = false;
 
         // Load from Save Data
         function loadFromSave(gameState) {
@@ -1314,6 +1412,8 @@
                 showNotification("GameLoaded");
                 // Show Continue button only if there is a saved game
                 document.getElementById('continue-button').style.display = 'none';
+                // Update version number display
+                document.getElementById('version').innerText = `Version ${gameState.version}`;
             } catch (error) {
                 console.error("Error loading game:", error);
                 showNotification("LoadError");
@@ -1326,6 +1426,7 @@
             if (confirmStart && !confirmModal("ConfirmNewGame")) {
                 return;
             }
+            clearAllIntervals();
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game').style.display = 'flex';
             resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
@@ -1493,6 +1594,11 @@
                 generateAchievementsUI();
                 checkAchievements();
                 showNotification("UpgradePurchased", [upgrade.name, `Level ${upgrade.level}`]);
+                trackGAEvent('purchase_upgrade', {
+                    'event_category': 'Upgrade',
+                    'event_label': upgrade.name,
+                    'value': upgrade.cost
+                });
                 debouncedSaveGame();
             } else {
                 showNotification("UpgradePurchaseFailed");
@@ -1541,6 +1647,10 @@
                     if (achievement.reward) achievement.reward();
                     showNotification("AchievementUnlocked", [achievement.name, achievement.rewardDescription]);
                     generateAchievementsUI();
+                    trackGAEvent('achievement_unlocked', {
+                        'event_category': 'Achievement',
+                        'event_label': achievement.name
+                    });
                     debouncedSaveGame();
                 }
             }
@@ -1590,6 +1700,10 @@
                     milestone.unlocked = true;
                     showNotification("StoryMilestone", [milestone.text]);
                     generateStoryUI();
+                    trackGAEvent('story_milestone_unlocked', {
+                        'event_category': 'Story',
+                        'event_label': milestone.text
+                    });
                     debouncedSaveGame();
                 }
             }
@@ -1600,7 +1714,7 @@
             const biomesDiv = document.getElementById('biomes');
             biomesDiv.innerHTML = ''; // Clear existing biomes
 
-            biomes.forEach(biome => {
+            biomes.forEach((biome, index) => {
                 const biomeDiv = document.createElement('div');
                 biomeDiv.className = 'biome';
                 let bonusText = '';
@@ -1617,11 +1731,15 @@
             const terraformBaseCost = 500;
             const terraformCost = terraformBaseCost * (biomes.length + 1);
             if (resources.water >= terraformCost) {
-                confirmModal("ConfirmTerraform", () => {
+                confirmAction("TerraformConfirm", () => {
                     resources.water -= terraformCost;
                     unlockNewBiome();
                     updateResourcesUI();
                     showNotification("TerraformSuccess");
+                    trackGAEvent('terraform_planet', {
+                        'event_category': 'Terraform',
+                        'event_label': 'Planet terraformed'
+                    });
                     debouncedSaveGame();
                 });
             } else {
@@ -1716,6 +1834,7 @@
         }
 
         function triggerRandomEvent() {
+            if (document.hidden) return; // Prevent triggering when the game is not visible
             const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
             randomEvent.effect();
             showNotification("EventTriggered", [randomEvent.name, randomEvent.description]);
@@ -1723,6 +1842,10 @@
             updateResourcesUI();
             checkAchievements();
             checkQuests();
+            trackGAEvent('event_triggered', {
+                'event_category': 'Event',
+                'event_label': randomEvent.name
+            });
             debouncedSaveGame();
         }
 
@@ -1741,94 +1864,93 @@
 
         // Notifications and Modals
         function openConfirmationModal(messageKey, onConfirm) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-modal', 'true');
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.setAttribute('role', 'dialog');
+                modal.setAttribute('aria-modal', 'true');
 
-            const modalContent = document.createElement('div');
-            modalContent.className = 'modal-content';
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
 
-            // Store reference to the element that opened the modal
-            const opener = document.activeElement;
+                // Store reference to the element that opened the modal
+                const opener = document.activeElement;
 
-            const closeBtn = document.createElement('span');
-            closeBtn.className = 'close-modal';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.onclick = () => { document.body.removeChild(modal); };
-            closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'close-modal';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = () => { document.body.removeChild(modal); };
+                closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
 
-            const messagePara = document.createElement('p');
-            messagePara.innerText = translations[currentLanguage][messageKey] || messageKey;
-            messagePara.dataset.translationKey = messageKey;
+                const messagePara = document.createElement('p');
+                messagePara.innerText = translations[currentLanguage][messageKey] || messageKey;
+                messagePara.dataset.translationKey = messageKey;
 
-            const buttonsDiv = document.createElement('div');
-            buttonsDiv.style.display = 'flex';
-            buttonsDiv.style.justifyContent = 'space-between';
-            buttonsDiv.style.marginTop = '20px';
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.style.display = 'flex';
+                buttonsDiv.style.justifyContent = 'space-between';
+                buttonsDiv.style.marginTop = '20px';
 
-            const confirmBtn = document.createElement('button');
-            confirmBtn.innerText = translations[currentLanguage]["Yes"] || "Yes";
-            confirmBtn.onclick = () => {
-                onConfirm();
-                document.body.removeChild(modal);
-                opener.focus();
-            };
-            confirmBtn.setAttribute('aria-label', 'Confirm');
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.innerText = translations[currentLanguage]["No"] || "No";
-            cancelBtn.onclick = () => { document.body.removeChild(modal); opener.focus(); };
-            cancelBtn.setAttribute('aria-label', 'Cancel');
-
-            buttonsDiv.appendChild(confirmBtn);
-            buttonsDiv.appendChild(cancelBtn);
-
-            modalContent.appendChild(closeBtn);
-            modalContent.appendChild(messagePara);
-            modalContent.appendChild(buttonsDiv);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            // Focus management
-            confirmBtn.focus();
-
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', function(e) {
-                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-                const focusableContent = modal.querySelectorAll(focusableElements);
-                const firstElement = focusableContent[0];
-                const lastElement = focusableContent[focusableContent.length - 1];
-
-                if (e.key === 'Tab') {
-                    if (e.shiftKey) { // Shift + Tab
-                        if (document.activeElement === firstElement) {
-                            e.preventDefault();
-                            lastElement.focus();
-                        }
-                    } else { // Tab
-                        if (document.activeElement === lastElement) {
-                            e.preventDefault();
-                            firstElement.focus();
-                        }
-                    }
-                }
-
-                if (e.key === 'Escape') {
-                    e.preventDefault();
+                const confirmBtn = document.createElement('button');
+                confirmBtn.innerText = translations[currentLanguage]["Yes"] || "Yes";
+                confirmBtn.onclick = () => {
+                    onConfirm();
                     document.body.removeChild(modal);
                     opener.focus();
-                }
+                    resolve(true);
+                };
+                confirmBtn.setAttribute('aria-label', 'Confirm');
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.innerText = translations[currentLanguage]["No"] || "No";
+                cancelBtn.onclick = () => { document.body.removeChild(modal); opener.focus(); resolve(false); };
+                cancelBtn.setAttribute('aria-label', 'Cancel');
+
+                buttonsDiv.appendChild(confirmBtn);
+                buttonsDiv.appendChild(cancelBtn);
+
+                modalContent.appendChild(closeBtn);
+                modalContent.appendChild(messagePara);
+                modalContent.appendChild(buttonsDiv);
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
+
+                // Focus management
+                confirmBtn.focus();
+
+                // Add event listener for focus trapping
+                modal.addEventListener('keydown', function(e) {
+                    const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                    const focusableContent = modal.querySelectorAll(focusableElements);
+                    const firstElement = focusableContent[0];
+                    const lastElement = focusableContent[focusableContent.length - 1];
+
+                    if (e.key === 'Tab') {
+                        if (e.shiftKey) { // Shift + Tab
+                            if (document.activeElement === firstElement) {
+                                e.preventDefault();
+                                lastElement.focus();
+                            }
+                        } else { // Tab
+                            if (document.activeElement === lastElement) {
+                                e.preventDefault();
+                                firstElement.focus();
+                            }
+                        }
+                    }
+
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        document.body.removeChild(modal);
+                        opener.focus();
+                        resolve(false);
+                    }
+                });
             });
         }
 
         function confirmModal(messageKey, onConfirm) {
-            return new Promise((resolve) => {
-                openConfirmationModal(messageKey, () => {
-                    onConfirm();
-                    resolve(true);
-                });
-            });
+            return openConfirmationModal(messageKey, onConfirm);
         }
 
         function openAlertModal(messageKey) {
@@ -1892,14 +2014,14 @@
             });
         }
 
-        // Function to alert messages
         function alertMessage(messageKey) {
             openAlertModal(messageKey);
         }
 
         // Function to confirm action and get response
         async function confirmAction(messageKey, onConfirm) {
-            await confirmModal(messageKey, onConfirm);
+            const confirmed = await confirmModal(messageKey, onConfirm);
+            return confirmed;
         }
 
         // Function to open help modal
@@ -1914,11 +2036,38 @@
         }
 
         // Function to close help modal
-        function closeHelp() {
+        function closeTutorial() {
             const modal = document.getElementById('tutorial-modal');
             modal.style.display = 'none';
             // Remove event listener when modal is closed
             modal.removeEventListener('keydown', trapTabKeyTutorial);
+        }
+
+        function trapTabKeyTutorial(e) {
+            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+            const modal = document.getElementById('tutorial-modal');
+            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
+            const focusableContent = modal.querySelectorAll(focusableElements);
+            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+
+            if (e.key === 'Tab') {
+                if (e.shiftKey) { // Shift + Tab
+                    if (document.activeElement === firstFocusableElement) {
+                        e.preventDefault();
+                        lastFocusableElement.focus();
+                    }
+                } else { // Tab
+                    if (document.activeElement === lastFocusableElement) {
+                        e.preventDefault();
+                        firstFocusableElement.focus();
+                    }
+                }
+            }
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeTutorial();
+            }
         }
 
         // Page Visibility Handling
@@ -1961,9 +2110,8 @@
             const savedGame = localStorage.getItem('PixelPlanetSave');
             if (savedGame) {
                 const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.5") {
+                if (parsedSave.version !== "0.6") {
                     // Handle version upgrades if necessary
-                    // For simplicity, start a new game if versions do not match
                     showNotification("VersionMismatch");
                     startNewGame(false);
                 } else {
@@ -2000,6 +2148,10 @@
             showNotification("ThemeChanged", [capitalizeFirstLetter(theme)]);
             // Save theme selection
             localStorage.setItem('PixelPlanetTheme', theme);
+            trackGAEvent('theme_changed', {
+                'event_category': 'Theme',
+                'event_label': theme
+            });
         }
 
         function loadTheme() {
@@ -2013,182 +2165,22 @@
 
         // Reset Game
         function resetGame() {
-            confirmModal("ConfirmResetGame", () => {
+            confirmAction("ConfirmResetGame", () => {
+                clearAllIntervals();
                 localStorage.removeItem('PixelPlanetSave');
                 localStorage.removeItem('PixelPlanetLeaderboard');
                 localStorage.removeItem('PixelPlanetVersion');
+                localStorage.removeItem('PixelPlanetPlayerName');
                 startNewGame(false); // Pass false to avoid double confirmation
                 showNotification("GameReset");
-            });
-        }
-
-        // Language Support
-        const translations = {
-            en: {
-                "Start New Game": "🚀 Start New Game",
-                "Continue Game": "🔄 Continue Game",
-                "Leaderboard": "🏅 Leaderboard",
-                "Language": "🌐 Language:",
-                "Generate Resources": "🔄 Generate Resources",
-                "Terraform Planet": "🌍 Terraform Planet",
-                "Save Game": "💾 Save Game",
-                "Reset Game": "🗑️ Reset Game",
-                "Toggle Theme": "🎨 Toggle Theme",
-                "Achievements": "🏆 Achievements",
-                "Quests": "🎯 Quests",
-                "Events": "🎉 Events",
-                "Biomes": "🌿 Biomes",
-                "Your Planet": "Your Planet",
-                "Close Leaderboard": "Close Leaderboard",
-                "Close": "Close",
-                "Tutorial": "📖 Tutorial",
-                "Got It!": "Got It!",
-                "Share": "📤 Share",
-                "Resource Generated": "🔄 Resources generated!",
-                "Achievement Unlocked": "🏆 Achievement Unlocked: {0} - Reward: {1}",
-                "Quest Completed": "🎯 Quest Completed: {0} - Reward: {1}",
-                "Game Saved": "💾 Game saved!",
-                "Game Loaded": "✅ Game loaded successfully!",
-                "UpgradePurchased": "🔧 Upgrade Purchased: {0} - {1}",
-                "UpgradePurchaseFailed": "❌ Not enough Water to purchase this upgrade!",
-                "TerraformSuccess": "🌍 Planet terraformed! New biome unlocked.",
-                "TerraformFailed": "❌ Not enough Water to terraform the planet!",
-                "ShareReward": "🎁 Thanks for sharing! Energy +10.",
-                "SolarFlareImpact": "⚡ Solar Flare! Energy production decreased.",
-                "SolarFlareRestored": "⚡ Energy production restored after Solar Flare.",
-                "MeteorShowerImpact": "⛏ Meteor Shower! Mineral production increased.",
-                "MeteorShowerNormalized": "⛏ Mineral production normalized after Meteor Shower.",
-                "EventTriggered": "🎉 Event: {0} - {1}",
-                "AchievementUnlocked": "🏆 Achievement Unlocked: {0} - Reward: {1}",
-                "QuestCompleted": "🎯 Quest Completed: {0} - Reward: {1}",
-                "GameSaved": "💾 Game saved!",
-                "SaveError": "⚠️ Error saving game.",
-                "LoadError": "⚠️ Error loading game. Starting a new game.",
-                "NewGameStarted": "🚀 New game started! Welcome to Pixel Planet.",
-                "NoSavedGame": "❌ No saved game found.",
-                "ThemeChanged": "🖌️ Theme changed to {0}.",
-                "VersionMismatch": "🔄 Game version mismatch. Starting a new game.",
-                "GameReset": "🗑️ Game has been reset."
-                // Add more translations as needed
-            },
-            es: {
-                "Start New Game": "🚀 Iniciar Nuevo Juego",
-                "Continue Game": "🔄 Continuar Juego",
-                "Leaderboard": "🏅 Tabla de Clasificación",
-                "Language": "🌐 Idioma:",
-                "Generate Resources": "🔄 Generar Recursos",
-                "Terraform Planet": "🌍 Terraformar Planeta",
-                "Save Game": "💾 Guardar Juego",
-                "Reset Game": "🗑️ Reiniciar Juego",
-                "Toggle Theme": "🎨 Cambiar Tema",
-                "Achievements": "🏆 Logros",
-                "Quests": "🎯 Misiones",
-                "Events": "🎉 Eventos",
-                "Biomes": "🌿 Biomas",
-                "Your Planet": "Tu Planeta",
-                "Close Leaderboard": "Cerrar Tabla de Clasificación",
-                "Close": "Cerrar",
-                "Tutorial": "📖 Tutorial",
-                "Got It!": "¡Entendido!",
-                "Share": "📤 Compartir",
-                "Resource Generated": "🔄 ¡Recursos generados!",
-                "Achievement Unlocked": "🏆 Logro Desbloqueado: {0} - Recompensa: {1}",
-                "Quest Completed": "🎯 Misión Completada: {0} - Recompensa: {1}",
-                "Game Saved": "💾 ¡Juego guardado!",
-                "Game Loaded": "✅ ¡Juego cargado exitosamente!",
-                "UpgradePurchased": "🔧 Actualización Comprada: {0} - {1}",
-                "UpgradePurchaseFailed": "❌ ¡No tienes suficiente Agua para comprar esta actualización!",
-                "TerraformSuccess": "🌍 ¡Planeta terraformado! Nuevo bioma desbloqueado.",
-                "TerraformFailed": "❌ ¡No tienes suficiente Agua para terraformar el planeta!",
-                "ShareReward": "🎁 ¡Gracias por compartir! Energía +10.",
-                "SolarFlareImpact": "⚡ ¡Explosión Solar! La producción de energía disminuyó.",
-                "SolarFlareRestored": "⚡ La producción de energía se restauró después de la Explosión Solar.",
-                "MeteorShowerImpact": "⛏ ¡Lluvia de Meteoros! La producción de minerales aumentó.",
-                "MeteorShowerNormalized": "⛏ La producción de minerales se normalizó después de la Lluvia de Meteoros.",
-                "EventTriggered": "🎉 Evento: {0} - {1}",
-                "AchievementUnlocked": "🏆 Logro Desbloqueado: {0} - Recompensa: {1}",
-                "QuestCompleted": "🎯 Misión Completada: {0} - Recompensa: {1}",
-                "GameSaved": "💾 ¡Juego guardado!",
-                "SaveError": "⚠️ Error al guardar el juego.",
-                "LoadError": "⚠️ Error al cargar el juego. Iniciando un nuevo juego.",
-                "NewGameStarted": "🚀 Nuevo juego iniciado! Bienvenido a Pixel Planet.",
-                "NoSavedGame": "❌ No se encontró un juego guardado.",
-                "ThemeChanged": "🖌️ Tema cambiado a {0}.",
-                "VersionMismatch": "🔄 Incompatibilidad de versión del juego. Iniciando un nuevo juego.",
-                "GameReset": "🗑️ El juego ha sido reiniciado."
-                // Add more translations as needed
-            }
-            // Add more languages as needed
-        };
-
-        let currentLanguage = 'en';
-
-        function changeLanguage(lang) {
-            currentLanguage = lang;
-            localStorage.setItem('PixelPlanetLanguage', lang);
-            applyTranslations();
-            updateDynamicContentLanguage();
-        }
-
-        function applyTranslations() {
-            // Translate button texts
-            document.querySelectorAll('button').forEach(button => {
-                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
-                if (translations[currentLanguage][key]) {
-                    button.innerText = translations[currentLanguage][key];
-                }
-            });
-
-            // Translate labels
-            document.querySelectorAll('label').forEach(label => {
-                const key = label.innerText.replace(':', '').trim();
-                if (translations[currentLanguage][key]) {
-                    label.innerText = `${translations[currentLanguage][key]}:`;
-                }
-            });
-
-            // Translate Help and Share buttons
-            const helpButton = document.getElementById('help-button');
-            const shareButton = document.getElementById('share-button');
-            if (translations[currentLanguage]["Help"]) {
-                helpButton.innerText = translations[currentLanguage]["Help"];
-            }
-            if (translations[currentLanguage]["Share"]) {
-                shareButton.innerText = translations[currentLanguage]["Share"];
-            }
-
-            // Translate other dynamic elements if needed
-        }
-
-        function updateDynamicContentLanguage() {
-            // Update modals if they are open
-            const openModals = document.querySelectorAll('.modal');
-            openModals.forEach(modal => {
-                const messagePara = modal.querySelector('p');
-                if (messagePara && messagePara.dataset.translationKey) {
-                    const key = messagePara.dataset.translationKey;
-                    messagePara.innerText = translations[currentLanguage][key] || key;
-                }
-
-                const buttons = modal.querySelectorAll('button');
-                buttons.forEach(button => {
-                    const key = button.innerText;
-                    if (translations[currentLanguage][key]) {
-                        button.innerText = translations[currentLanguage][key];
-                    }
+                trackGAEvent('game_reset', {
+                    'event_category': 'Game',
+                    'event_label': 'Game reset by player'
                 });
             });
-
-            // Update other dynamic content like tooltips if necessary
         }
 
-        // Load Language on Init
-        function loadLanguage() {
-            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
-            currentLanguage = savedLanguage;
-            document.getElementById('language').value = savedLanguage;
-            applyTranslations();
-        }
+        // Language Support already handled
 
         // Leaderboard and Social Sharing Integration
         function updateSocialSharing() {
@@ -2196,10 +2188,10 @@
                 name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -2210,92 +2202,19 @@
             document.getElementById('share-reddit-game').href = redditURL;
         }
 
-        // Notification Messages
-        const notificationMessages = {
-            en: {
-                "ResourceGenerated": "🔄 Resources generated!",
-                "AchievementUnlocked": "🏆 Achievement Unlocked: {0} - Reward: {1}",
-                "QuestCompleted": "🎯 Quest Completed: {0} - Reward: {1}",
-                "GameSaved": "💾 Game saved!",
-                "SaveError": "⚠️ Error saving game.",
-                "LoadError": "⚠️ Error loading game. Starting a new game.",
-                "UpgradePurchased": "🔧 Upgrade Purchased: {0} - {1}",
-                "UpgradePurchaseFailed": "❌ Not enough Water to purchase this upgrade!",
-                "TerraformSuccess": "🌍 Planet terraformed! New biome unlocked.",
-                "TerraformFailed": "❌ Not enough Water to terraform the planet!",
-                "ShareReward": "🎁 Thanks for sharing! Energy +10.",
-                "SolarFlareImpact": "⚡ Solar Flare! Energy production decreased.",
-                "SolarFlareRestored": "⚡ Energy production restored after Solar Flare.",
-                "MeteorShowerImpact": "⛏ Meteor Shower! Mineral production increased.",
-                "MeteorShowerNormalized": "⛏ Mineral production normalized after Meteor Shower.",
-                "EventTriggered": "🎉 Event: {0} - {1}",
-                "NewGameStarted": "🚀 New game started! Welcome to Pixel Planet.",
-                "NoSavedGame": "❌ No saved game found.",
-                "ThemeChanged": "🖌️ Theme changed to {0}.",
-                "VersionMismatch": "🔄 Game version mismatch. Starting a new game.",
-                "GameReset": "🗑️ Game has been reset."
-            },
-            es: {
-                "ResourceGenerated": "🔄 ¡Recursos generados!",
-                "AchievementUnlocked": "🏆 Logro Desbloqueado: {0} - Recompensa: {1}",
-                "QuestCompleted": "🎯 Misión Completada: {0} - Recompensa: {1}",
-                "GameSaved": "💾 ¡Juego guardado!",
-                "SaveError": "⚠️ Error al guardar el juego.",
-                "LoadError": "⚠️ Error al cargar el juego. Iniciando un nuevo juego.",
-                "UpgradePurchased": "🔧 Actualización Comprada: {0} - {1}",
-                "UpgradePurchaseFailed": "❌ ¡No tienes suficiente Agua para comprar esta actualización!",
-                "TerraformSuccess": "🌍 ¡Planeta terraformado! Nuevo bioma desbloqueado.",
-                "TerraformFailed": "❌ ¡No tienes suficiente Agua para terraformar el planeta!",
-                "ShareReward": "🎁 ¡Gracias por compartir! Energía +10.",
-                "SolarFlareImpact": "⚡ ¡Explosión Solar! La producción de energía disminuyó.",
-                "SolarFlareRestored": "⚡ La producción de energía se restauró después de la Explosión Solar.",
-                "MeteorShowerImpact": "⛏ ¡Lluvia de Meteoros! La producción de minerales aumentó.",
-                "MeteorShowerNormalized": "⛏ La producción de minerales se normalizó después de la Lluvia de Meteoros.",
-                "EventTriggered": "🎉 Evento: {0} - {1}",
-                "NewGameStarted": "🚀 ¡Nuevo juego iniciado! Bienvenido a Pixel Planet.",
-                "NoSavedGame": "❌ No se encontró un juego guardado.",
-                "ThemeChanged": "🖌️ Tema cambiado a {0}.",
-                "VersionMismatch": "🔄 Incompatibilidad de versión del juego. Iniciando un nuevo juego.",
-                "GameReset": "🗑️ El juego ha sido reiniciado."
-            }
-            // Add more languages as needed
-        };
+        // Notification Messages and Translations already handled
 
-        // Function to show translated notifications
-        function showNotification(messageKey, params = []) {
-            const notification = document.getElementById('notification');
-            let message = translations[currentLanguage][messageKey] || notificationMessages[currentLanguage][messageKey] || messageKey;
+        // Function to show translated notifications is already defined
 
-            // Replace placeholders with actual parameters
-            params.forEach((param, index) => {
-                message = message.replace(`{${index}}`, param);
-            });
+        // Function to buy upgrades already handled
 
-            notification.innerText = message;
-            notification.style.display = 'block';
-            notification.style.opacity = '1';
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 500);
-            }, 3000);
-        }
+        // Function to reset upgrades already handled
 
-        // Function to reset upgrades
-        function resetUpgrades() {
-            for (let key in upgrades) {
-                upgrades[key].level = 0;
-                upgrades[key].cost = upgrades[key].baseCost;
-            }
-        }
+        // Function to reset achievements already handled
 
-        // Function to reset achievements
-        function resetAchievements() {
-            for (let key in achievements) {
-                achievements[key].unlocked = false;
-            }
-        }
+        // Function to reset quests already handled
+
+        // Function to generate biomes already handled
 
         // Function to handle offline resource generation
         function handleOfflineResourceGeneration(lastSaveTime) {
@@ -2312,6 +2231,10 @@
                 showNotification("OfflineResources", [formatNumber(effectiveDuration)]);
                 checkAchievements();
                 checkQuests();
+                trackGAEvent('offline_resources_generated', {
+                    'event_category': 'Offline',
+                    'event_label': `${formatNumber(effectiveDuration)} seconds`
+                });
                 debouncedSaveGame();
             }
         }
@@ -2327,6 +2250,10 @@
                 updateResourcesUI();
                 checkAchievements();
                 checkQuests();
+                trackGAEvent('resource_generated', {
+                    'event_category': 'Resources',
+                    'event_label': 'Auto-generated resources'
+                });
                 debouncedSaveGame();
             }, 1000);
         }
@@ -2345,6 +2272,10 @@
             updateResourcesUI();
             checkAchievements();
             checkQuests();
+            trackGAEvent('resource_consumed', {
+                'event_category': 'Resources',
+                'event_label': 'Periodic consumption'
+            });
             debouncedSaveGame();
         }
 
@@ -2356,7 +2287,7 @@
             }, 30000); // Autosave every 30 seconds
         }
 
-        // Handle Offline Resource Generation is already defined
+        // Start Event System already handled
 
         // Schedule Quest Reset (Daily)
         function scheduleQuestReset() {
@@ -2368,13 +2299,31 @@
             }, millisTillMidnight);
         }
 
-        // Device Detection is already defined
+        // Function to reset all temporary effects
+        function clearAllTemporaryEffects() {
+            waterPerSecond = 1;
+            mineralsPerSecond = 0;
+            plantsPerSecond = 0;
+            energyPerSecond = 0;
+            // Reset any other temporary variables or states
+        }
 
-        // Generate Story UI is already defined
+        // Function to reset all intervals
+        function clearAllIntervals() {
+            clearInterval(resourceGenerationInterval);
+            clearInterval(resourceConsumptionInterval);
+            clearInterval(autosaveInterval);
+            clearInterval(eventInterval);
+        }
 
-        // Additional: Handle Offline Resources Notification
-        translations.en["OfflineResources"] = "⏰ You were offline for {0} seconds. Resources have been updated.";
-        translations.es["OfflineResources"] = "⏰ Estuviste desconectado por {0} segundos. Los recursos se han actualizado.";
+        // Leaderboard Functions already handled
+
+        // Tracking GA Events
+        function trackGAEvent(eventName, eventParams) {
+            if (typeof gtag === 'function') {
+                gtag('event', eventName, eventParams);
+            }
+        }
 
         // Initialize Language and Social Sharing
         document.addEventListener("DOMContentLoaded", function() {
@@ -2388,7 +2337,7 @@
             }
 
             // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.5';
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
             document.getElementById('version').innerText = `Version ${savedVersion}`;
         });
 
