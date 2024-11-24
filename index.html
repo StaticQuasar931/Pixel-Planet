@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Planet</title>
     
-    <!-- External CSS (Within the HTML for simplicity) -->
+    <!-- Internal CSS -->
     <style>
         /* Theme Variables */
         body.dark-theme {
@@ -15,6 +15,7 @@
             --button-bg-color: #1f8ef1;
             --modal-content-bg: #1e1e1e;
             --upgrade-bg-color: #2c2c2c;
+            --tooltip-bg-color: #333;
         }
 
         body.light-theme {
@@ -23,6 +24,7 @@
             --button-bg-color: #008CBA;
             --modal-content-bg: #ffffff;
             --upgrade-bg-color: #e0e0e0;
+            --tooltip-bg-color: #f9f9f9;
         }
 
         /* Global Styles */
@@ -181,7 +183,7 @@
         .tooltip {
             visibility: hidden;
             width: 160px;
-            background-color: var(--upgrade-bg-color);
+            background-color: var(--tooltip-bg-color);
             color: var(--text-color);
             text-align: center;
             border-radius: 6px;
@@ -531,7 +533,7 @@
     <!-- Notification -->
     <div id="notification"></div>
 
-    <!-- External JavaScript (Within the HTML for simplicity) -->
+    <!-- Internal JavaScript -->
     <script>
         // Utility function to format numbers
         function formatNumber(num) {
@@ -589,92 +591,6 @@
             }, 3000);
         }
 
-        // Function to update social sharing URLs
-        function updateSocialSharing() {
-            const currentPlayer = {
-                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
-                totalResources: calculateTotalResources()
-            };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
-            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
-
-            // Assign secure attributes
-            document.getElementById('share-twitter').href = twitterURL;
-            document.getElementById('share-facebook').href = facebookURL;
-            document.getElementById('share-reddit').href = redditURL;
-
-            document.getElementById('share-twitter-game').href = twitterURL;
-            document.getElementById('share-facebook-game').href = facebookURL;
-            document.getElementById('share-reddit-game').href = redditURL;
-        }
-
-        // Leaderboard Functions
-        function showLeaderboard() {
-            updateLeaderboard();
-            openModal('leaderboard');
-        }
-
-        function closeLeaderboard() {
-            closeModal('leaderboard');
-        }
-
-        function updateLeaderboard() {
-            const leaderboardBody = document.querySelector('#leaderboard-table tbody');
-            leaderboardBody.innerHTML = ''; // Clear existing entries
-
-            // Retrieve leaderboard data from localStorage
-            let leaderboard = JSON.parse(localStorage.getItem('PixelPlanetLeaderboard')) || [];
-
-            // Current player data
-            const currentPlayer = {
-                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
-                totalResources: calculateTotalResources()
-            };
-
-            // Add current player to leaderboard if not already present
-            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
-                leaderboard.push(currentPlayer);
-            } else {
-                // Update totalResources if player already exists
-                leaderboard = leaderboard.map(player => {
-                    if (player.name === currentPlayer.name) {
-                        return currentPlayer;
-                    }
-                    return player;
-                });
-            }
-
-            // Sort leaderboard by totalResources descending
-            leaderboard.sort((a, b) => b.totalResources - a.totalResources);
-
-            // Keep top 10
-            leaderboard = leaderboard.slice(0, 10);
-
-            // Save updated leaderboard
-            localStorage.setItem('PixelPlanetLeaderboard', JSON.stringify(leaderboard));
-
-            // Populate leaderboard table
-            leaderboard.forEach((player, index) => {
-                const row = document.createElement('tr');
-
-                const rankCell = document.createElement('td');
-                rankCell.innerText = index + 1;
-                row.appendChild(rankCell);
-
-                const nameCell = document.createElement('td');
-                nameCell.innerText = player.name;
-                row.appendChild(nameCell);
-
-                const resourcesCell = document.createElement('td');
-                resourcesCell.innerText = formatNumber(player.totalResources);
-                row.appendChild(resourcesCell);
-
-                leaderboardBody.appendChild(row);
-            });
-        }
-
         // Notification Messages
         const notificationMessages = {
             en: {
@@ -718,6 +634,9 @@
                 "FeedbackSubmissionFailed": "❌ Failed to submit feedback. Please try again later.",
                 "StoryMilestone": "📖 Story Milestone Achieved!",
                 "GameLoaded": "✅ Game loaded successfully!",
+                "Pixel Planet": "Pixel Planet",
+                "Pixel Planet Tutorial": "Pixel Planet Tutorial",
+                "Feedback": "Feedback",
             },
             es: {
                 "ResourceGenerated": "🔄 ¡Recursos generados!",
@@ -760,6 +679,9 @@
                 "FeedbackSubmissionFailed": "❌ No se pudo enviar el feedback. Por favor, inténtalo de nuevo más tarde.",
                 "StoryMilestone": "📖 ¡Hito de la Historia Alcanzado!",
                 "GameLoaded": "✅ ¡Juego cargado con éxito!",
+                "Pixel Planet": "Pixel Planet",
+                "Pixel Planet Tutorial": "Tutorial de Pixel Planet",
+                "Feedback": "Feedback",
             }
             // Add more languages as needed
         };
@@ -817,6 +739,15 @@
                 feedbackTitle.innerText = `📝 ${notificationMessages[currentLanguage]["Feedback"]}`;
             }
 
+            // Translate section headings
+            const sections = document.querySelectorAll('.section h3');
+            sections.forEach(section => {
+                const text = section.innerText.replace(':', '').trim();
+                if (notificationMessages[currentLanguage][text]) {
+                    section.innerText = `${notificationMessages[currentLanguage][text]}`;
+                }
+            });
+
             // Translate other static texts as needed
         }
 
@@ -830,6 +761,14 @@
                     const key = messagePara.dataset.translationKey;
                     messagePara.innerText = notificationMessages[currentLanguage][key] || key;
                 }
+
+                const headers = modal.querySelectorAll('h2, h3');
+                headers.forEach(header => {
+                    const key = header.id && notificationMessages[currentLanguage][header.id] ? header.id : null;
+                    if (key) {
+                        header.innerText = notificationMessages[currentLanguage][key] || header.innerText;
+                    }
+                });
 
                 const buttons = modal.querySelectorAll('button');
                 buttons.forEach(button => {
@@ -1665,6 +1604,7 @@
             biomes.forEach((biome, index) => {
                 const biomeDiv = document.createElement('div');
                 biomeDiv.className = 'biome';
+                biomeDiv.style.whiteSpace = 'pre-line'; // Preserve line breaks
                 biomeDiv.innerText = `${biome.name} Biome\n${formatBiomeBonuses(biome.bonuses)}`;
 
                 if (index === biomes.length - 1 && biome.highlight) { // Newly unlocked biome
@@ -1682,7 +1622,7 @@
             for (let key in bonuses) {
                 bonusText += `+${bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
             }
-            return bonusText;
+            return bonusText.trim();
         }
 
         // Unlock Terraform (New Biome)
@@ -1841,6 +1781,7 @@
             const eventsDiv = document.getElementById('events');
             const eventDiv = document.createElement('div');
             eventDiv.className = 'event';
+            eventDiv.style.whiteSpace = 'pre-line'; // Preserve line breaks
             eventDiv.innerText = `${event.name}: ${event.description}`;
             eventsDiv.prepend(eventDiv); // Add to top
 
@@ -2296,8 +2237,91 @@
             });
         }
 
-        // Leaderboard and Social Sharing Integration
-        // Already handled in updateSocialSharing()
+        // Leaderboard Functions
+        function showLeaderboard() {
+            updateLeaderboard();
+            openModal('leaderboard');
+        }
+
+        function closeLeaderboard() {
+            closeModal('leaderboard');
+        }
+
+        function updateLeaderboard() {
+            const leaderboardBody = document.querySelector('#leaderboard-table tbody');
+            leaderboardBody.innerHTML = ''; // Clear existing entries
+
+            // Retrieve leaderboard data from localStorage
+            let leaderboard = JSON.parse(localStorage.getItem('PixelPlanetLeaderboard')) || [];
+
+            // Current player data
+            const currentPlayer = {
+                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
+                totalResources: calculateTotalResources()
+            };
+
+            // Add current player to leaderboard if not already present
+            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
+                leaderboard.push(currentPlayer);
+            } else {
+                // Update totalResources if player already exists
+                leaderboard = leaderboard.map(player => {
+                    if (player.name === currentPlayer.name) {
+                        return currentPlayer;
+                    }
+                    return player;
+                });
+            }
+
+            // Sort leaderboard by totalResources descending
+            leaderboard.sort((a, b) => b.totalResources - a.totalResources);
+
+            // Keep top 10
+            leaderboard = leaderboard.slice(0, 10);
+
+            // Save updated leaderboard
+            localStorage.setItem('PixelPlanetLeaderboard', JSON.stringify(leaderboard));
+
+            // Populate leaderboard table
+            leaderboard.forEach((player, index) => {
+                const row = document.createElement('tr');
+
+                const rankCell = document.createElement('td');
+                rankCell.innerText = index + 1;
+                row.appendChild(rankCell);
+
+                const nameCell = document.createElement('td');
+                nameCell.innerText = player.name;
+                row.appendChild(nameCell);
+
+                const resourcesCell = document.createElement('td');
+                resourcesCell.innerText = formatNumber(player.totalResources);
+                row.appendChild(resourcesCell);
+
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        // Function to share game
+        function updateSocialSharing() {
+            const currentPlayer = {
+                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
+                totalResources: calculateTotalResources()
+            };
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+
+            // Assign secure attributes
+            document.getElementById('share-twitter').href = twitterURL;
+            document.getElementById('share-facebook').href = facebookURL;
+            document.getElementById('share-reddit').href = redditURL;
+
+            document.getElementById('share-twitter-game').href = twitterURL;
+            document.getElementById('share-facebook-game').href = facebookURL;
+            document.getElementById('share-reddit-game').href = redditURL;
+        }
 
         // Function to share game
         function shareGame() {
@@ -2536,6 +2560,92 @@
             setPlayerNameButton.addEventListener('click', setPlayerName);
         }
 
+        // Leaderboard Functions
+        function showLeaderboard() {
+            updateLeaderboard();
+            openModal('leaderboard');
+        }
+
+        function closeLeaderboard() {
+            closeModal('leaderboard');
+        }
+
+        function updateLeaderboard() {
+            const leaderboardBody = document.querySelector('#leaderboard-table tbody');
+            leaderboardBody.innerHTML = ''; // Clear existing entries
+
+            // Retrieve leaderboard data from localStorage
+            let leaderboard = JSON.parse(localStorage.getItem('PixelPlanetLeaderboard')) || [];
+
+            // Current player data
+            const currentPlayer = {
+                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
+                totalResources: calculateTotalResources()
+            };
+
+            // Add current player to leaderboard if not already present
+            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
+                leaderboard.push(currentPlayer);
+            } else {
+                // Update totalResources if player already exists
+                leaderboard = leaderboard.map(player => {
+                    if (player.name === currentPlayer.name) {
+                        return currentPlayer;
+                    }
+                    return player;
+                });
+            }
+
+            // Sort leaderboard by totalResources descending
+            leaderboard.sort((a, b) => b.totalResources - a.totalResources);
+
+            // Keep top 10
+            leaderboard = leaderboard.slice(0, 10);
+
+            // Save updated leaderboard
+            localStorage.setItem('PixelPlanetLeaderboard', JSON.stringify(leaderboard));
+
+            // Populate leaderboard table
+            leaderboard.forEach((player, index) => {
+                const row = document.createElement('tr');
+
+                const rankCell = document.createElement('td');
+                rankCell.innerText = index + 1;
+                row.appendChild(rankCell);
+
+                const nameCell = document.createElement('td');
+                nameCell.innerText = player.name;
+                row.appendChild(nameCell);
+
+                const resourcesCell = document.createElement('td');
+                resourcesCell.innerText = formatNumber(player.totalResources);
+                row.appendChild(resourcesCell);
+
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        // Function to share game
+        function updateSocialSharing() {
+            const currentPlayer = {
+                name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
+                totalResources: calculateTotalResources()
+            };
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+
+            // Assign secure attributes
+            document.getElementById('share-twitter').href = twitterURL;
+            document.getElementById('share-facebook').href = facebookURL;
+            document.getElementById('share-reddit').href = redditURL;
+
+            document.getElementById('share-twitter-game').href = twitterURL;
+            document.getElementById('share-facebook-game').href = facebookURL;
+            document.getElementById('share-reddit-game').href = redditURL;
+        }
+
         // Function to share game
         function shareGame() {
             const currentPlayer = {
@@ -2583,62 +2693,6 @@
             closeFeedback();
             feedbackInput.value = '';
         }
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
 
         // Initialize Device Detection
         function detectDevice() {
@@ -2698,194 +2752,6 @@
 
         // Function to attach all event listeners already handled
 
-        // Function to attach all event listeners already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Initialize Device Detection already handled
-
-        // Function to initialize the game already handled
-
-        // Function to calculate total resources already handled
-
-        // Function to attach event listeners already handled
-
         // Function to set player name already handled
 
         // Function to toggle theme already handled
@@ -2901,274 +2767,6 @@
         // Function to share game already handled
 
         // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Initialize Device Detection already handled
-
-        // Function to initialize the game already handled
-
-        // Function to calculate total resources already handled
-
-        // Function to attach event listeners already handled
-
-        // Function to set player name already handled
-
-        // Function to toggle theme already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Function to confirm action and get response already handled
-
-        // Function to open help modal already handled
-
-        // Function to close help modal already handled
-
-        // Function to open feedback modal already handled
-
-        // Function to close feedback modal already handled
-
-        // Function to buy upgrades already handled
-
-        // Function to reset upgrades already handled
-
-        // Function to reset achievements already handled
-
-        // Function to reset quests already handled
-
-        // Function to generate biomes already handled
-
-        // Function to handle offline resource generation already handled
-
-        // Function to start resource generation already handled
-
-        // Function to start resource consumption already handled
-
-        // Function to start autosave already handled
-
-        // Function to schedule quest reset already handled
-
-        // Function to reset all temporary effects already handled
-
-        // Function to reset all intervals already handled
-
-        // Function to track GA event already handled
-
-        // Function to apply translations already handled
-
-        // Function to update dynamic content language already handled
-
-        // Function to load language already handled
-
-        // Function to detect device already handled
-
-        // Function to set player name already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Initialize Device Detection already handled
-
-        // Function to initialize the game already handled
-
-        // Function to calculate total resources already handled
-
-        // Function to attach event listeners already handled
-
-        // Function to set player name already handled
-
-        // Function to toggle theme already handled
-
-        // Function to change theme already handled
-
-        // Function to load theme already handled
-
-        // Function to capitalize first letter already handled
-
-        // Function to reset game already handled
-
-        // Function to share game already handled
-
-        // Function to handle feedback already handled
-
-        // Initialize Device Detection already handled
-
-        // Function to initialize the game already handled
-
-        // Function to calculate total resources already handled
-
-        // Initialize Device Detection and Game on DOMContentLoaded already handled
-
-        // Function to initialize the game already handled
-
-        // Initialize the game and attach event listeners
-        function initGameFinal() {
-            loadLanguage();
-            updateSocialSharing();
-            detectDevice();
-
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.6") {
-                    // Handle version upgrades if necessary
-                    showNotification("VersionMismatch");
-                    startNewGame(false);
-                } else {
-                    loadFromSave(parsedSave);
-                }
-            } else {
-                startNewGame();
-            }
-
-            // Show Continue button if a saved game exists
-            if (savedGame) {
-                document.getElementById('continue-button').style.display = 'inline-block';
-            }
-
-            // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
-            document.getElementById('version').innerText = `Version ${savedVersion}`;
-        }
-
-        // Initialize on DOMContentLoaded
-        document.addEventListener("DOMContentLoaded", function() {
-            // Initialize the game
-            initGameFinal();
-        });
 
     </script>
 </body>
