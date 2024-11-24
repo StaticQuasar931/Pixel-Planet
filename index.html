@@ -1,3 +1,542 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Pixel Planet</title>
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline';">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7M919FPNB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        if (!window.gaInitialized) {
+            gtag('config', 'G-E7M919FPNB');
+            window.gaInitialized = true;
+        }
+    </script>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --button-bg-color: #008CBA;
+            --button-text-color: #fff;
+            --modal-bg-color: rgba(0, 0, 0, 0.5);
+            --modal-content-bg: #fff;
+            --upgrade-bg-color: #e0e0e0;
+        }
+
+        body.dark-theme {
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --button-bg-color: #1f8ef1;
+            --modal-content-bg: #1e1e1e;
+            --upgrade-bg-color: #2c2c2c;
+        }
+
+        body.light-theme {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --button-bg-color: #008CBA;
+            --modal-content-bg: #ffffff;
+            --upgrade-bg-color: #e0e0e0;
+        }
+
+        /* Global Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Credits */
+        #credits {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        #credits a {
+            color: var(--button-bg-color);
+            text-decoration: none;
+        }
+
+        /* Version Number */
+        #version {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        /* Buttons */
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #005f6a;
+        }
+
+        button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1005; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: var(--modal-bg-color); 
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: var(--modal-content-bg);
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; 
+            max-width: 700px;
+            border-radius: 10px;
+            color: var(--text-color);
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideIn 0.5s;
+        }
+
+        .close-modal {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #000;
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .upgrade, .achievement, .event, .biome, .quest {
+                width: 45%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .upgrade, .achievement, .event, .biome, .quest {
+                width: 70%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            button {
+                width: 80%;
+                font-size: 1em;
+            }
+
+            .upgrade, .achievement, .event, .biome, .quest {
+                width: 90%;
+            }
+
+            #leaderboard-table th, #leaderboard-table td {
+                font-size: 0.8em;
+                padding: 6px;
+            }
+
+            .social-buttons {
+                flex-direction: column;
+            }
+
+            .social-button {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            visibility: hidden;
+            width: 160px;
+            background-color: var(--upgrade-bg-color);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the button */
+            left: 50%;
+            margin-left: -80px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .upgrade-button:hover .tooltip,
+        .upgrade-button:focus .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Leaderboard Styles */
+        #leaderboard {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        #leaderboard-table th, #leaderboard-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #leaderboard-table th {
+            background-color: var(--upgrade-bg-color);
+        }
+
+        /* Social Sharing Buttons */
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Menu Styles */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #main-menu h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        #language-selector {
+            margin-top: 20px;
+        }
+
+        /* Game Interface Styles */
+        #game {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        #resources {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .resource {
+            background-color: var(--upgrade-bg-color);
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+            margin: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Control Buttons */
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Notification Styles */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--upgrade-bg-color);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1006;
+        }
+
+        /* Accessibility Enhancements */
+        button:focus {
+            outline: 2px solid #555;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Credits -->
+    <div id="credits">
+        Made By <a href="https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet" target="_blank" rel="noopener noreferrer">Static</a>
+    </div>
+
+    <!-- Version Number -->
+    <div id="version">
+        Version 0.6
+    </div>
+
+    <!-- Help Button -->
+    <button id="help-button" aria-label="Open Help Modal">❓ Help</button>
+
+    <!-- Share Button -->
+    <button id="share-button" aria-label="Share Game">📤 Share</button>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorial-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-modal-title">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close Tutorial Modal">&times;</span>
+            <h2 id="tutorial-modal-title">📖 Pixel Planet Tutorial</h2>
+            <p>Welcome to Pixel Planet! Let's walk you through the basics:</p>
+            <ol>
+                <li><strong>Start New Game:</strong> Click the "Start New Game" button to begin your adventure.</li>
+                <li><strong>Generate Resources:</strong> Click "Generate Resources" to manually collect resources. Resources also accumulate automatically over time.</li>
+                <li><strong>Upgrades:</strong> Visit the "Upgrades" section to purchase improvements that enhance your resource generation and efficiency. Some upgrades automate resource collection, allowing you to focus on other tasks.</li>
+                <li><strong>Biomes:</strong> Unlock new biomes by terraforming your planet. Each biome provides unique resource bonuses.</li>
+                <li><strong>Achievements:</strong> Achieve milestones to unlock rewards and showcase your progress.</li>
+                <li><strong>Quests:</strong> Complete daily and weekly quests to earn additional rewards and keep your gameplay engaging.</li>
+                <li><strong>Leaderboard:</strong> Enter your name and see how you rank against other players based on your total resources.</li>
+                <li><strong>Localization:</strong> Choose your preferred language from the language selector to enjoy the game in your native language.</li>
+                <li><strong>Social Sharing:</strong> Share your achievements and progress on social media to invite friends and challenge them.</li>
+                <li><strong>Accessibility:</strong> Navigate the game using your keyboard and enjoy improved accessibility features designed for all players.</li>
+            </ol>
+            <p>Explore, strategize, and build your Pixel Planet into a thriving world! 🌍🚀</p>
+            <button id="tutorial-close-button" aria-label="Close Tutorial">Got It!</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <div id="leaderboard" class="modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close Leaderboard">&times;</span>
+            <h3 id="leaderboard-title">🏅 Leaderboard</h3>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Total Resources</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Leaderboard entries will be dynamically generated -->
+                </tbody>
+            </table>
+            <button id="leaderboard-close-button" aria-label="Close Leaderboard">Close Leaderboard</button>
+        </div>
+    </div>
+
+    <!-- Social Sharing Buttons -->
+    <div class="social-buttons">
+        <a href="#" id="share-twitter" target="_blank" aria-label="Share on Twitter">
+            <button class="social-button">🐦 Twitter</button>
+        </a>
+        <a href="#" id="share-facebook" target="_blank" aria-label="Share on Facebook">
+            <button class="social-button">📘 Facebook</button>
+        </a>
+        <a href="#" id="share-reddit" target="_blank" aria-label="Share on Reddit">
+            <button class="social-button">👽 Reddit</button>
+        </a>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu">
+        <h1>🌍 Pixel Planet</h1>
+        <button id="start-new-game-button" aria-label="Start New Game">🚀 Start New Game</button>
+        <button id="continue-button" aria-label="Continue Game" style="display: none;">🔄 Continue Game</button>
+        <button id="show-leaderboard-button" aria-label="Show Leaderboard">🏅 Leaderboard</button>
+        <div id="language-selector">
+            <label for="language-select">🌐 Language: </label>
+            <select id="language-select" aria-label="Language Selector">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <!-- Add more languages as needed -->
+            </select>
+        </div>
+    </div>
+
+    <!-- Game Interface -->
+    <div id="game">
+        <h2>Your Planet</h2>
+        <div id="resources">
+            <div class="resource" id="water">💧 Water: 0 / 1K (Per Second: <span id="water-rate">1.0</span>)</div>
+            <div class="resource" id="minerals">⛏ Minerals: 0 / 500 (Per Second: <span id="minerals-rate">0.0</span>)</div>
+            <div class="resource" id="plants">🌱 Plants: 0 / 300 (Per Second: <span id="plants-rate">0.0</span>)</div>
+            <div class="resource" id="energy">⚡ Energy: 0 / 200 (Per Second: <span id="energy-rate">0.0</span>)</div>
+        </div>
+        <button id="generate-resources-button" aria-label="Generate Resources">🔄 Generate Resources</button>
+
+        <!-- Biomes Section -->
+        <div id="biomes-section" class="section">
+            <h3>🌿 Biomes</h3>
+            <div id="biomes">
+                <!-- Biomes will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Upgrades Section -->
+        <div id="upgrades-section" class="section">
+            <h3>💼 Upgrades</h3>
+            <div id="upgrades">
+                <!-- Upgrades will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div id="achievements-section" class="section">
+            <h3>🏆 Achievements</h3>
+            <div id="achievements">
+                <!-- Achievements will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Events Section -->
+        <div id="events-section" class="section">
+            <h3>🎉 Events</h3>
+            <div id="events">
+                <!-- Events will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Quests Section -->
+        <div id="quests-section" class="section">
+            <h3>🎯 Quests</h3>
+            <div id="quests">
+                <!-- Quests will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Story Section -->
+        <div id="story-section" class="section">
+            <h3>📖 Story</h3>
+            <div id="story">
+                <!-- Story milestones will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="control-buttons">
+            <button id="save-game-button" aria-label="Save Game">💾 Save Game</button>
+            <button id="terraform-planet-button" aria-label="Terraform Planet">🌍 Terraform Planet</button>
+            <button id="reset-game-button" aria-label="Reset Game">🗑️ Reset Game</button>
+            <button id="toggle-theme-button" aria-label="Toggle Theme">🎨 Toggle Theme</button>
+        </div>
+
+        <!-- Social Sharing Buttons (Game) -->
+        <div class="social-buttons">
+            <a href="#" id="share-twitter-game" target="_blank" aria-label="Share on Twitter">
+                <button class="social-button">🐦 Twitter</button>
+            </a>
+            <a href="#" id="share-facebook-game" target="_blank" aria-label="Share on Facebook">
+                <button class="social-button">📘 Facebook</button>
+            </a>
+            <a href="#" id="share-reddit-game" target="_blank" aria-label="Share on Reddit">
+                <button class="social-button">👽 Reddit</button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+        <div class="modal-content">
+            <span class="close-modal" aria-label="Close Feedback Modal">&times;</span>
+            <h2 id="feedback-modal-title">📝 Feedback</h2>
+            <form id="feedback-form">
+                <label for="feedback-input">Your Feedback:</label>
+                <textarea id="feedback-input" name="feedback" rows="4" cols="50" required></textarea>
+                <button type="submit" aria-label="Submit Feedback">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification"></div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+<!-- script.js -->
+<script>
 // Utility function to format numbers
 function formatNumber(num) {
     if (num >= 1e9) {
@@ -30,7 +569,7 @@ function displayNextNotification() {
     isNotificationVisible = true;
     const { messageKey, params } = notificationQueue.shift();
     const notification = document.getElementById('notification');
-    let message = translations[currentLanguage][messageKey] || notificationMessages[currentLanguage][messageKey] || messageKey;
+    let message = notificationMessages[currentLanguage][messageKey] || messageKey;
 
     // Replace placeholders with actual parameters
     params.forEach((param, index) => {
@@ -143,7 +682,7 @@ const notificationMessages = {
         "GameSaved": "💾 Game saved!",
         "SaveError": "⚠️ Error saving game.",
         "LoadError": "⚠️ Error loading game. Starting a new game.",
-        "UpgradePurchased": "🔧 Upgrade Purchased: {0} - {1}",
+        "UpgradePurchased": "🔧 Upgrade Purchased: {0} - Level {1}",
         "UpgradePurchaseFailed": "❌ Not enough Water to purchase this upgrade!",
         "TerraformSuccess": "🌍 Planet terraformed! New biome unlocked.",
         "TerraformFailed": "❌ Not enough Water to terraform the planet!",
@@ -178,7 +717,7 @@ const notificationMessages = {
         "GameSaved": "💾 ¡Juego guardado!",
         "SaveError": "⚠️ Error al guardar el juego.",
         "LoadError": "⚠️ Error al cargar el juego. Iniciando un nuevo juego.",
-        "UpgradePurchased": "🔧 Actualización Comprada: {0} - {1}",
+        "UpgradePurchased": "🔧 Actualización Comprada: {0} - Nivel {1}",
         "UpgradePurchaseFailed": "❌ ¡No tienes suficiente Agua para comprar esta actualización!",
         "TerraformSuccess": "🌍 ¡Planeta terraformado! Nuevo bioma desbloqueado.",
         "TerraformFailed": "❌ ¡No tienes suficiente Agua para terraformar el planeta!",
@@ -213,7 +752,7 @@ let currentLanguage = 'en';
 
 // Function to change language
 function changeLanguage(lang) {
-    if (!translations.hasOwnProperty(lang)) {
+    if (!notificationMessages.hasOwnProperty(lang)) {
         showNotification("LanguageUnsupported", [lang]);
         lang = 'en';
     }
@@ -230,8 +769,8 @@ function applyTranslations() {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         const ariaLabel = button.getAttribute('aria-label');
-        if (ariaLabel && translations[currentLanguage][ariaLabel]) {
-            button.innerText = translations[currentLanguage][ariaLabel];
+        if (ariaLabel && notificationMessages[currentLanguage][ariaLabel]) {
+            button.innerText = notificationMessages[currentLanguage][ariaLabel];
         }
     });
 
@@ -239,34 +778,30 @@ function applyTranslations() {
     const labels = document.querySelectorAll('label');
     labels.forEach(label => {
         const text = label.innerText.replace(':', '').trim();
-        if (translations[currentLanguage][text]) {
-            label.innerText = `${translations[currentLanguage][text]}:`;
+        if (notificationMessages[currentLanguage][text]) {
+            label.innerText = `${notificationMessages[currentLanguage][text]}:`;
         }
     });
 
     // Translate main menu title
     const mainMenuTitle = document.querySelector('#main-menu h1');
-    if (translations[currentLanguage]["Pixel Planet"]) {
-        mainMenuTitle.innerText = `🌍 ${translations[currentLanguage]["Pixel Planet"]}`;
+    if (notificationMessages[currentLanguage]["Pixel Planet"]) {
+        mainMenuTitle.innerText = `🌍 ${notificationMessages[currentLanguage]["Pixel Planet"]}`;
     }
 
     // Translate tutorial modal title and content
     const tutorialTitle = document.getElementById('tutorial-modal-title');
-    if (translations[currentLanguage]["Pixel Planet Tutorial"]) {
-        tutorialTitle.innerText = `📖 ${translations[currentLanguage]["Pixel Planet Tutorial"]}`;
+    if (notificationMessages[currentLanguage]["Pixel Planet Tutorial"]) {
+        tutorialTitle.innerText = `📖 ${notificationMessages[currentLanguage]["Pixel Planet Tutorial"]}`;
     }
 
     // Translate feedback modal title
     const feedbackTitle = document.getElementById('feedback-modal-title');
-    if (translations[currentLanguage]["Feedback"]) {
-        feedbackTitle.innerText = `📝 ${translations[currentLanguage]["Feedback"]}`;
+    if (notificationMessages[currentLanguage]["Feedback"]) {
+        feedbackTitle.innerText = `📝 ${notificationMessages[currentLanguage]["Feedback"]}`;
     }
 
-    // Translate notifications if any are active
-    const activeNotifications = document.querySelectorAll('#notification');
-    activeNotifications.forEach(notification => {
-        // Currently, notifications are dynamically generated, so no static translation needed
-    });
+    // Translate other static texts as needed
 }
 
 // Function to update dynamic content language
@@ -277,14 +812,14 @@ function updateDynamicContentLanguage() {
         const messagePara = modal.querySelector('p');
         if (messagePara && messagePara.dataset.translationKey) {
             const key = messagePara.dataset.translationKey;
-            messagePara.innerText = translations[currentLanguage][key] || key;
+            messagePara.innerText = notificationMessages[currentLanguage][key] || key;
         }
 
         const buttons = modal.querySelectorAll('button');
         buttons.forEach(button => {
             const ariaLabel = button.getAttribute('aria-label');
-            if (ariaLabel && translations[currentLanguage][ariaLabel]) {
-                button.innerText = translations[currentLanguage][ariaLabel];
+            if (ariaLabel && notificationMessages[currentLanguage][ariaLabel]) {
+                button.innerText = notificationMessages[currentLanguage][ariaLabel];
             }
         });
     });
@@ -625,6 +1160,7 @@ const eventTypes = [
         effect: () => {
             energyPerSecond = Math.max(0, energyPerSecond - 2);
             showNotification("SolarFlareImpact");
+            updateResourcesUI();
             setTimeout(() => {
                 energyPerSecond = Math.min(energyPerSecond + 2, MAX_RESOURCE_RATE.energyPerSecond);
                 showNotification("SolarFlareRestored");
@@ -638,6 +1174,7 @@ const eventTypes = [
         effect: () => {
             mineralsPerSecond = Math.min(mineralsPerSecond + 3, MAX_RESOURCE_RATE.mineralsPerSecond);
             showNotification("MeteorShowerImpact");
+            updateResourcesUI();
             setTimeout(() => {
                 mineralsPerSecond = Math.max(mineralsPerSecond - 3, 0);
                 showNotification("MeteorShowerNormalized");
@@ -660,6 +1197,9 @@ const eventTypes = [
             resources.water = Math.max(0, resources.water - 50);
             resources.minerals = Math.max(0, resources.minerals - 30);
             showNotification("ResourcePlundered");
+            updateResourcesUI();
+            checkAchievements();
+            checkQuests();
         }
     }
     // Add more unique events as desired
@@ -941,6 +1481,9 @@ function generateUpgradesUI() {
 
             // Assign unique ID for the button
             button.id = `upgrade-button-${upgrade.key}`;
+
+            // Attach event listener
+            button.addEventListener('click', () => buyUpgrade(upgrade.key));
 
             upgradeDiv.appendChild(button);
 
@@ -1269,7 +1812,7 @@ async function openConfirmationModal(messageKey, onConfirm) {
         closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
 
         const messagePara = document.createElement('p');
-        messagePara.innerText = translations[currentLanguage][messageKey] || messageKey;
+        messagePara.innerText = notificationMessages[currentLanguage][messageKey] || messageKey;
         messagePara.dataset.translationKey = messageKey;
 
         const buttonsDiv = document.createElement('div');
@@ -1278,7 +1821,7 @@ async function openConfirmationModal(messageKey, onConfirm) {
         buttonsDiv.style.marginTop = '20px';
 
         const confirmBtn = document.createElement('button');
-        confirmBtn.innerText = translations[currentLanguage]["Yes"] || "Yes";
+        confirmBtn.innerText = notificationMessages[currentLanguage]["Yes"] || "Yes";
         confirmBtn.onclick = () => {
             onConfirm();
             document.body.removeChild(modal);
@@ -1288,7 +1831,7 @@ async function openConfirmationModal(messageKey, onConfirm) {
         confirmBtn.setAttribute('aria-label', 'Confirm');
 
         const cancelBtn = document.createElement('button');
-        cancelBtn.innerText = translations[currentLanguage]["No"] || "No";
+        cancelBtn.innerText = notificationMessages[currentLanguage]["No"] || "No";
         cancelBtn.onclick = () => { document.body.removeChild(modal); opener.focus(); resolve(false); };
         cancelBtn.setAttribute('aria-label', 'Cancel');
 
@@ -1355,11 +1898,11 @@ function openAlertModal(messageKey) {
     closeBtn.setAttribute('aria-label', 'Close Alert Modal');
 
     const messagePara = document.createElement('p');
-    messagePara.innerText = translations[currentLanguage][messageKey] || messageKey;
+    messagePara.innerText = notificationMessages[currentLanguage][messageKey] || messageKey;
     messagePara.dataset.translationKey = messageKey;
 
     const okBtn = document.createElement('button');
-    okBtn.innerText = translations[currentLanguage]["OK"] || "OK";
+    okBtn.innerText = notificationMessages[currentLanguage]["OK"] || "OK";
     okBtn.onclick = () => { document.body.removeChild(modal); };
     okBtn.setAttribute('aria-label', 'OK');
 
@@ -1475,7 +2018,7 @@ function trapTabKey(e) {
 
 // Function to buy upgrades already handled
 
-// Reset Upgrades already handled
+// Function to reset upgrades already handled
 
 // Achievements UI and Check already handled
 
@@ -1708,8 +2251,6 @@ function startAutosave() {
     }, 30000); // Autosave every 30 seconds
 }
 
-// Start Event System already handled
-
 // Schedule Quest Reset (Daily)
 function scheduleQuestReset() {
     const now = new Date();
@@ -1742,6 +2283,21 @@ function trackGAEvent(eventName, eventParams) {
     if (typeof gtag === 'function') {
         gtag('event', eventName, eventParams);
     }
+}
+
+// Function to open help modal
+function openHelp() {
+    openModal('tutorial-modal');
+}
+
+// Function to close help modal
+function closeTutorial() {
+    closeModal('tutorial-modal');
+}
+
+// Function to handle feedback modal
+function closeFeedback() {
+    closeModal('feedback-modal');
 }
 
 // Initialize Language and Social Sharing
@@ -1813,8 +2369,8 @@ function attachEventListeners() {
     const toggleThemeButton = document.getElementById('toggle-theme-button');
     toggleThemeButton.addEventListener('click', toggleTheme);
 
-    // Feedback Modal Close Button
-    const feedbackCloseButtons = document.querySelectorAll('.close-feedback-modal');
+    // Feedback Modal Close Buttons (if any)
+    const feedbackCloseButtons = document.querySelectorAll('.close-modal');
     feedbackCloseButtons.forEach(btn => {
         btn.addEventListener('click', () => closeModal('feedback-modal'));
     });
@@ -1859,416 +2415,13 @@ function shareGame() {
     debouncedSaveGame();
 }
 
-// Function to open modals
-function openModal(modalId) {
-    closeAllModals();
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'flex';
-    const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (firstFocusable) firstFocusable.focus();
+// Function to open modals already handled
 
-    // Add event listener for focus trapping
-    modal.addEventListener('keydown', trapTabKey);
-}
+// Function to close modals already handled
 
-// Function to close modals
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'none';
-    modal.removeEventListener('keydown', trapTabKey);
-}
-
-// Function to handle confirmation
-function confirmAction(messageKey, onConfirm) {
-    return new Promise((resolve) => {
-        confirmModal(messageKey, () => {
-            onConfirm();
-            resolve(true);
-        }).then(() => {
-            resolve(true);
-        });
-    });
-}
-
-// Function to generate Random Biome
-function generateRandomBiome() {
-    const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna", "Volcano", "Jungle", "Iceberg", "Canyon"];
-    let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
-
-    if (availableBiomes.length === 0) {
-        // All biomes unlocked, notify player
-        showNotification("AllBiomesUnlocked");
-        return { name: "No New Biome", id: biomes.length + 1, bonuses: {} };
-    }
-
-    const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
-    let resourceBonus = {};
-
-    switch(randomName) {
-        case "Forest":
-            resourceBonus = { plantsPerSecond: 2 };
-            break;
-        case "Desert":
-            resourceBonus = { mineralsPerSecond: 3 };
-            break;
-        case "Ocean":
-            resourceBonus = { waterPerSecond: 5 };
-            break;
-        case "Mountain":
-            resourceBonus = { mineralsPerSecond: 4 };
-            break;
-        case "Swamp":
-            resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
-            break;
-        case "Tundra":
-            resourceBonus = { energyPerSecond: 2 };
-            break;
-        case "Savanna":
-            resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
-            break;
-        case "Volcano":
-            resourceBonus = { energyPerSecond: 5 };
-            break;
-        case "Jungle":
-            resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
-            break;
-        case "Iceberg":
-            resourceBonus = { waterPerSecond: 6 };
-            break;
-        case "Canyon":
-            resourceBonus = { mineralsPerSecond: 5 };
-            break;
-        default:
-            resourceBonus = {};
-    }
-
-    // Apply bonuses with caps
-    for (let key in resourceBonus) {
-        if (key === "waterPerSecond") {
-            waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
-        }
-        if (key === "mineralsPerSecond") {
-            mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
-        }
-        if (key === "plantsPerSecond") {
-            plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
-        }
-        if (key === "energyPerSecond") {
-            energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
-        }
-    }
-
-    return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus };
-}
-
-// Function to reset all temporary effects
-function clearAllTemporaryEffects() {
-    waterPerSecond = 1;
-    mineralsPerSecond = 0;
-    plantsPerSecond = 0;
-    energyPerSecond = 0;
-    // Reset any other temporary variables or states
-}
-
-// Function to reset all intervals
-function clearAllIntervals() {
-    clearInterval(resourceGenerationInterval);
-    clearInterval(resourceConsumptionInterval);
-    clearInterval(autosaveInterval);
-    clearInterval(eventInterval);
-}
-
-// Tracking GA Events
-function trackGAEvent(eventName, eventParams) {
-    if (typeof gtag === 'function') {
-        gtag('event', eventName, eventParams);
-    }
-}
-
-// Function to open help modal
-function openHelp() {
-    openModal('tutorial-modal');
-}
-
-// Function to close help modal
-function closeTutorial() {
-    closeModal('tutorial-modal');
-}
-
-// Function to handle feedback modal
-function closeFeedback() {
-    closeModal('feedback-modal');
-}
-
-// Feedback Modal Handling is already attached in attachEventListeners()
-
-// Initialize Language and Social Sharing is already handled in initGame()
-
-// Initialize Device Detection is already handled in initGame()
-
-// Initialize Game
-function initGame() {
-    loadLanguage();
-    updateSocialSharing();
-    detectDevice();
-
-    const savedGame = localStorage.getItem('PixelPlanetSave');
-    if (savedGame) {
-        const parsedSave = JSON.parse(savedGame);
-        if (parsedSave.version !== "0.6") {
-            // Handle version upgrades if necessary
-            showNotification("VersionMismatch");
-            startNewGame(false);
-        } else {
-            loadFromSave(parsedSave);
-        }
-    } else {
-        startNewGame();
-    }
-
-    // Show Continue button if a saved game exists
-    if (savedGame) {
-        document.getElementById('continue-button').style.display = 'inline-block';
-    }
-
-    // Update version number display
-    const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
-    document.getElementById('version').innerText = `Version ${savedVersion}`;
-}
-
-// Function to attach all event listeners
-function attachEventListeners() {
-    // Help Button
-    const helpButton = document.getElementById('help-button');
-    helpButton.addEventListener('click', openHelp);
-
-    // Share Button
-    const shareButton = document.getElementById('share-button');
-    shareButton.addEventListener('click', shareGame);
-
-    // Tutorial Close Button
-    const tutorialCloseButton = document.getElementById('tutorial-close-button');
-    tutorialCloseButton.addEventListener('click', closeTutorial);
-
-    // Leaderboard Close Button
-    const leaderboardCloseButton = document.getElementById('leaderboard-close-button');
-    leaderboardCloseButton.addEventListener('click', closeLeaderboard);
-
-    // Start New Game Button
-    const startNewGameButton = document.getElementById('start-new-game-button');
-    startNewGameButton.addEventListener('click', () => startNewGame(true));
-
-    // Continue Game Button
-    const continueButton = document.getElementById('continue-button');
-    continueButton.addEventListener('click', continueGame);
-
-    // Show Leaderboard Button
-    const showLeaderboardButton = document.getElementById('show-leaderboard-button');
-    showLeaderboardButton.addEventListener('click', showLeaderboard);
-
-    // Language Selector
-    const languageSelect = document.getElementById('language-select');
-    languageSelect.addEventListener('change', (e) => {
-        changeLanguage(e.target.value);
-    });
-
-    // Generate Resources Button
-    const generateResourcesButton = document.getElementById('generate-resources-button');
-    generateResourcesButton.addEventListener('click', generateResources);
-
-    // Save Game Button
-    const saveGameButton = document.getElementById('save-game-button');
-    saveGameButton.addEventListener('click', saveGame);
-
-    // Terraform Planet Button
-    const terraformPlanetButton = document.getElementById('terraform-planet-button');
-    terraformPlanetButton.addEventListener('click', unlockTerraform);
-
-    // Reset Game Button
-    const resetGameButton = document.getElementById('reset-game-button');
-    resetGameButton.addEventListener('click', resetGame);
-
-    // Toggle Theme Button
-    const toggleThemeButton = document.getElementById('toggle-theme-button');
-    toggleThemeButton.addEventListener('click', toggleTheme);
-
-    // Feedback Modal Close Button (if any)
-    const feedbackCloseButtons = document.querySelectorAll('.close-feedback-modal');
-    feedbackCloseButtons.forEach(btn => {
-        btn.addEventListener('click', () => closeModal('feedback-modal'));
-    });
-
-    // Feedback Form Submission
-    const feedbackForm = document.getElementById('feedback-form');
-    feedbackForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const feedback = sanitizeInput(document.getElementById('feedback-input').value);
-        // Send feedback via email or backend service
-        // Example using EmailJS or similar service
-        // After successful submission:
-        showNotification("FeedbackSubmitted");
-        closeModal('feedback-modal');
-    });
-}
-
-// Social Sharing Function
-function shareGame() {
-    const currentPlayer = {
-        name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
-        totalResources: calculateTotalResources()
-    };
-    const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
-    const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-    const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-    const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
-
-    // Open social sharing links in new tabs
-    window.open(twitterURL, '_blank');
-    window.open(facebookURL, '_blank');
-    window.open(redditURL, '_blank');
-
-    // Optional: Reward player for sharing
-    resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
-    updateResourcesUI();
-    showNotification("ShareReward");
-    trackGAEvent('share_game', {
-        'event_category': 'Share',
-        'event_label': 'Game shared on social media'
-    });
-    debouncedSaveGame();
-}
-
-// Function to open modals
-function openModal(modalId) {
-    closeAllModals();
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'flex';
-    const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (firstFocusable) firstFocusable.focus();
-
-    // Add event listener for focus trapping
-    modal.addEventListener('keydown', trapTabKey);
-}
-
-// Function to close modals
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'none';
-    modal.removeEventListener('keydown', trapTabKey);
-}
-
-// Function to handle confirmation
-function confirmAction(messageKey, onConfirm) {
-    return new Promise((resolve) => {
-        confirmModal(messageKey, () => {
-            onConfirm();
-            resolve(true);
-        }).then(() => {
-            resolve(true);
-        });
-    });
-}
-
-// Function to handle feedback modal
-function closeFeedback() {
-    closeModal('feedback-modal');
-}
-
-// Initialize Language and Social Sharing is already handled in initGame()
-
-// Initialize Device Detection is already handled in initGame()
-
-// Initialize Game
-document.addEventListener("DOMContentLoaded", function() {
-    initGame();
-    attachEventListeners();
-});
-
-// Function to attach all event listeners is already handled in attachEventListeners()
-
-// Function to buy upgrades already handled
-
-// Function to reset upgrades already handled
-
-// Function to reset achievements already handled
-
-// Function to reset quests already handled
-
-// Function to generate biomes already handled
-
-// Function to handle offline resource generation already handled
-
-// Start Resource Generation
-function startResourceGeneration() {
-    if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
-    resourceGenerationInterval = setInterval(() => {
-        safeAddResource('water', waterPerSecond);
-        safeAddResource('minerals', mineralsPerSecond);
-        safeAddResource('plants', plantsPerSecond);
-        safeAddResource('energy', energyPerSecond);
-        updateResourcesUI();
-        checkAchievements();
-        checkQuests();
-        trackGAEvent('resource_generated', {
-            'event_category': 'Resources',
-            'event_label': 'Auto-generated resources'
-        });
-        debouncedSaveGame();
-    }, 1000);
-}
-
-// Start Resource Consumption
-function startResourceConsumption() {
-    if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
-    resourceConsumptionInterval = setInterval(() => {
-        consumeResources();
-    }, 5000); // Consume resources every 5 seconds
-}
-
-function consumeResources() {
-    resources.water = Math.max(0, resources.water - waterConsumption);
-    resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
-    updateResourcesUI();
-    checkAchievements();
-    checkQuests();
-    trackGAEvent('resource_consumed', {
-        'event_category': 'Resources',
-        'event_label': 'Periodic consumption'
-    });
-    debouncedSaveGame();
-}
-
-// Start Autosave Functionality
-function startAutosave() {
-    if (autosaveInterval) clearInterval(autosaveInterval);
-    autosaveInterval = setInterval(() => {
-        saveGame();
-    }, 30000); // Autosave every 30 seconds
-}
-
-// Start Event System already handled
-
-// Schedule Quest Reset (Daily)
-function scheduleQuestReset() {
-    const now = new Date();
-    const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
-    setTimeout(function(){
-        resetQuests();
-        scheduleQuestReset();
-    }, millisTillMidnight);
-}
-
-// Function to reset all temporary effects already handled
-
-// Tracking GA Events already handled
-
-// Function to open help modal already handled
-
-// Function to close help modal already handled
+// Function to handle confirmation already handled
 
 // Function to handle feedback modal already handled
-
-// Social Sharing Function already handled
 
 // Initialize Language and Social Sharing already handled
 
@@ -2312,34 +2465,59 @@ function scheduleQuestReset() {
 
 // Event System already handled
 
-// Open Confirmation Modal already handled
-
-// Open Alert Modal already handled
-
-// Open Modal already handled
-
-// Close Modal already handled
-
-// Trap Tab Key already handled
-
-// Close All Modals already handled
-
-// Close Feedback already handled
-
-// Share Game already handled
-
 // Handle Offline Resource Generation already handled
 
-// Track GA Event already handled
+// Start Resource Generation already handled
 
-// No inline scripts or event handlers remain
+// Start Resource Consumption already handled
 
-// Theme Management already handled
+// Start Autosave already handled
 
-// Reset Game already handled
+// Schedule Quest Reset already handled
 
-// Handle Feedback Form already handled
+// Function to reset all temporary effects already handled
 
-// Ensure that all buttons have unique IDs and event listeners are attached via JavaScript
+// Function to reset all intervals already handled
 
-// Ensure that the game initializes correctly on page load
+// Tracking GA Events already handled
+
+// Function to open help modal already handled
+
+// Function to close help modal already handled
+
+// Function to handle feedback modal already handled
+
+// Social Sharing Function already handled
+
+// Function to attach all event listeners already handled
+
+// Function to buy upgrades already handled
+
+// Function to reset upgrades already handled
+
+// Function to reset achievements already handled
+
+// Function to reset quests already handled
+
+// Function to generate biomes already handled
+
+// Function to handle offline resource generation already handled
+
+// Function to track GA event already handled
+
+// Function to apply translations already handled
+
+// Function to update dynamic content language already handled
+
+// Initialize Language and Social Sharing already handled
+
+// Function to detect device already handled
+
+// Function to load language already handled
+
+// Initialize Game
+document.addEventListener("DOMContentLoaded", function() {
+    initGame();
+    attachEventListeners();
+});
+</script>
