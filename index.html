@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Pixel Planet</title>
-    <!-- Favicon (Ensure you have a favicon.ico in your project directory) -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXXXX-X"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
+
       gtag('config', 'UA-XXXXXXXXX-X');
     </script>
     <style>
@@ -79,6 +77,19 @@
             transition: background 0.5s, color 0.5s;
         }
 
+        /* Animated Background */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: var(--background-color);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
         /* Notification */
         #notification {
             position: fixed;
@@ -133,51 +144,52 @@
             font-size: 0.8em;
         }
 
-        /* Help Modal */
-        #help-modal {
-            display: none; /* Hidden by default */
-            position: fixed; 
-            z-index: 1001; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: var(--modal-bg-color); 
-        }
-
-        #help-modal-content {
-            background-color: var(--modal-content-bg);
-            margin: 5% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-            max-width: 600px;
-            border-radius: 10px;
-            color: var(--text-color);
-            text-align: left;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        #help-modal-content h2 {
-            text-align: center;
-        }
-
-        #close-help {
-            color: #aaa;
-            position: absolute;
+        /* Help Button */
+        #help-button {
+            position: fixed;
             top: 10px;
-            right: 20px;
-            font-size: 28px;
-            font-weight: bold;
+            right: 60px;
+            background-color: #f39c12;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            z-index: 1002;
+            font-size: 1em;
         }
 
-        #close-help:hover,
-        #close-help:focus {
-            color: #000;
-            text-decoration: none;
+        #help-button:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+        #help-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Social Sharing Button */
+        #share-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            z-index: 1002;
+            font-size: 1em;
+        }
+
+        #share-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        #share-button:active {
+            transform: scale(0.95);
         }
 
         /* Main Menu and Game Container */
@@ -264,6 +276,12 @@
             word-wrap: break-word;
             transition: background-color 0.5s, color 0.5s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: fadeInBiomes 1s ease-in-out;
+        }
+
+        @keyframes fadeInBiomes {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         /* Upgrades Section */
@@ -286,6 +304,12 @@
             text-align: left;
             transition: background-color 0.5s, color 0.5s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: fadeInUpgrades 1s ease-in-out;
+        }
+
+        @keyframes fadeInUpgrades {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .upgrade span {
@@ -322,6 +346,12 @@
             text-align: left;
             transition: background-color 0.5s, color 0.5s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: fadeInAchievements 1s ease-in-out;
+        }
+
+        @keyframes fadeInAchievements {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .achievement.unlocked {
@@ -352,6 +382,12 @@
             word-wrap: break-word;
             transition: background-color 0.5s, color 0.5s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: fadeInEvents 1s ease-in-out;
+        }
+
+        @keyframes fadeInEvents {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Quests Section */
@@ -374,35 +410,17 @@
             text-align: left;
             transition: background-color 0.5s, color 0.5s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: fadeInQuests 1s ease-in-out;
+        }
+
+        @keyframes fadeInQuests {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Theme Selector */
         #theme-selector {
             margin-top: 10px;
-        }
-
-        /* Help Button */
-        #help-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: #f39c12;
-            color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            z-index: 1002;
-            font-size: 1em;
-        }
-
-        #help-button:hover {
-            background-color: #e67e22;
-            transform: scale(1.05);
-        }
-
-        #help-button:active {
-            transform: scale(0.95);
         }
 
         /* Leaderboard Section */
@@ -414,6 +432,17 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
+            background-color: var(--upgrade-bg-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: fadeInLeaderboard 0.5s ease-in-out;
+            position: relative;
+        }
+
+        @keyframes fadeInLeaderboard {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         #leaderboard h3 {
@@ -434,6 +463,15 @@
         #leaderboard-table th {
             background-color: #555;
             color: #fff;
+        }
+
+        #leaderboard-close {
+            background-color: #e74c3c;
+            transition: background-color 0.3s;
+        }
+
+        #leaderboard-close:hover {
+            background-color: #c0392b;
         }
 
         /* Social Sharing Buttons */
@@ -517,6 +555,36 @@
             text-decoration: none;
         }
 
+        /* Continue Game Button */
+        #continue-button {
+            background-color: #f1c40f;
+            transition: background-color 0.3s;
+        }
+
+        #continue-button:hover {
+            background-color: #d4ac0d;
+        }
+
+        /* Reset Game Button */
+        #reset-button {
+            background-color: #e74c3c;
+            transition: background-color 0.3s;
+        }
+
+        #reset-button:hover {
+            background-color: #c0392b;
+        }
+
+        /* Leaderboard Fade Out */
+        .fadeOut {
+            animation: fadeOutLeaderboard 0.5s forwards;
+        }
+
+        @keyframes fadeOutLeaderboard {
+            from { opacity: 1; }
+            to { opacity: 0; display: none; }
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .upgrade, .achievement, .event, .biome, .quest {
@@ -556,7 +624,7 @@
 <body>
     <!-- Credits -->
     <div id="credits">
-        Made By <a href="https://your-google-site-link.com" target="_blank" rel="noopener noreferrer">Static</a>
+        Made By <a href="https://staticquasar931.github.io/Pixel-Planet/" target="_blank" rel="noopener noreferrer">Static</a>
     </div>
 
     <!-- Version Number -->
@@ -566,6 +634,9 @@
 
     <!-- Help Button -->
     <div id="help-button" onclick="openHelp()" aria-label="Open Help Modal">❓ Help</div>
+
+    <!-- Share Button -->
+    <div id="share-button" onclick="shareGame()" aria-label="Share Game">📤 Share</div>
 
     <!-- Tutorial Modal -->
     <div id="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-modal-title">
@@ -580,7 +651,7 @@
                 <li><strong>Biomes:</strong> Unlock new biomes by terraforming your planet. Each biome provides unique resource bonuses.</li>
                 <li><strong>Achievements:</strong> Achieve milestones to unlock rewards and showcase your progress.</li>
                 <li><strong>Quests:</strong> Complete daily and weekly quests to earn additional rewards and keep your gameplay engaging.</li>
-                <li><strong>Leaderboard:</strong> Compete with other players by climbing the leaderboard based on your total resources and achievements.</li>
+                <li><strong>Leaderboard:</strong> Enter your name and see how you rank against other players based on your total resources.</li>
                 <li><strong>Localization:</strong> Choose your preferred language from the language selector to enjoy the game in your native language.</li>
                 <li><strong>Social Sharing:</strong> Share your achievements and progress on social media to invite friends and challenge them.</li>
                 <li><strong>Accessibility:</strong> Navigate the game using your keyboard and enjoy improved accessibility features designed for all players.</li>
@@ -605,7 +676,7 @@
                 <!-- Leaderboard entries will be dynamically generated -->
             </tbody>
         </table>
-        <button onclick="closeLeaderboard()" aria-label="Close Leaderboard">Close Leaderboard</button>
+        <button id="leaderboard-close" onclick="closeLeaderboard()" aria-label="Close Leaderboard">Close Leaderboard</button>
     </div>
 
     <!-- Social Sharing Buttons -->
@@ -625,6 +696,7 @@
     <div id="main-menu">
         <h1>🌍 Pixel Planet</h1>
         <button onclick="startNewGame()" aria-label="Start New Game">🚀 Start New Game</button>
+        <button onclick="continueGame()" id="continue-button" aria-label="Continue Game" style="display: none;">🔄 Continue Game</button>
         <button onclick="showLeaderboard()" aria-label="Show Leaderboard">🏅 Leaderboard</button>
         <div id="language-selector">
             <label for="language">🌐 Language: </label>
@@ -640,10 +712,10 @@
     <div id="game" style="display: none;">
         <h2>Your Planet</h2>
         <div id="resources">
-            <div class="resource" id="water">💧 Water: 0 / 1000 (Per Second: <span id="water-rate">1</span>)</div>
-            <div class="resource" id="minerals">⛏ Minerals: 0 / 500 (Per Second: <span id="minerals-rate">0</span>)</div>
-            <div class="resource" id="plants">🌱 Plants: 0 / 300 (Per Second: <span id="plants-rate">0</span>)</div>
-            <div class="resource" id="energy">⚡ Energy: 0 / 200 (Per Second: <span id="energy-rate">0</span>)</div>
+            <div class="resource" id="water">💧 Water: 0 / 1000 (Per Second: <span id="water-rate">1.0</span>)</div>
+            <div class="resource" id="minerals">⛏ Minerals: 0 / 500 (Per Second: <span id="minerals-rate">0.0</span>)</div>
+            <div class="resource" id="plants">🌱 Plants: 0 / 300 (Per Second: <span id="plants-rate">0.0</span>)</div>
+            <div class="resource" id="energy">⚡ Energy: 0 / 200 (Per Second: <span id="energy-rate">0.0</span>)</div>
         </div>
         <button onclick="generateResources()" aria-label="Generate Resources">🔄 Generate Resources</button>
 
@@ -677,15 +749,21 @@
             <!-- Quests will be dynamically generated -->
         </div>
 
+        <!-- Story Section -->
+        <div id="story">
+            <h3>📖 Story</h3>
+            <!-- Story milestones will be dynamically generated -->
+        </div>
+
         <!-- Control Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
             <button onclick="saveGame()" aria-label="Save Game">💾 Save Game</button>
             <button onclick="unlockTerraform()" aria-label="Terraform Planet">🌍 Terraform Planet</button>
-            <button onclick="resetGame()" aria-label="Reset Game">🗑️ Reset Game</button>
+            <button onclick="resetGame()" id="reset-button" aria-label="Reset Game">🗑️ Reset Game</button>
             <button onclick="toggleTheme()" aria-label="Toggle Theme">🎨 Toggle Theme</button>
         </div>
 
-        <!-- Social Sharing Buttons (Duplicated in Main Menu) -->
+        <!-- Social Sharing Buttons (Moved to less invasive spot) -->
         <div class="social-buttons">
             <a href="#" id="share-twitter-game" target="_blank" aria-label="Share on Twitter">
                 <button class="social-button">🐦 Twitter</button>
@@ -699,6 +777,9 @@
         </div>
     </div>
 
+    <!-- Notification -->
+    <div id="notification"></div>
+
     <!-- Leaderboard Script -->
     <script>
         // Function to show leaderboard
@@ -709,7 +790,12 @@
 
         // Function to close leaderboard
         function closeLeaderboard() {
-            document.getElementById('leaderboard').style.display = 'none';
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.classList.add('fadeOut');
+            setTimeout(() => {
+                leaderboard.style.display = 'none';
+                leaderboard.classList.remove('fadeOut');
+            }, 500);
         }
 
         // Function to update leaderboard
@@ -722,12 +808,22 @@
 
             // Current player data
             const currentPlayer = {
-                name: 'You',
+                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
                 totalResources: calculateTotalResources()
             };
 
-            // Add current player to leaderboard
-            leaderboard.push(currentPlayer);
+            // Add current player to leaderboard if not already present
+            if (!leaderboard.some(player => player.name === currentPlayer.name)) {
+                leaderboard.push(currentPlayer);
+            } else {
+                // Update totalResources if player already exists
+                leaderboard = leaderboard.map(player => {
+                    if (player.name === currentPlayer.name) {
+                        return currentPlayer;
+                    }
+                    return player;
+                });
+            }
 
             // Sort leaderboard by totalResources descending
             leaderboard.sort((a, b) => b.totalResources - a.totalResources);
@@ -751,7 +847,7 @@
                 row.appendChild(nameCell);
 
                 const resourcesCell = document.createElement('td');
-                resourcesCell.innerText = player.totalResources;
+                resourcesCell.innerText = player.totalResources.toFixed(1);
                 row.appendChild(resourcesCell);
 
                 leaderboardBody.appendChild(row);
@@ -768,10 +864,14 @@
     <script>
         // Function to update social sharing URLs
         function updateSocialSharing() {
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! Check out my progress: https://<your-username>.github.io/Pixel-Planet/`);
+            const currentPlayer = {
+                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
+                totalResources: calculateTotalResources()
+            };
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://<your-username>.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://<your-username>.github.io/Pixel-Planet/')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -780,6 +880,41 @@
             document.getElementById('share-twitter-game').href = twitterURL;
             document.getElementById('share-facebook-game').href = facebookURL;
             document.getElementById('share-reddit-game').href = redditURL;
+        }
+
+        // Function to handle sharing with reward and cooldown
+        function shareGame() {
+            const lastShare = localStorage.getItem('PixelPlanetLastShare');
+            const now = Date.now();
+            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
+
+            if (lastShare && now - lastShare < cooldown) {
+                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
+                showNotification(`⏳ You can share again in ${remaining} minutes.`);
+                return;
+            }
+
+            // Prompt for player name if not set
+            let playerName = localStorage.getItem('PixelPlanetPlayerName');
+            if (!playerName || playerName === 'Player') {
+                playerName = prompt("Enter your name for the leaderboard:");
+                if (playerName) {
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                } else {
+                    playerName = 'Player';
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                }
+            }
+
+            // Open share URL in new tab
+            window.open(`https://staticquasar931.github.io/Pixel-Planet/`, '_blank');
+
+            // Reward the player
+            resources.energy += 10; // Example reward
+            updateResourcesUI();
+            showNotification("🎁 Thanks for sharing! Energy +10.");
+            localStorage.setItem('PixelPlanetLastShare', now);
+            saveGame();
         }
 
         // Update social sharing URLs on load
@@ -1302,6 +1437,8 @@
                 loadTheme();
                 updateSocialSharing();
                 showNotification("✅ Game loaded successfully!");
+                // Show Continue button only if there is a saved game
+                document.getElementById('continue-button').style.display = 'none';
             } catch (error) {
                 console.error("Error loading game:", error);
                 showNotification("⚠️ Error loading game. Starting a new game.");
@@ -1342,6 +1479,17 @@
             updateSocialSharing();
             showNotification("🚀 New game started! Welcome to Pixel Planet.");
             saveGame();
+        }
+
+        // Continue Game
+        function continueGame() {
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                loadFromSave(parsedSave);
+            } else {
+                showNotification("❌ No saved game found.");
+            }
         }
 
         // Generate Resources Manually
@@ -1413,39 +1561,42 @@
                 upgradesRow.style.justifyContent = 'flex-start';
 
                 categories[category].forEach(upgrade => {
-                    const upgradeDiv = document.createElement('div');
-                    upgradeDiv.className = 'upgrade';
+                    // Only display upgrade if affordable
+                    if (resources.water >= upgrade.cost) {
+                        const upgradeDiv = document.createElement('div');
+                        upgradeDiv.className = 'upgrade';
 
-                    const name = document.createElement('span');
-                    name.innerText = `${upgrade.name}`;
-                    upgradeDiv.appendChild(name);
+                        const name = document.createElement('span');
+                        name.innerText = `${upgrade.name}`;
+                        upgradeDiv.appendChild(name);
 
-                    const description = document.createElement('span');
-                    description.innerText = `${upgrade.description}`;
-                    upgradeDiv.appendChild(description);
+                        const description = document.createElement('span');
+                        description.innerText = `${upgrade.description}`;
+                        upgradeDiv.appendChild(description);
 
-                    const cost = document.createElement('span');
-                    cost.innerText = `Cost: ${upgrade.cost} 💧`;
-                    upgradeDiv.appendChild(cost);
+                        const cost = document.createElement('span');
+                        cost.innerText = `Cost: ${upgrade.cost} 💧`;
+                        upgradeDiv.appendChild(cost);
 
-                    const button = document.createElement('button');
-                    button.className = 'upgrade-button';
-                    button.innerText = `Buy (Level ${upgrade.level})`;
-                    button.disabled = resources.water < upgrade.cost;
-                    button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
-                    button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
-                    button.onclick = () => buyUpgrade(upgrade.key);
-                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
+                        const button = document.createElement('button');
+                        button.className = 'upgrade-button';
+                        button.innerText = `Buy (Level ${upgrade.level})`;
+                        button.disabled = resources.water < upgrade.cost;
+                        button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
+                        button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
+                        button.onclick = () => buyUpgrade(upgrade.key);
+                        button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
 
-                    // Add tooltip
-                    const tooltip = document.createElement('span');
-                    tooltip.className = 'tooltip';
-                    tooltip.innerText = upgrade.description;
-                    button.appendChild(tooltip);
+                        // Add tooltip
+                        const tooltip = document.createElement('span');
+                        tooltip.className = 'tooltip';
+                        tooltip.innerText = upgrade.description;
+                        button.appendChild(tooltip);
 
-                    upgradeDiv.appendChild(button);
+                        upgradeDiv.appendChild(button);
 
-                    upgradesRow.appendChild(upgradeDiv);
+                        upgradesRow.appendChild(upgradeDiv);
+                    }
                 });
 
                 categoryDiv.appendChild(upgradesRow);
@@ -1546,7 +1697,7 @@
             const storyDiv = document.getElementById('story');
             if (!storyDiv) return; // If no story section, exit
 
-            storyDiv.innerHTML = ''; // Clear existing story
+            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
 
             for (let key in storyMilestones) {
                 const milestone = storyMilestones[key];
@@ -1593,7 +1744,8 @@
             const terraformBaseCost = 500;
             const terraformCost = terraformBaseCost * (biomes.length + 1);
             if (resources.water >= terraformCost) {
-                if (confirm(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`)) {
+                const confirmation = confirm(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
+                if (confirmation) {
                     resources.water -= terraformCost;
                     unlockNewBiome();
                     updateResourcesUI();
@@ -1859,8 +2011,10 @@
 
         // Reset Game
         function resetGame() {
-            if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
+            const confirmation = confirm("Are you sure you want to reset the game? All progress will be lost.");
+            if (confirmation) {
                 localStorage.removeItem('PixelPlanetSave');
+                localStorage.removeItem('PixelPlanetLeaderboard');
                 startNewGame(false); // Pass false to avoid double confirmation
                 showNotification("🗑️ Game has been reset.");
             }
@@ -1870,6 +2024,7 @@
         const translations = {
             en: {
                 "Start New Game": "🚀 Start New Game",
+                "Continue Game": "🔄 Continue Game",
                 "Leaderboard": "🏅 Leaderboard",
                 "Language": "🌐 Language:",
                 "Generate Resources": "🔄 Generate Resources",
@@ -1886,10 +2041,12 @@
                 "Close": "Close",
                 "Tutorial": "📖 Tutorial",
                 "Got It!": "Got It!",
+                "Share": "📤 Share"
                 // Add more translations as needed
             },
             es: {
                 "Start New Game": "🚀 Iniciar Nuevo Juego",
+                "Continue Game": "🔄 Continuar Juego",
                 "Leaderboard": "🏅 Tabla de Clasificación",
                 "Language": "🌐 Idioma:",
                 "Generate Resources": "🔄 Generar Recursos",
@@ -1902,10 +2059,11 @@
                 "Events": "🎉 Eventos",
                 "Biomes": "🌿 Biomas",
                 "Your Planet": "Tu Planeta",
-                "Close Leaderboard": "Cerrar Tabla",
+                "Close Leaderboard": "Cerrar Tabla de Clasificación",
                 "Close": "Cerrar",
                 "Tutorial": "📖 Tutorial",
                 "Got It!": "¡Entendido!",
+                "Share": "📤 Compartir"
                 // Add more translations as needed
             }
             // Add more languages as needed
@@ -1920,28 +2078,31 @@
         }
 
         function applyTranslations() {
-            document.querySelectorAll('[aria-label]').forEach(element => {
-                const key = element.getAttribute('aria-label');
-                if (translations[currentLanguage][key]) {
-                    element.setAttribute('aria-label', translations[currentLanguage][key]);
-                }
-            });
-
+            // Translate button texts
             document.querySelectorAll('button').forEach(button => {
-                const key = button.innerText;
+                const key = button.innerText.replace(/\s*\(Level \d+\)/, '').trim();
                 if (translations[currentLanguage][key]) {
                     button.innerText = translations[currentLanguage][key];
                 }
             });
 
+            // Translate labels
             document.querySelectorAll('label').forEach(label => {
-                const key = label.innerText.replace(':', '');
+                const key = label.innerText.replace(':', '').trim();
                 if (translations[currentLanguage][key]) {
                     label.innerText = `${translations[currentLanguage][key]}:`;
                 }
             });
 
-            // Update other UI elements as needed
+            // Translate Help and Share buttons
+            const helpButton = document.getElementById('help-button');
+            const shareButton = document.getElementById('share-button');
+            if (translations[currentLanguage]["Help"]) {
+                helpButton.innerText = translations[currentLanguage]["Help"];
+            }
+            if (translations[currentLanguage]["Share"]) {
+                shareButton.innerText = translations[currentLanguage]["Share"];
+            }
         }
 
         // Load Language on Init
@@ -1955,13 +2116,13 @@
         // Leaderboard and Social Sharing Integration
         function updateSocialSharing() {
             const currentPlayer = {
-                name: 'You',
+                name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources}. Check it out: https://<your-username>.github.io/Pixel-Planet/`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://<your-username>.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://<your-username>.github.io/Pixel-Planet/')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -1970,6 +2131,41 @@
             document.getElementById('share-twitter-game').href = twitterURL;
             document.getElementById('share-facebook-game').href = facebookURL;
             document.getElementById('share-reddit-game').href = redditURL;
+        }
+
+        // Function to handle sharing with reward and cooldown
+        function shareGame() {
+            const lastShare = localStorage.getItem('PixelPlanetLastShare');
+            const now = Date.now();
+            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
+
+            if (lastShare && now - lastShare < cooldown) {
+                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
+                showNotification(`⏳ You can share again in ${remaining} minutes.`);
+                return;
+            }
+
+            // Prompt for player name if not set
+            let playerName = localStorage.getItem('PixelPlanetPlayerName');
+            if (!playerName || playerName === 'Player') {
+                playerName = prompt("Enter your name for the leaderboard:");
+                if (playerName) {
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                } else {
+                    playerName = 'Player';
+                    localStorage.setItem('PixelPlanetPlayerName', playerName);
+                }
+            }
+
+            // Open share URL in new tab
+            window.open(`https://staticquasar931.github.io/Pixel-Planet/`, '_blank');
+
+            // Reward the player
+            resources.energy += 10; // Example reward
+            updateResourcesUI();
+            showNotification("🎁 Thanks for sharing! Energy +10.");
+            localStorage.setItem('PixelPlanetLastShare', now);
+            saveGame();
         }
 
         // Initialize Language and Social Sharing
@@ -1985,31 +2181,17 @@
             storyHeading.innerText = '📖 Story';
             storySection.appendChild(storyHeading);
             gameDiv.appendChild(storySection);
+
+            // Show Continue button if a saved game exists
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                document.getElementById('continue-button').style.display = 'inline-block';
+            }
         });
 
         // Accessibility Enhancements
         // Ensure all buttons can be focused and navigated via keyboard
         // ARIA roles and labels are already implemented
-
-    </script>
-
-    <!-- Additional Features Script -->
-    <script>
-        // Tutorial and Onboarding are handled via the tutorial modal
-        // Localization is handled above
-
-        // Leaderboard is handled via the leaderboard script
-
-        // Data Analytics is integrated via Google Analytics script in head
-
-        // Optimized Performance and Load Times
-        // Ensure that intervals are cleared and not duplicated
-        // Code is structured for efficiency
-
-        // Accessibility is enhanced with ARIA labels and keyboard navigability
-
-        // Initialize Game on Load
-        window.onload = initGame;
     </script>
 </body>
 </html>
