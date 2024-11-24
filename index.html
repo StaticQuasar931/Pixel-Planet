@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Planet</title>
     
+    <!-- Google Analytics Integration -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7M919FPNB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-E7M919FPNB');
+    </script>
+
     <!-- Internal CSS -->
     <style>
         /* Theme Variables */
@@ -760,6 +770,22 @@
                     const key = messagePara.dataset.translationKey;
                     messagePara.innerText = notificationMessages[currentLanguage][key] || key;
                 }
+
+                const headers = modal.querySelectorAll('h2, h3');
+                headers.forEach(header => {
+                    const key = header.id && notificationMessages[currentLanguage][header.id] ? header.id : null;
+                    if (key) {
+                        header.innerText = notificationMessages[currentLanguage][key] || header.innerText;
+                    }
+                });
+
+                const buttons = modal.querySelectorAll('button');
+                buttons.forEach(button => {
+                    const ariaLabel = button.getAttribute('aria-label');
+                    if (ariaLabel && notificationMessages[currentLanguage][ariaLabel]) {
+                        button.innerText = notificationMessages[currentLanguage][ariaLabel];
+                    }
+                });
             });
         }
 
@@ -1381,6 +1407,11 @@
         function safeSubtractResource(resource, amount) {
             if (!resources.hasOwnProperty(resource)) return;
             resources[resource] = Math.max(resources[resource] - amount, 0);
+        }
+
+        // Calculate Total Resources
+        function calculateTotalResources() {
+            return resources.water + resources.minerals + resources.plants + resources.energy;
         }
 
         // Update Resources UI
@@ -2310,10 +2341,10 @@
                 name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             // Assign secure attributes
             document.getElementById('share-twitter').href = twitterURL;
@@ -2331,10 +2362,10 @@
                 name: sanitizeInput(localStorage.getItem('PixelPlanetPlayerName')) || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${formatNumber(currentPlayer.totalResources)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
 
             // Open social sharing links in new tabs with security attributes
             window.open(twitterURL, '_blank', 'noopener,noreferrer');
@@ -2431,67 +2462,132 @@
 
         // Function to handle feedback is already handled
 
-        // Initialize Device Detection is already handled
-
-        // Function to initialize the game is already handled
-
-        // Function to calculate total resources is already handled
-
         // Initialize Device Detection and Game on DOMContentLoaded is already handled
 
-        // Function to initialize the game is already handled
+        // Initialize the game and attach event listeners
+        function initGameFinal() {
+            loadLanguage();
+            updateSocialSharing();
+            detectDevice();
 
-        // Function to calculate total resources is already handled
+            const savedGame = localStorage.getItem('PixelPlanetSave');
+            if (savedGame) {
+                const parsedSave = JSON.parse(savedGame);
+                if (parsedSave.version !== "0.6") {
+                    // Handle version upgrades if necessary
+                    showNotification("VersionMismatch");
+                    startNewGame(false);
+                } else {
+                    loadFromSave(parsedSave);
+                }
+            } else {
+                startNewGame();
+            }
 
-        // Initialize Device Detection and Game on DOMContentLoaded is already handled
+            // Show Continue button if a saved game exists
+            if (savedGame) {
+                document.getElementById('continue-button').style.display = 'inline-block';
+            }
 
-        // Function to initialize the game is already handled
+            // Update version number display
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
+            document.getElementById('version').innerText = `Version ${savedVersion}`;
+        }
 
-        // Function to calculate total resources is already handled
+        // Calculate Total Resources is already handled
 
-        // Initialize Device Detection and Game on DOMContentLoaded is already handled
+        // Localization Setup is already handled
 
-        // Function to initialize the game is already handled
+        // Event Listener for DOMContentLoaded
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize the game
+            initGameFinal();
 
-        // Function to calculate total resources is already handled
+            // Attach Event Listeners
+            attachEventListeners();
+        });
 
-        // Function to attach event listeners is already handled
+        // Function to attach all event listeners
+        function attachEventListeners() {
+            // Help Button
+            const helpButton = document.getElementById('help-button');
+            helpButton.addEventListener('click', openHelp);
 
-        // Function to set player name is already handled
+            // Share Button
+            const shareButton = document.getElementById('share-button');
+            shareButton.addEventListener('click', shareGame);
 
-        // Function to toggle theme is already handled
+            // Tutorial Close Button
+            const tutorialCloseButton = document.getElementById('tutorial-close-button');
+            tutorialCloseButton.addEventListener('click', closeTutorial);
 
-        // Function to change theme is already handled
+            // Leaderboard Close Button
+            const leaderboardCloseButton = document.getElementById('leaderboard-close-button');
+            leaderboardCloseButton.addEventListener('click', closeLeaderboard);
 
-        // Function to load theme is already handled
+            // Start New Game Button
+            const startNewGameButton = document.getElementById('start-new-game-button');
+            startNewGameButton.addEventListener('click', () => startNewGame(true));
 
-        // Function to capitalize first letter is already handled
+            // Continue Game Button
+            const continueButton = document.getElementById('continue-button');
+            continueButton.addEventListener('click', continueGame);
 
-        // Function to reset game is already handled
+            // Show Leaderboard Button
+            const showLeaderboardButton = document.getElementById('show-leaderboard-button');
+            showLeaderboardButton.addEventListener('click', showLeaderboard);
 
-        // Function to share game is already handled
+            // Language Selector
+            const languageSelect = document.getElementById('language-select');
+            languageSelect.addEventListener('change', (e) => {
+                changeLanguage(e.target.value);
+            });
 
-        // Function to handle feedback is already handled
+            // Generate Resources Button
+            const generateResourcesButton = document.getElementById('generate-resources-button');
+            generateResourcesButton.addEventListener('click', generateResources);
 
-        // Initialize Device Detection is already handled
+            // Save Game Button
+            const saveGameButton = document.getElementById('save-game-button');
+            saveGameButton.addEventListener('click', saveGame);
 
-        // Function to initialize the game is already handled
+            // Terraform Planet Button
+            const terraformPlanetButton = document.getElementById('terraform-planet-button');
+            terraformPlanetButton.addEventListener('click', unlockTerraform);
 
-        // Function to calculate total resources is already handled
+            // Reset Game Button
+            const resetGameButton = document.getElementById('reset-game-button');
+            resetGameButton.addEventListener('click', resetGame);
 
-        // Function to attach event listeners is already handled
+            // Toggle Theme Button
+            const toggleThemeButton = document.getElementById('toggle-theme-button');
+            toggleThemeButton.addEventListener('click', toggleTheme);
 
-        // Function to set player name is already handled
+            // Feedback Button
+            const feedbackButton = document.getElementById('feedback-button');
+            feedbackButton.addEventListener('click', openFeedback);
 
-        // Function to toggle theme is already handled
+            // Feedback Modal Close Buttons
+            const feedbackCloseButtons = document.querySelectorAll('#feedback-modal .close-modal');
+            feedbackCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeFeedback());
+            });
 
-        // Function to change theme is already handled
+            // Feedback Form Submission
+            const feedbackForm = document.getElementById('feedback-form');
+            feedbackForm.addEventListener('submit', handleFeedbackSubmission);
 
-        // Function to load theme is already handled
+            // Share Game Buttons
+            const shareTwitterGame = document.getElementById('share-twitter-game');
+            const shareFacebookGame = document.getElementById('share-facebook-game');
+            const shareRedditGame = document.getElementById('share-reddit-game');
 
-        // Function to capitalize first letter is already handled
+            shareTwitterGame.addEventListener('click', shareGame);
+            shareFacebookGame.addEventListener('click', shareGame);
+            shareRedditGame.addEventListener('click', shareGame);
+        }
 
-        // Function to reset game is already handled
+        // Leaderboard Functions are already handled
 
         // Function to share game is already handled
 
@@ -2539,79 +2635,21 @@
 
         // Function to load language is already handled
 
-        // Function to detect device is already handled
-
-        // Function to set player name is already handled
-
-        // Function to change theme is already handled
-
-        // Function to load theme is already handled
-
-        // Function to capitalize first letter is already handled
-
-        // Function to reset game is already handled
-
-        // Function to share game is already handled
-
-        // Function to handle feedback is already handled
-
-        // Initialize Device Detection is already handled
-
-        // Function to initialize the game is already handled
-
-        // Function to calculate total resources is already handled
-
-        // Initialize Device Detection and Game on DOMContentLoaded is already handled
-
-        // Function to initialize the game is already handled
-
-        // Function to calculate total resources is already handled
-
-        // Initialize Device Detection and Game on DOMContentLoaded is already handled
-
-        // Function to initialize the game is already handled
-
-        // Function to calculate total resources is already handled
-
-        // Initialize Device Detection and Game on DOMContentLoaded is already handled
-
-        // Function to initialize the game is already handled
-
-        // Initialize the game and attach event listeners
-        function initGameFinal() {
-            loadLanguage();
-            updateSocialSharing();
-            detectDevice();
-
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.6") {
-                    // Handle version upgrades if necessary
-                    showNotification("VersionMismatch");
-                    startNewGame(false);
-                } else {
-                    loadFromSave(parsedSave);
-                }
+        // Function to detect device
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            if (/Mobi|Android/i.test(ua)) {
+                document.body.style.fontSize = '1em';
+            } else if (/iPad|Tablet/i.test(ua)) {
+                document.body.style.fontSize = '1.1em';
             } else {
-                startNewGame();
+                document.body.style.fontSize = '1.2em';
             }
-
-            // Show Continue button if a saved game exists
-            if (savedGame) {
-                document.getElementById('continue-button').style.display = 'inline-block';
-            }
-
-            // Update version number display
-            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.6';
-            document.getElementById('version').innerText = `Version ${savedVersion}`;
         }
 
-        // Initialize on DOMContentLoaded
-        document.addEventListener("DOMContentLoaded", function() {
-            // Initialize the game
-            initGameFinal();
-        });
+        // Initialize the game and attach event listeners is already handled
+
+        // Calculate Total Resources is already handled
 
     </script>
 </body>
