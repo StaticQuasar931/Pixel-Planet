@@ -413,7 +413,7 @@
     </div>
 
     <!-- Help Button -->
-    <div id="help-button" onclick="openHelp()">❓ Help</div>
+    <div id="help-button" onclick="openHelp()" aria-label="Open Help Modal">❓ Help</div>
 
     <!-- Notification -->
     <div id="notification" aria-live="polite"></div>
@@ -615,7 +615,9 @@
                 description: "Reduce Water consumption by 10%",
                 baseCost: 300,
                 cost: 300,
-                effect: (level) => { waterConsumption *= 0.9; },
+                effect: (level) => { 
+                    waterConsumption = Math.max(waterConsumption * 0.9, 0.1); 
+                },
                 level: 0,
                 category: "Efficiency Improvement"
             },
@@ -624,7 +626,9 @@
                 description: "Reduce Mineral consumption by 10%",
                 baseCost: 350,
                 cost: 350,
-                effect: (level) => { mineralConsumption *= 0.9; },
+                effect: (level) => { 
+                    mineralConsumption = Math.max(mineralConsumption * 0.9, 0.1); 
+                },
                 level: 0,
                 category: "Efficiency Improvement"
             },
@@ -784,6 +788,22 @@
             // Add more events as needed
         ];
 
+        // Maximum Resource Rates
+        const MAX_RESOURCE_RATE = {
+            waterPerSecond: 100,
+            mineralsPerSecond: 50,
+            plantsPerSecond: 30,
+            energyPerSecond: 20
+        };
+
+        // Maximum Resources
+        const MAX_RESOURCES = {
+            water: 1000000,
+            minerals: 500000,
+            plants: 300000,
+            energy: 200000
+        };
+
         // Quests Completion and Reset
         function checkQuests() {
             for (let key in quests) {
@@ -866,13 +886,13 @@
             } catch (error) {
                 console.error("Error loading game:", error);
                 showNotification("⚠️ Error loading game. Starting a new game.");
-                startNewGame();
+                startNewGame(false);
             }
         }
 
         // Start New Game
-        function startNewGame() {
-            if (!confirm("Are you sure you want to start a new game? All progress will be lost.")) {
+        function startNewGame(confirmStart=true) {
+            if (confirmStart && !confirm("Are you sure you want to start a new game? All progress will be lost.")) {
                 return;
             }
             document.getElementById('main-menu').style.display = 'none';
@@ -887,11 +907,14 @@
             mineralsPerSecond = 0;
             plantsPerSecond = 0;
             energyPerSecond = 0;
+            waterConsumption = 1;
+            mineralConsumption = 1;
             updateResourcesUI();
             generateUpgradesUI();
             generateAchievementsUI();
             generateQuestsUI();
             displayBiomes();
+            generateStoryUI();
             startResourceGeneration();
             startResourceConsumption();
             startAutosave();
@@ -915,14 +938,8 @@
         }
 
         // Add Resource with Storage Limit and Caps
-        const MAX_RESOURCES = {
-            water: 1000000,
-            minerals: 500000,
-            plants: 300000,
-            energy: 200000
-        };
-
         function addResource(resource, amount) {
+            if (!MAX_RESOURCES.hasOwnProperty(resource)) return;
             resources[resource] = Math.min(resources[resource] + amount, storage[resource], MAX_RESOURCES[resource]);
             saveGame(); // Save whenever resources change
         }
@@ -1225,10 +1242,18 @@
 
             // Apply bonuses with caps
             for (let key in resourceBonus) {
-                if (key === "waterPerSecond") waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
-                if (key === "mineralsPerSecond") mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
-                if (key === "plantsPerSecond") plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
-                if (key === "energyPerSecond") energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
+                if (key === "waterPerSecond") {
+                    waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
+                }
+                if (key === "mineralsPerSecond") {
+                    mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
+                }
+                if (key === "plantsPerSecond") {
+                    plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
+                }
+                if (key === "energyPerSecond") {
+                    energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
+                }
             }
 
             return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus };
@@ -1368,7 +1393,7 @@
                     // Handle version upgrades if necessary
                     // For simplicity, start a new game if versions do not match
                     showNotification("🔄 Game version mismatch. Starting a new game.");
-                    startNewGame();
+                    startNewGame(false);
                 } else {
                     loadFromSave(parsedSave);
                 }
@@ -1386,7 +1411,7 @@
                 document.body.classList.add('light-theme');
             } else {
                 // Default theme
-                document.body.classList.add('');
+                document.body.classList.remove('dark-theme', 'light-theme');
             }
             showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
             // Save theme selection
@@ -1406,7 +1431,7 @@
         function resetGame() {
             if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
                 localStorage.removeItem('PixelPlanetSave');
-                startNewGame();
+                startNewGame(false); // Pass false to avoid double confirmation
                 showNotification("🗑️ Game has been reset.");
             }
         }
