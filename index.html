@@ -2,431 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Pixel Planet</title>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7M919FPNB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-E7M919FPNB');
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS Styles -->
     <style>
-        /* CSS Variables for Theming */
-        :root {
-            --background-color: linear-gradient(135deg, #1e1e1e, #2c2c2c);
-            --text-color: #ffffff;
-            --button-color: #4CAF50;
-            --button-hover-color: #45a049;
-            --upgrade-bg-color: #333;
-            --achievement-unlocked-bg: #4CAF50;
-            --event-bg-color: #444;
-            --biome-bg-color: #2e2e2e;
-            --notification-bg-color: rgba(0, 0, 0, 0.8);
-            --modal-bg-color: rgba(0, 0, 0, 0.9);
-            --modal-content-bg: #2e2e2e;
-            --link-color: #4CAF50;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --tooltip-bg-color: rgba(0, 0, 0, 0.7);
-            --tooltip-text-color: #ffffff;
-        }
-
-        /* Dark Theme */
-        body.dark-theme {
-            --background-color: linear-gradient(135deg, #121212, #1e1e1e);
-            --text-color: #e0e0e0;
-            --button-color: #bb86fc;
-            --button-hover-color: #3700b3;
-            --upgrade-bg-color: #1f1f1f;
-            --achievement-unlocked-bg: #03dac6;
-            --event-bg-color: #333;
-            --biome-bg-color: #1e1e1e;
-            --notification-bg-color: rgba(0, 0, 0, 0.9);
-            --modal-content-bg: #1f1f1f;
-            --link-color: #bb86fc;
-        }
-
-        /* Light Theme */
-        body.light-theme {
-            --background-color: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-            --text-color: #000000;
-            --button-color: #4CAF50;
-            --button-hover-color: #45a049;
-            --upgrade-bg-color: #ffffff;
-            --achievement-unlocked-bg: #4CAF50;
-            --event-bg-color: #e0e0e0;
-            --biome-bg-color: #f9f9f9;
-            --notification-bg-color: rgba(255, 255, 255, 0.9);
-            --modal-content-bg: #ffffff;
-            --link-color: #4CAF50;
-        }
-
-        /* General Styles */
-        body {
-            font-family: var(--font-family);
-            background: var(--background-color);
-            color: var(--text-color);
-            text-align: center;
+        /* CSS Reset */
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            transition: background 0.5s, color 0.5s;
+            box-sizing: border-box;
         }
 
-        /* Animated Background */
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Theme Variables */
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --button-bg: #008CBA;
+            --button-hover-bg: #005f6a;
+            --modal-bg-color: rgba(0, 0, 0, 0.5);
+            --modal-content-bg: #fff;
+            --notification-bg: rgba(0, 0, 0, 0.7);
+            --notification-text: #fff;
         }
 
+        .dark-theme {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --button-bg: #1f8ef1;
+            --button-hover-bg: #166bb5;
+            --modal-content-bg: #1e1e1e;
+            --notification-bg: rgba(255, 255, 255, 0.8);
+            --notification-text: #333;
+        }
+
+        .light-theme {
+            --bg-color: #ffffff;
+            --text-color: #000;
+            --button-bg: #4CAF50;
+            --button-hover-bg: #45a049;
+            --modal-content-bg: #fff;
+            --notification-bg: rgba(0, 0, 0, 0.7);
+            --notification-text: #fff;
+        }
+
+        /* Body Styling */
         body {
-            background: var(--background-color);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        /* Notification */
-        #notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--notification-bg-color);
+            background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 15px 20px;
-            border-radius: 5px;
-            display: none;
-            z-index: 1000;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            max-width: 300px;
-            word-wrap: break-word;
-        }
-
-        @keyframes fadein {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeout {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        /* Credits */
-        #credits {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: var(--text-color);
-            font-size: 0.9em;
-        }
-
-        #credits a {
-            color: var(--link-color);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        #credits a:hover {
-            text-decoration: underline;
-        }
-
-        /* Version Number */
-        #version {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            color: var(--text-color);
-            font-size: 0.8em;
-        }
-
-        /* Help Button */
-        #help-button {
-            position: fixed;
-            top: 10px;
-            right: 120px;
-            background-color: #f39c12;
-            color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            z-index: 1002;
-            font-size: 1em;
-        }
-
-        #help-button:hover {
-            background-color: #e67e22;
-            transform: scale(1.05);
-        }
-
-        #help-button:active {
-            transform: scale(0.95);
-        }
-
-        /* Share Button */
-        #share-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: #4CAF50;
-            color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            z-index: 1002;
-            font-size: 1em;
-        }
-
-        #share-button:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        #share-button:active {
-            transform: scale(0.95);
-        }
-
-        /* Main Menu and Game Container */
-        #main-menu, #game {
-            padding: 20px;
-            flex: 1;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding: 20px;
         }
 
-        /* Headings */
-        h1, h2, h3, h4 {
-            margin: 10px 0;
-        }
-
-        /* Buttons */
-        button {
-            padding: 12px 24px;
-            margin: 10px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--button-color);
-            color: var(--text-color);
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            min-width: 150px;
-            position: relative;
-        }
-
-        button:hover {
-            background-color: var(--button-hover-color);
-            transform: scale(1.05);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button:disabled {
-            background-color: #888;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: absolute;
-            top: -5px;
-            left: 105%;
-            background-color: var(--tooltip-bg-color);
-            color: var(--tooltip-text-color);
-            padding: 5px 10px;
-            border-radius: 4px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            z-index: 1002;
-        }
-
-        button:hover .tooltip {
-            opacity: 1;
-        }
-
-        /* Resources and Upgrades */
-        .resource, .upgrade, .achievement, .event, .biome, .quest {
-            font-size: 1.2em;
-            margin: 10px 0;
-        }
-
-        /* Biomes */
-        .biome {
-            margin: 10px;
-            padding: 15px;
-            border: 2px solid #444;
-            display: inline-block;
-            border-radius: 8px;
-            background-color: var(--biome-bg-color);
-            width: 150px;
-            white-space: pre-line;
-            word-wrap: break-word;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: fadeInBiomes 1s ease-in-out;
-        }
-
-        @keyframes fadeInBiomes {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Upgrades Section */
-        #upgrades {
-            margin-top: 20px;
-            width: 90%;
-            max-width: 1000px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .upgrade {
-            background-color: var(--upgrade-bg-color);
-            border: 1px solid #555;
-            border-radius: 8px;
-            padding: 15px;
-            width: 220px;
-            text-align: left;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: fadeInUpgrades 1s ease-in-out;
-        }
-
-        @keyframes fadeInUpgrades {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .upgrade span {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .upgrade-button {
-            background-color: #008CBA;
-            transition: background-color 0.3s;
-        }
-
-        .upgrade-button:hover {
-            background-color: #007bb5;
-        }
-
-        /* Achievements Section */
-        #achievements {
-            margin-top: 20px;
-            width: 90%;
-            max-width: 800px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .achievement {
-            background-color: var(--upgrade-bg-color);
-            border: 1px solid #555;
-            border-radius: 8px;
-            padding: 15px;
-            width: 220px;
-            text-align: left;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: fadeInAchievements 1s ease-in-out;
-        }
-
-        @keyframes fadeInAchievements {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .achievement.unlocked {
-            background-color: var(--achievement-unlocked-bg);
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        /* Events Section */
-        #events {
-            margin-top: 20px;
-            width: 90%;
-            max-width: 800px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .event {
-            background-color: var(--event-bg-color);
-            border: 1px solid #666;
-            border-radius: 8px;
-            padding: 15px;
-            width: 220px;
-            text-align: left;
-            white-space: pre-line;
-            word-wrap: break-word;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: fadeInEvents 1s ease-in-out;
-        }
-
-        @keyframes fadeInEvents {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Quests Section */
-        #quests {
-            margin-top: 20px;
-            width: 90%;
-            max-width: 800px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .quest {
-            background-color: var(--upgrade-bg-color);
-            border: 1px solid #555;
-            border-radius: 8px;
-            padding: 15px;
-            width: 220px;
-            text-align: left;
-            transition: background-color 0.5s, color 0.5s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: fadeInQuests 1s ease-in-out;
-        }
-
-        @keyframes fadeInQuests {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Story Section */
-        #story {
-            margin-top: 20px;
+        /* Main Menu and Game Interface */
+        #main-menu, #game {
             width: 90%;
             max-width: 800px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
+        }
+
+        /* Credits and Version */
+        #credits, #version {
+            margin-bottom: 10px;
+            font-size: 0.9em;
         }
 
         /* Theme Selector */
@@ -496,7 +141,7 @@
             text-align: center;
         }
 
-        #close-tutorial {
+        .close-modal {
             color: #aaa;
             position: absolute;
             top: 10px;
@@ -506,22 +151,111 @@
             cursor: pointer;
         }
 
-        #close-tutorial:hover,
-        #close-tutorial:focus {
+        .close-modal:hover,
+        .close-modal:focus {
             color: #000;
             text-decoration: none;
         }
 
-        /* Leaderboard Section Removed */
-
-        /* Notification Fade Out */
-        .fadeOut {
-            animation: fadeOutLeaderboard 0.5s forwards;
+        /* Main Menu Buttons */
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--button-bg);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        @keyframes fadeOutLeaderboard {
-            from { opacity: 1; }
-            to { opacity: 0; display: none; }
+        button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* Resource Display */
+        #resources {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 10px 0;
+        }
+
+        .resource {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+
+        /* Sections */
+        h1, h2, h3, h4 {
+            margin-bottom: 10px;
+        }
+
+        /* Upgrade, Achievement, Event, Biome, Quest Styles */
+        .upgrade, .achievement, .event, .biome, .quest {
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .upgrade.unlocked, .achievement.unlocked, .event.unlocked, .biome.unlocked, .quest.unlocked {
+            background-color: #c8e6c9;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the element */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--text-color) transparent transparent transparent;
+        }
+
+        .upgrade:hover .tooltip, .achievement:hover .tooltip, .event:hover .tooltip, .biome:hover .tooltip, .quest:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Notification */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--notification-bg);
+            color: var(--notification-text);
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1006;
         }
 
         /* Responsive Design */
@@ -549,9 +283,15 @@
 
             /* Tooltip positioning for small screens */
             .tooltip {
-                left: auto;
+                left: 0;
                 top: 105%;
                 right: 0;
+            }
+
+            /* Adjust language selector */
+            #language-selector {
+                top: 60px;
+                right: 10px;
             }
         }
 
@@ -560,50 +300,6 @@
             touch-action: manipulation;
             user-select: none;
         }
-
-        /* In-Game Modal Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1003;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: var(--modal-bg-color);
-        }
-
-        .modal-content {
-            background-color: var(--modal-content-bg);
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 10px;
-            position: relative;
-            color: var(--text-color);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .close-modal {
-            color: #aaa;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close-modal:hover,
-        .close-modal:focus {
-            color: #000;
-            text-decoration: none;
-        }
-
-        /* Leaderboard Table Scroll on Small Screens Removed */
 
         /* Highlight animation for upgrades */
         .highlight {
@@ -616,7 +312,7 @@
 <body>
     <!-- Credits -->
     <div id="credits">
-        Made By <a href="https://staticquasar931.github.io/Pixel-Planet/" target="_blank" rel="noopener noreferrer">Static</a>
+        Made By <a href="https://your-github-pages-url.com" target="_blank" rel="noopener noreferrer">Your Name</a>
     </div>
 
     <!-- Version Number -->
@@ -625,37 +321,42 @@
     </div>
 
     <!-- Help Button -->
-    <div id="help-button" onclick="openHelp()" aria-label="Open Help Modal">❓ Help</div>
+    <div id="help-button" onclick="openHelp()" aria-label="Open Help Modal" style="cursor: pointer; margin-top: 10px;">
+        ❓ Help
+    </div>
 
     <!-- Share Button -->
-    <div id="share-button" onclick="shareGame()" aria-label="Share Game">📤 Share</div>
+    <div id="share-button" onclick="shareGame()" aria-label="Share Game" style="cursor: pointer; margin-top: 10px;">
+        📤 Share
+    </div>
+
+    <!-- Language Selector -->
+    <div id="language-selector" style="position: fixed; top: 20px; right: 10px;">
+        <select onchange="changeLanguage(this.value)" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <!-- Add more languages as needed -->
+        </select>
+    </div>
 
     <!-- Tutorial Modal -->
     <div id="tutorial-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-modal-title">
-        <div class="modal-content">
+        <div id="tutorial-modal-content" class="modal-content">
             <span class="close-modal" onclick="closeHelp()" aria-label="Close Tutorial Modal">&times;</span>
             <h2 id="tutorial-modal-title">📖 Pixel Planet Tutorial</h2>
-            <p>Welcome to Pixel Planet! Let's walk you through the basics:</p>
-            <ol>
-                <li><strong>Start New Game:</strong> Click the "Start New Game" button to begin your adventure.</li>
-                <li><strong>Generate Resources:</strong> Click "Generate Resources" to manually collect resources. Resources also accumulate automatically over time.</li>
-                <li><strong>Upgrades:</strong> Visit the "Upgrades" section to purchase improvements that enhance your resource generation and efficiency. Some upgrades automate resource collection, allowing you to focus on other tasks.</li>
-                <li><strong>Biomes:</strong> Unlock new biomes by terraforming your planet. Each biome provides unique resource bonuses.</li>
-                <li><strong>Achievements:</strong> Achieve milestones to unlock rewards and showcase your progress.</li>
-                <li><strong>Quests:</strong> Complete daily and weekly quests to earn additional rewards and keep your gameplay engaging.</li>
-                <li><strong>Story:</strong> Follow the unfolding story as you develop your planet.</li>
-                <li><strong>Social Sharing:</strong> Share your achievements and progress on social media to invite friends and challenge them.</li>
-                <li><strong>Accessibility:</strong> Navigate the game using your keyboard and enjoy improved accessibility features designed for all players.</li>
+            <p id="tutorial-text">Welcome to Pixel Planet! Let's walk you through the basics:</p>
+            <ol id="tutorial-steps">
+                <!-- Tutorial steps will be dynamically translated -->
             </ol>
-            <p>Explore, strategize, and build your Pixel Planet into a thriving world! 🌍🚀</p>
+            <p id="tutorial-conclusion">Explore, strategize, and build your Pixel Planet into a thriving world! 🌍🚀</p>
             <button onclick="closeHelp()" aria-label="Close Tutorial">Got It!</button>
         </div>
     </div>
 
     <!-- Main Menu -->
     <div id="main-menu">
-        <h1>🌍 Pixel Planet</h1>
-        <button onclick="startNewGame()" aria-label="Start New Game">🚀 Start New Game</button>
+        <h1 id="main-title">🌍 Pixel Planet</h1>
+        <button onclick="startNewGame()" aria-label="Start New Game" id="start-new-game-button">🚀 Start New Game</button>
         <button onclick="continueGame()" id="continue-button" aria-label="Continue Game" style="display: none;">🔄 Continue Game</button>
         <div class="social-buttons">
             <a href="#" id="share-twitter" target="_blank" aria-label="Share on Twitter">
@@ -671,57 +372,60 @@
     </div>
 
     <!-- Game Interface -->
-    <div id="game" style="display: none;">
-        <h2>Your Planet</h2>
+    <div id="game" style="display: none; flex-direction: column; align-items: center;">
+        <h2 id="game-title">Your Planet</h2>
         <div id="resources">
             <div class="resource" id="water">💧 Water: 0 / 1000 (Per Second: <span id="water-rate">1.0</span>)</div>
             <div class="resource" id="minerals">⛏ Minerals: 0 / 500 (Per Second: <span id="minerals-rate">0.0</span>)</div>
             <div class="resource" id="plants">🌱 Plants: 0 / 300 (Per Second: <span id="plants-rate">0.0</span>)</div>
             <div class="resource" id="energy">⚡ Energy: 0 / 200 (Per Second: <span id="energy-rate">0.0</span>)</div>
         </div>
-        <button onclick="generateResources()" aria-label="Generate Resources">🔄 Generate Resources</button>
+        <button onclick="generateResources()" aria-label="Generate Resources" id="generate-resources-button">🔄 Generate Resources</button>
+
+        <!-- Terraform Planet Button -->
+        <button onclick="unlockTerraform()" aria-label="Terraform Planet" id="terraform-button">🌍 Terraform Planet</button>
 
         <!-- Biomes Section -->
-        <h3>🌿 Biomes</h3>
+        <h3 id="biomes-title">🌿 Biomes</h3>
         <div id="biomes">
             <!-- Biomes will be dynamically generated -->
         </div>
 
         <!-- Upgrades Section -->
-        <h3>💼 Upgrades</h3>
+        <h3 id="upgrades-title">💼 Upgrades</h3>
         <div id="upgrades">
             <!-- Upgrades will be dynamically generated -->
         </div>
 
         <!-- Achievements Section -->
-        <h3>🏆 Achievements</h3>
+        <h3 id="achievements-title">🏆 Achievements</h3>
         <div id="achievements">
             <!-- Achievements will be dynamically generated -->
         </div>
 
         <!-- Events Section -->
-        <h3>🎉 Events</h3>
+        <h3 id="events-title">🎉 Events</h3>
         <div id="events">
             <!-- Events will be dynamically generated -->
         </div>
 
         <!-- Quests Section -->
-        <h3>🎯 Quests</h3>
+        <h3 id="quests-title">🎯 Quests</h3>
         <div id="quests">
             <!-- Quests will be dynamically generated -->
         </div>
 
         <!-- Story Section -->
         <div id="story">
-            <h3>📖 Story</h3>
+            <h3 id="story-title">📖 Story</h3>
             <!-- Story milestones will be dynamically generated -->
         </div>
 
         <!-- Control Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-            <button onclick="saveGame()" aria-label="Save Game">💾 Save Game</button>
+            <button onclick="saveGame()" aria-label="Save Game" id="save-game-button">💾 Save Game</button>
             <button onclick="resetGame()" id="reset-button" aria-label="Reset Game">🗑️ Reset Game</button>
-            <button onclick="toggleTheme()" aria-label="Toggle Theme">🎨 Toggle Theme</button>
+            <button onclick="toggleTheme()" aria-label="Toggle Theme" id="toggle-theme-button">🎨 Toggle Theme</button>
         </div>
 
         <!-- Social Sharing Buttons (Consolidated) -->
@@ -776,36 +480,48 @@
                 description: "+10 Water per second",
                 baseCost: 100,
                 cost: 100,
-                effect: (level) => { waterPerSecond = Math.min(waterPerSecond + 10, MAX_RESOURCE_RATE.waterPerSecond); },
+                effect: (level) => { 
+                    waterPerSecond = Math.min(waterPerSecond + 10, MAX_RESOURCE_RATE.waterPerSecond); 
+                },
                 level: 0,
-                category: "Resource Boost"
+                category: "Resource Boost",
+                key: "waterBoost"
             },
             mineralsBoost: {
                 name: "🔧 Improve Mineral Extraction",
                 description: "+5 Minerals per second",
                 baseCost: 200,
                 cost: 200,
-                effect: (level) => { mineralsPerSecond = Math.min(mineralsPerSecond + 5, MAX_RESOURCE_RATE.mineralsPerSecond); },
+                effect: (level) => { 
+                    mineralsPerSecond = Math.min(mineralsPerSecond + 5, MAX_RESOURCE_RATE.mineralsPerSecond); 
+                },
                 level: 0,
-                category: "Resource Boost"
+                category: "Resource Boost",
+                key: "mineralsBoost"
             },
             plantBoost: {
                 name: "🔧 Enhance Plant Growth",
                 description: "+3 Plants per second",
                 baseCost: 150,
                 cost: 150,
-                effect: (level) => { plantsPerSecond = Math.min(plantsPerSecond + 3, MAX_RESOURCE_RATE.plantsPerSecond); },
+                effect: (level) => { 
+                    plantsPerSecond = Math.min(plantsPerSecond + 3, MAX_RESOURCE_RATE.plantsPerSecond); 
+                },
                 level: 0,
-                category: "Resource Boost"
+                category: "Resource Boost",
+                key: "plantBoost"
             },
             energyBoost: {
                 name: "🔧 Boost Energy Generation",
                 description: "+2 Energy per second",
                 baseCost: 120,
                 cost: 120,
-                effect: (level) => { energyPerSecond = Math.min(energyPerSecond + 2, MAX_RESOURCE_RATE.energyPerSecond); },
+                effect: (level) => { 
+                    energyPerSecond = Math.min(energyPerSecond + 2, MAX_RESOURCE_RATE.energyPerSecond); 
+                },
                 level: 0,
-                category: "Resource Boost"
+                category: "Resource Boost",
+                key: "energyBoost"
             },
             // Efficiency Improvements
             waterEfficiency: {
@@ -817,7 +533,8 @@
                     waterConsumption = Math.max(waterConsumption * 0.9, 0.1); 
                 },
                 level: 0,
-                category: "Efficiency Improvement"
+                category: "Efficiency Improvement",
+                key: "waterEfficiency"
             },
             mineralEfficiency: {
                 name: "⚙️ Mineral Efficiency",
@@ -828,7 +545,8 @@
                     mineralConsumption = Math.max(mineralConsumption * 0.9, 0.1); 
                 },
                 level: 0,
-                category: "Efficiency Improvement"
+                category: "Efficiency Improvement",
+                key: "mineralEfficiency"
             },
             // Storage Upgrades
             waterStorage: {
@@ -838,7 +556,8 @@
                 cost: 300,
                 effect: (level) => { storage.water += 500; },
                 level: 0,
-                category: "Storage Upgrade"
+                category: "Storage Upgrade",
+                key: "waterStorage"
             },
             mineralsStorage: {
                 name: "🏗️ Expand Minerals Storage",
@@ -847,7 +566,8 @@
                 cost: 350,
                 effect: (level) => { storage.minerals += 250; },
                 level: 0,
-                category: "Storage Upgrade"
+                category: "Storage Upgrade",
+                key: "mineralsStorage"
             },
             plantsStorage: {
                 name: "🏗️ Expand Plants Storage",
@@ -856,7 +576,8 @@
                 cost: 250,
                 effect: (level) => { storage.plants += 150; },
                 level: 0,
-                category: "Storage Upgrade"
+                category: "Storage Upgrade",
+                key: "plantsStorage"
             },
             energyStorage: {
                 name: "🏗️ Expand Energy Storage",
@@ -865,7 +586,8 @@
                 cost: 200,
                 effect: (level) => { storage.energy += 100; },
                 level: 0,
-                category: "Storage Upgrade"
+                category: "Storage Upgrade",
+                key: "energyStorage"
             },
             // Automation Upgrades
             autoWater: {
@@ -873,36 +595,48 @@
                 description: "Automatically collect 1 Water per second",
                 baseCost: 500,
                 cost: 500,
-                effect: (level) => { waterPerSecond = Math.min(waterPerSecond + 1 * level, MAX_RESOURCE_RATE.waterPerSecond); },
+                effect: (level) => { 
+                    waterPerSecond = Math.min(waterPerSecond + 1 * level, MAX_RESOURCE_RATE.waterPerSecond); 
+                },
                 level: 0,
-                category: "Automation"
+                category: "Automation",
+                key: "autoWater"
             },
             autoMinerals: {
                 name: "🤖 Automate Mineral Extraction",
                 description: "Automatically collect 0.5 Minerals per second",
                 baseCost: 600,
                 cost: 600,
-                effect: (level) => { mineralsPerSecond = Math.min(mineralsPerSecond + 0.5 * level, MAX_RESOURCE_RATE.mineralsPerSecond); },
+                effect: (level) => { 
+                    mineralsPerSecond = Math.min(mineralsPerSecond + 0.5 * level, MAX_RESOURCE_RATE.mineralsPerSecond); 
+                },
                 level: 0,
-                category: "Automation"
+                category: "Automation",
+                key: "autoMinerals"
             },
             autoPlants: {
                 name: "🤖 Automate Plant Growth",
                 description: "Automatically collect 0.3 Plants per second",
                 baseCost: 550,
                 cost: 550,
-                effect: (level) => { plantsPerSecond = Math.min(plantsPerSecond + 0.3 * level, MAX_RESOURCE_RATE.plantsPerSecond); },
+                effect: (level) => { 
+                    plantsPerSecond = Math.min(plantsPerSecond + 0.3 * level, MAX_RESOURCE_RATE.plantsPerSecond); 
+                },
                 level: 0,
-                category: "Automation"
+                category: "Automation",
+                key: "autoPlants"
             },
             autoEnergy: {
                 name: "🤖 Automate Energy Generation",
                 description: "Automatically collect 0.2 Energy per second",
                 baseCost: 650,
                 cost: 650,
-                effect: (level) => { energyPerSecond = Math.min(energyPerSecond + 0.2 * level, MAX_RESOURCE_RATE.energyPerSecond); },
+                effect: (level) => { 
+                    energyPerSecond = Math.min(energyPerSecond + 0.2 * level, MAX_RESOURCE_RATE.energyPerSecond); 
+                },
                 level: 0,
-                category: "Automation"
+                category: "Automation",
+                key: "autoEnergy"
             }
             // Add more upgrades as needed
         };
@@ -1033,8 +767,8 @@
                 name: "Resource Boom",
                 description: "A sudden boom increases your Water and Minerals!",
                 effect: () => {
-                    resources.water = Math.min(resources.water + 50, storage.water, MAX_RESOURCES.water);
-                    resources.minerals = Math.min(resources.minerals + 25, storage.minerals, MAX_RESOURCES.minerals);
+                    addResource('water', 50);
+                    addResource('minerals', 25);
                 }
             },
             {
@@ -1048,21 +782,21 @@
                 name: "Mineral Surge",
                 description: "Mineral Surge! You received an extra 40 Minerals!",
                 effect: () => {
-                    resources.minerals = Math.min(resources.minerals + 40, storage.minerals, MAX_RESOURCES.minerals);
+                    addResource('minerals', 40);
                 }
             },
             {
                 name: "Plant Overgrowth",
                 description: "Plant Overgrowth! You received an extra 20 Plants!",
                 effect: () => {
-                    resources.plants = Math.min(resources.plants + 20, storage.plants, MAX_RESOURCES.plants);
+                    addResource('plants', 20);
                 }
             },
             {
                 name: "Energy Boost",
                 description: "Energy Boost! You received an extra 10 Energy!",
                 effect: () => {
-                    resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
+                    addResource('energy', 10);
                 }
             },
             {
@@ -1081,6 +815,7 @@
         // === Functions ===
 
         // Function to show help/tutorial modal
+        let previousActiveElement = null; // Declare globally
         function openHelp() {
             const modal = document.getElementById('tutorial-modal');
             modal.style.display = 'block';
@@ -1186,7 +921,7 @@
                 const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
                 const focusableContent = modal.querySelectorAll(focusableElements);
                 const firstElement = focusableContent[0];
-                const lastElement = focusableContent[focusableContent.length - 1];
+                const lastElement = focusableContent[focusableElements.length - 1];
 
                 if (e.key === 'Tab') {
                     if (e.shiftKey) { // Shift + Tab
@@ -1218,7 +953,7 @@
             });
         }
 
-        // Function to alert message using custom modal (if needed)
+        // Function to alert message using custom modal
         function openAlertModal(message) {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -1287,7 +1022,7 @@
         // Function to start new game
         async function startNewGame(confirmStart=true) {
             if (confirmStart) {
-                const confirmed = await confirmModal("Are you sure you want to start a new game? All progress will be lost.");
+                const confirmed = await confirmModal(getTranslation("confirm_new_game"));
                 if (!confirmed) return;
             }
 
@@ -1318,7 +1053,8 @@
             scheduleQuestReset();
             loadTheme();
             updateSocialSharing();
-            showNotification("🚀 New game started! Welcome to Pixel Planet.");
+            applyTranslations(); // Apply translations to dynamic elements
+            showNotification(getTranslation("new_game_started"));
             saveGame();
         }
 
@@ -1329,52 +1065,7 @@
                 const parsedSave = JSON.parse(savedGame);
                 loadFromSave(parsedSave);
             } else {
-                showNotification("❌ No saved game found.");
-            }
-        }
-
-        // Function to load game from save data
-        function loadFromSave(gameState) {
-            try {
-                // Validate gameState structure
-                if (!gameState.resources || !gameState.upgrades) throw new Error("Invalid save data.");
-
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('game').style.display = 'flex';
-                resources = gameState.resources;
-                storage = gameState.storage;
-                biomes = gameState.biomes;
-                upgrades = gameState.upgrades;
-                waterPerSecond = gameState.waterPerSecond;
-                mineralsPerSecond = gameState.mineralsPerSecond;
-                plantsPerSecond = gameState.plantsPerSecond;
-                energyPerSecond = gameState.energyPerSecond;
-                achievements = gameState.achievements;
-                quests = gameState.quests;
-                storyMilestones = gameState.storyMilestones;
-                updateResourcesUI();
-                generateUpgradesUI();
-                generateAchievementsUI();
-                generateQuestsUI();
-                displayBiomes();
-                handleOfflineResourceGeneration(gameState.lastUpdateTime);
-                startResourceGeneration();
-                startResourceConsumption();
-                startAutosave();
-                startEventSystem();
-                scheduleQuestReset();
-                checkAchievements();
-                checkQuests();
-                generateStoryUI();
-                loadTheme();
-                updateSocialSharing();
-                showNotification("✅ Game loaded successfully!");
-                // Hide Continue button after loading
-                document.getElementById('continue-button').style.display = 'none';
-            } catch (error) {
-                console.error("Error loading game:", error);
-                showNotification("⚠️ Error loading game. Starting a new game.");
-                startNewGame(false);
+                showNotification(getTranslation("no_saved_game"));
             }
         }
 
@@ -1387,7 +1078,7 @@
             updateResourcesUI();
             checkAchievements();
             checkQuests();
-            showNotification("🔄 Resources generated!");
+            showNotification(getTranslation("resources_generated"));
             saveGame();
         }
 
@@ -1405,10 +1096,10 @@
             const plantsElem = document.getElementById('plants');
             const energyElem = document.getElementById('energy');
 
-            waterElem.innerHTML = `💧 Water: ${resources.water} / ${storage.water} (Per Second: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
-            mineralsElem.innerHTML = `⛏ Minerals: ${resources.minerals} / ${storage.minerals} (Per Second: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
-            plantsElem.innerHTML = `🌱 Plants: ${resources.plants} / ${storage.plants} (Per Second: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
-            energyElem.innerHTML = `⚡ Energy: ${resources.energy} / ${storage.energy} (Per Second: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
+            waterElem.innerHTML = `💧 ${getTranslation("water")}: ${resources.water} / ${storage.water} (${getTranslation("per_second")}: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
+            mineralsElem.innerHTML = `⛏ ${getTranslation("minerals")}: ${resources.minerals} / ${storage.minerals} (${getTranslation("per_second")}: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
+            plantsElem.innerHTML = `🌱 ${getTranslation("plants")}: ${resources.plants} / ${storage.plants} (${getTranslation("per_second")}: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
+            energyElem.innerHTML = `⚡ ${getTranslation("energy")}: ${resources.energy} / ${storage.energy} (${getTranslation("per_second")}: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
 
             generateUpgradesUI(); // Update upgrade button states based on new resource counts
 
@@ -1436,7 +1127,7 @@
                 categoryDiv.style.textAlign = 'left';
                 categoryDiv.style.marginBottom = '10px';
                 const categoryTitle = document.createElement('h4');
-                categoryTitle.innerText = category;
+                categoryTitle.innerText = getTranslation(category);
                 categoryDiv.appendChild(categoryTitle);
 
                 // Create a flex container for upgrades to align left to right
@@ -1459,17 +1150,17 @@
                     upgradeDiv.appendChild(description);
 
                     const cost = document.createElement('span');
-                    cost.innerText = `Cost: ${upgrade.cost} 💧`;
+                    cost.innerText = `${getTranslation("cost")}: ${upgrade.cost} 💧`;
                     upgradeDiv.appendChild(cost);
 
                     const button = document.createElement('button');
                     button.className = 'upgrade-button';
-                    button.innerText = `Buy (Level ${upgrade.level})`;
+                    button.innerText = `${getTranslation("buy")} (${getTranslation("level")} ${upgrade.level})`;
                     button.disabled = resources.water < upgrade.cost;
                     button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
                     button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
                     button.onclick = () => buyUpgrade(upgrade.key);
-                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
+                    button.setAttribute('aria-label', `${getTranslation("buy")} upgrade ${upgrade.name}`);
 
                     // Add tooltip
                     const tooltip = document.createElement('span');
@@ -1500,13 +1191,13 @@
                 updateResourcesUI();
                 generateAchievementsUI();
                 checkAchievements();
-                showNotification(`🔧 Upgrade "${upgrade.name}" purchased! Level: ${upgrade.level}`);
+                showNotification(`${getTranslation("upgrade_purchased")} "${upgrade.name}"! ${getTranslation("new_level")} ${upgrade.level}`);
                 // Highlight the upgrade div briefly
                 const upgradesDiv = document.getElementById('upgrades');
                 const upgradeElements = upgradesDiv.getElementsByClassName('upgrade');
                 for (let elem of upgradeElements) {
                     const btn = elem.querySelector('button');
-                    if (btn && btn.getAttribute('aria-label') === `Buy upgrade ${upgrade.name}`) {
+                    if (btn && btn.getAttribute('aria-label') === `${getTranslation("buy")} upgrade ${upgrade.name}`) {
                         elem.classList.add('highlight');
                         setTimeout(() => {
                             elem.classList.remove('highlight');
@@ -1516,7 +1207,7 @@
                 }
                 saveGame();
             } else {
-                showNotification("❌ Not enough Water to purchase this upgrade!");
+                showNotification(`${getTranslation("not_enough_water")}`);
             }
         }
 
@@ -1560,7 +1251,7 @@
                 if (!achievement.unlocked && achievement.condition()) {
                     achievement.unlocked = true;
                     if (achievement.reward) achievement.reward();
-                    showNotification(`🏆 Achievement Unlocked: ${achievement.name} - Reward: ${achievement.rewardDescription}`);
+                    showNotification(`${getTranslation("achievement_unlocked")} "${achievement.name}" - ${getTranslation("reward")}: ${achievement.rewardDescription}`);
                     generateAchievementsUI();
                     saveGame();
                 }
@@ -1583,7 +1274,7 @@
                 const quest = quests[key];
                 const questDiv = document.createElement('div');
                 questDiv.className = 'quest';
-                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
+                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? getTranslation("completed") : getTranslation("incomplete")}`;
                 questsDiv.appendChild(questDiv);
             }
         }
@@ -1595,7 +1286,7 @@
                 if (!quest.completed && quest.condition()) {
                     quest.completed = true;
                     if (quest.reward) quest.reward();
-                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: ${quest.rewardDescription}`);
+                    showNotification(`${getTranslation("quest_completed")} "${quest.name}" - ${getTranslation("reward")}: ${quest.rewardDescription}`);
                     generateQuestsUI();
                     saveGame();
                 }
@@ -1613,7 +1304,7 @@
         // Function to generate Story UI
         function generateStoryUI() {
             const storyDiv = document.getElementById('story');
-            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
+            storyDiv.innerHTML = `<h3 id="story-title">${getTranslation("story")}</h3>`; // Reset story section
 
             for (let key in storyMilestones) {
                 const milestone = storyMilestones[key];
@@ -1631,7 +1322,7 @@
                 const milestone = storyMilestones[key];
                 if (!milestone.unlocked && milestone.condition()) {
                     milestone.unlocked = true;
-                    showNotification(`📖 Story Update: ${milestone.text}`);
+                    showNotification(`${getTranslation("story_update")}: ${milestone.text}`);
                     generateStoryUI();
                     saveGame();
                 }
@@ -1648,9 +1339,9 @@
                 biomeDiv.className = 'biome';
                 let bonusText = '';
                 for (let key in biome.bonuses) {
-                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
+                    bonusText += `+${biome.bonuses[key]} ${getTranslation(key.replace('PerSecond', '').toLowerCase())} / sec\n`;
                 }
-                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}\n${biome.description}`;
+                biomeDiv.innerText = `${biome.name} ${getTranslation("biome")}\n${bonusText}\n${biome.description}`;
                 biomesDiv.appendChild(biomeDiv);
             });
         }
@@ -1660,16 +1351,16 @@
             const terraformBaseCost = 500;
             const terraformCost = terraformBaseCost * (biomes.length + 1);
             if (resources.water >= terraformCost) {
-                const confirmed = await confirmModal(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
+                const confirmed = await confirmModal(`${getTranslation("confirm_terraform")} ${terraformCost} 💧 ${getTranslation("water")}?`);
                 if (!confirmed) return;
 
                 resources.water -= terraformCost;
                 unlockNewBiome();
                 updateResourcesUI();
-                showNotification(`🌍 Planet terraformed! New biome unlocked.`);
+                showNotification(`${getTranslation("terraform_unlocked")}`);
                 saveGame();
             } else {
-                showNotification("❌ Not enough Water to terraform the planet!");
+                showNotification(`${getTranslation("not_enough_water")}`);
             }
         }
 
@@ -1689,7 +1380,7 @@
             let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
 
             if (availableBiomes.length === 0) {
-                showNotification("🎉 Congratulations! You've unlocked all available biomes.");
+                showNotification(getTranslation("all_biomes_unlocked"));
                 return null;
             }
 
@@ -1700,51 +1391,51 @@
             switch(randomName) {
                 case "Forest":
                     resourceBonus = { plantsPerSecond: 2 };
-                    biomeDescription = "A lush forest teeming with plant life.";
+                    biomeDescription = getTranslation("forest_description");
                     break;
                 case "Desert":
                     resourceBonus = { mineralsPerSecond: 3 };
-                    biomeDescription = "An arid desert with abundant minerals.";
+                    biomeDescription = getTranslation("desert_description");
                     break;
                 case "Ocean":
                     resourceBonus = { waterPerSecond: 5 };
-                    biomeDescription = "A vast ocean providing ample water resources.";
+                    biomeDescription = getTranslation("ocean_description");
                     break;
                 case "Mountain":
                     resourceBonus = { mineralsPerSecond: 4 };
-                    biomeDescription = "Majestic mountains rich in minerals.";
+                    biomeDescription = getTranslation("mountain_description");
                     break;
                 case "Swamp":
                     resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
-                    biomeDescription = "A mysterious swamp with diverse plant life.";
+                    biomeDescription = getTranslation("swamp_description");
                     break;
                 case "Tundra":
                     resourceBonus = { energyPerSecond: 2 };
-                    biomeDescription = "A cold tundra harnessing energy resources.";
+                    biomeDescription = getTranslation("tundra_description");
                     break;
                 case "Savanna":
                     resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
-                    biomeDescription = "A sprawling savanna with balanced resources.";
+                    biomeDescription = getTranslation("savanna_description");
                     break;
                 case "Volcano":
                     resourceBonus = { energyPerSecond: 5 };
-                    biomeDescription = "An active volcano generating significant energy.";
+                    biomeDescription = getTranslation("volcano_description");
                     break;
                 case "Jungle":
                     resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
-                    biomeDescription = "A dense jungle brimming with plant and water resources.";
+                    biomeDescription = getTranslation("jungle_description");
                     break;
                 case "Iceberg":
                     resourceBonus = { waterPerSecond: 6 };
-                    biomeDescription = "A massive iceberg providing a steady water supply.";
+                    biomeDescription = getTranslation("iceberg_description");
                     break;
                 case "Canyon":
                     resourceBonus = { mineralsPerSecond: 5 };
-                    biomeDescription = "A deep canyon rich in mineral deposits.";
+                    biomeDescription = getTranslation("canyon_description");
                     break;
                 default:
                     resourceBonus = {};
-                    biomeDescription = "A unique biome with special resources.";
+                    biomeDescription = getTranslation("unique_biome_description");
             }
 
             // Apply bonuses with caps
@@ -1778,7 +1469,7 @@
         function triggerRandomEvent() {
             const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
             randomEvent.effect();
-            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
+            showNotification(`${getTranslation("event_occurred")}: ${randomEvent.name} - ${randomEvent.description}`);
             displayEvents(randomEvent);
             updateResourcesUI();
             checkAchievements();
@@ -1826,13 +1517,14 @@
                     achievements,
                     quests,
                     storyMilestones,
-                    lastUpdateTime: Date.now()
+                    lastUpdateTime: Date.now(),
+                    currentLanguage: currentLanguage // Save current language
                 };
                 localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
-                showNotification("💾 Game saved!");
+                showNotification(getTranslation("game_saved"));
             } catch (error) {
                 console.error("Error saving game:", error);
-                showNotification("⚠️ Error saving game.");
+                showNotification(getTranslation("error_saving_game"));
             }
         }
 
@@ -1855,6 +1547,7 @@
                 achievements = gameState.achievements;
                 quests = gameState.quests;
                 storyMilestones = gameState.storyMilestones;
+                currentLanguage = gameState.currentLanguage || 'en'; // Load saved language or default to English
                 updateResourcesUI();
                 generateUpgradesUI();
                 generateAchievementsUI();
@@ -1871,564 +1564,13 @@
                 generateStoryUI();
                 loadTheme();
                 updateSocialSharing();
-                showNotification("✅ Game loaded successfully!");
+                applyTranslations(); // Apply translations to dynamic elements
+                showNotification(getTranslation("game_loaded"));
                 // Hide Continue button after loading
                 document.getElementById('continue-button').style.display = 'none';
             } catch (error) {
                 console.error("Error loading game:", error);
-                showNotification("⚠️ Error loading game. Starting a new game.");
-                startNewGame(false);
-            }
-        }
-
-        // Function to generate a new game
-        async function startNewGame(confirmStart=true) {
-            if (confirmStart) {
-                const confirmed = await confirmModal("Are you sure you want to start a new game? All progress will be lost.");
-                if (!confirmed) return;
-            }
-
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game').style.display = 'flex';
-            resources = { water: 0, minerals: 0, plants: 0, energy: 0 };
-            storage = { water: 1000, minerals: 500, plants: 300, energy: 200 };
-            biomes = [];
-            resetUpgrades();
-            resetAchievements();
-            resetQuests();
-            waterPerSecond = 1;
-            mineralsPerSecond = 0;
-            plantsPerSecond = 0;
-            energyPerSecond = 0;
-            waterConsumption = 1;
-            mineralConsumption = 1;
-            updateResourcesUI();
-            generateUpgradesUI();
-            generateAchievementsUI();
-            generateQuestsUI();
-            displayBiomes();
-            generateStoryUI();
-            startResourceGeneration();
-            startResourceConsumption();
-            startAutosave();
-            startEventSystem();
-            scheduleQuestReset();
-            loadTheme();
-            updateSocialSharing();
-            showNotification("🚀 New game started! Welcome to Pixel Planet.");
-            saveGame();
-        }
-
-        // Function to continue game
-        function continueGame() {
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                loadFromSave(parsedSave);
-            } else {
-                showNotification("❌ No saved game found.");
-            }
-        }
-
-        // Function to generate resources manually
-        function generateResources() {
-            addResource('water', 10);
-            addResource('minerals', 5);
-            addResource('plants', 3);
-            addResource('energy', 2);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-            showNotification("🔄 Resources generated!");
-            saveGame();
-        }
-
-        // Function to add resources with storage limits and caps
-        function addResource(resource, amount) {
-            if (!MAX_RESOURCES.hasOwnProperty(resource)) return;
-            resources[resource] = Math.min(resources[resource] + amount, storage[resource], MAX_RESOURCES[resource]);
-            saveGame(); // Save whenever resources change
-        }
-
-        // Function to update resources UI
-        function updateResourcesUI() {
-            const waterElem = document.getElementById('water');
-            const mineralsElem = document.getElementById('minerals');
-            const plantsElem = document.getElementById('plants');
-            const energyElem = document.getElementById('energy');
-
-            waterElem.innerHTML = `💧 Water: ${resources.water} / ${storage.water} (Per Second: <span id="water-rate">${waterPerSecond.toFixed(1)}</span>)`;
-            mineralsElem.innerHTML = `⛏ Minerals: ${resources.minerals} / ${storage.minerals} (Per Second: <span id="minerals-rate">${mineralsPerSecond.toFixed(1)}</span>)`;
-            plantsElem.innerHTML = `🌱 Plants: ${resources.plants} / ${storage.plants} (Per Second: <span id="plants-rate">${plantsPerSecond.toFixed(1)}</span>)`;
-            energyElem.innerHTML = `⚡ Energy: ${resources.energy} / ${storage.energy} (Per Second: <span id="energy-rate">${energyPerSecond.toFixed(1)}</span>)`;
-
-            generateUpgradesUI(); // Update upgrade button states based on new resource counts
-
-            checkStoryMilestones(); // Check for story milestones
-        }
-
-        // Function to generate Upgrades UI
-        function generateUpgradesUI() {
-            const upgradesDiv = document.getElementById('upgrades');
-            upgradesDiv.innerHTML = ''; // Clear existing upgrades
-
-            // Sort upgrades by category
-            const categories = {};
-            for (let key in upgrades) {
-                const upgrade = upgrades[key];
-                if (!categories[upgrade.category]) {
-                    categories[upgrade.category] = [];
-                }
-                categories[upgrade.category].push({ key, ...upgrade });
-            }
-
-            for (let category in categories) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.style.width = '100%';
-                categoryDiv.style.textAlign = 'left';
-                categoryDiv.style.marginBottom = '10px';
-                const categoryTitle = document.createElement('h4');
-                categoryTitle.innerText = category;
-                categoryDiv.appendChild(categoryTitle);
-
-                // Create a flex container for upgrades to align left to right
-                const upgradesRow = document.createElement('div');
-                upgradesRow.style.display = 'flex';
-                upgradesRow.style.flexWrap = 'wrap';
-                upgradesRow.style.gap = '20px';
-                upgradesRow.style.justifyContent = 'flex-start';
-
-                categories[category].forEach(upgrade => {
-                    const upgradeDiv = document.createElement('div');
-                    upgradeDiv.className = 'upgrade';
-
-                    const name = document.createElement('span');
-                    name.innerText = `${upgrade.name}`;
-                    upgradeDiv.appendChild(name);
-
-                    const description = document.createElement('span');
-                    description.innerText = `${upgrade.description}`;
-                    upgradeDiv.appendChild(description);
-
-                    const cost = document.createElement('span');
-                    cost.innerText = `Cost: ${upgrade.cost} 💧`;
-                    upgradeDiv.appendChild(cost);
-
-                    const button = document.createElement('button');
-                    button.className = 'upgrade-button';
-                    button.innerText = `Buy (Level ${upgrade.level})`;
-                    button.disabled = resources.water < upgrade.cost;
-                    button.style.backgroundColor = resources.water < upgrade.cost ? '#888' : '#008CBA';
-                    button.style.cursor = resources.water < upgrade.cost ? 'not-allowed' : 'pointer';
-                    button.onclick = () => buyUpgrade(upgrade.key);
-                    button.setAttribute('aria-label', `Buy upgrade ${upgrade.name}`);
-
-                    // Add tooltip
-                    const tooltip = document.createElement('span');
-                    tooltip.className = 'tooltip';
-                    tooltip.innerText = upgrade.description;
-                    button.appendChild(tooltip);
-
-                    upgradeDiv.appendChild(button);
-
-                    upgradesRow.appendChild(upgradeDiv);
-                });
-
-                categoryDiv.appendChild(upgradesRow);
-                upgradesDiv.appendChild(categoryDiv);
-            }
-        }
-
-        // Function to buy an upgrade
-        function buyUpgrade(upgradeKey) {
-            const upgrade = upgrades[upgradeKey];
-            if (!upgrade) return;
-
-            if (resources.water >= upgrade.cost) {
-                resources.water -= upgrade.cost;
-                upgrade.level += 1;
-                upgrade.effect(upgrade.level);
-                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.5, upgrade.level));
-                updateResourcesUI();
-                generateAchievementsUI();
-                checkAchievements();
-                showNotification(`🔧 Upgrade "${upgrade.name}" purchased! Level: ${upgrade.level}`);
-                // Highlight the upgrade div briefly
-                const upgradesDiv = document.getElementById('upgrades');
-                const upgradeElements = upgradesDiv.getElementsByClassName('upgrade');
-                for (let elem of upgradeElements) {
-                    const btn = elem.querySelector('button');
-                    if (btn && btn.getAttribute('aria-label') === `Buy upgrade ${upgrade.name}`) {
-                        elem.classList.add('highlight');
-                        setTimeout(() => {
-                            elem.classList.remove('highlight');
-                        }, 1000);
-                        break;
-                    }
-                }
-                saveGame();
-            } else {
-                showNotification("❌ Not enough Water to purchase this upgrade!");
-            }
-        }
-
-        // Function to reset upgrades (for new game)
-        function resetUpgrades() {
-            for (let key in upgrades) {
-                upgrades[key].level = 0;
-                upgrades[key].cost = upgrades[key].baseCost;
-            }
-        }
-
-        // Function to generate Achievements UI
-        function generateAchievementsUI() {
-            const achievementsDiv = document.getElementById('achievements');
-            achievementsDiv.innerHTML = ''; // Clear existing achievements
-
-            for (let key in achievements) {
-                const achievement = achievements[key];
-                const achievementDiv = document.createElement('div');
-                achievementDiv.className = 'achievement';
-                if (achievement.unlocked) {
-                    achievementDiv.classList.add('unlocked');
-                }
-
-                const name = document.createElement('span');
-                name.innerText = `${achievement.name}`;
-                achievementDiv.appendChild(name);
-
-                const description = document.createElement('span');
-                description.innerText = `${achievement.description}`;
-                achievementDiv.appendChild(description);
-
-                achievementsDiv.appendChild(achievementDiv);
-            }
-        }
-
-        // Function to check and unlock achievements
-        function checkAchievements() {
-            for (let key in achievements) {
-                const achievement = achievements[key];
-                if (!achievement.unlocked && achievement.condition()) {
-                    achievement.unlocked = true;
-                    if (achievement.reward) achievement.reward();
-                    showNotification(`🏆 Achievement Unlocked: ${achievement.name} - Reward: ${achievement.rewardDescription}`);
-                    generateAchievementsUI();
-                    saveGame();
-                }
-            }
-        }
-
-        // Function to reset achievements (for new game)
-        function resetAchievements() {
-            for (let key in achievements) {
-                achievements[key].unlocked = false;
-            }
-        }
-
-        // Function to generate Quests UI
-        function generateQuestsUI() {
-            const questsDiv = document.getElementById('quests');
-            questsDiv.innerHTML = ''; // Clear existing quests
-
-            for (let key in quests) {
-                const quest = quests[key];
-                const questDiv = document.createElement('div');
-                questDiv.className = 'quest';
-                questDiv.innerText = `${quest.name}: ${quest.description} - ${quest.completed ? '✅ Completed' : '❌ Incomplete'}`;
-                questsDiv.appendChild(questDiv);
-            }
-        }
-
-        // Function to check and complete quests
-        function checkQuests() {
-            for (let key in quests) {
-                const quest = quests[key];
-                if (!quest.completed && quest.condition()) {
-                    quest.completed = true;
-                    if (quest.reward) quest.reward();
-                    showNotification(`🎯 Quest Completed: ${quest.name} - Reward: ${quest.rewardDescription}`);
-                    generateQuestsUI();
-                    saveGame();
-                }
-            }
-        }
-
-        // Function to reset quests (daily/weekly)
-        function resetQuests() {
-            for (let key in quests) {
-                quests[key].completed = false;
-            }
-            generateQuestsUI();
-        }
-
-        // Function to generate Story UI
-        function generateStoryUI() {
-            const storyDiv = document.getElementById('story');
-            storyDiv.innerHTML = '<h3>📖 Story</h3>'; // Reset story section
-
-            for (let key in storyMilestones) {
-                const milestone = storyMilestones[key];
-                if (milestone.unlocked) {
-                    const paragraph = document.createElement('p');
-                    paragraph.innerText = milestone.text;
-                    storyDiv.appendChild(paragraph);
-                }
-            }
-        }
-
-        // Function to check and unlock Story Milestones
-        function checkStoryMilestones() {
-            for (let key in storyMilestones) {
-                const milestone = storyMilestones[key];
-                if (!milestone.unlocked && milestone.condition()) {
-                    milestone.unlocked = true;
-                    showNotification(`📖 Story Update: ${milestone.text}`);
-                    generateStoryUI();
-                    saveGame();
-                }
-            }
-        }
-
-        // Function to display Biomes
-        function displayBiomes() {
-            const biomesDiv = document.getElementById('biomes');
-            biomesDiv.innerHTML = ''; // Clear existing biomes
-
-            biomes.forEach(biome => {
-                const biomeDiv = document.createElement('div');
-                biomeDiv.className = 'biome';
-                let bonusText = '';
-                for (let key in biome.bonuses) {
-                    bonusText += `+${biome.bonuses[key]} ${key.replace('PerSecond', '')} / sec\n`;
-                }
-                biomeDiv.innerText = `${biome.name} Biome\n${bonusText}\n${biome.description}`;
-                biomesDiv.appendChild(biomeDiv);
-            });
-        }
-
-        // Function to unlock Terraform (new biome)
-        async function unlockTerraform() {
-            const terraformBaseCost = 500;
-            const terraformCost = terraformBaseCost * (biomes.length + 1);
-            if (resources.water >= terraformCost) {
-                const confirmed = await confirmModal(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
-                if (!confirmed) return;
-
-                resources.water -= terraformCost;
-                unlockNewBiome();
-                updateResourcesUI();
-                showNotification(`🌍 Planet terraformed! New biome unlocked.`);
-                saveGame();
-            } else {
-                showNotification("❌ Not enough Water to terraform the planet!");
-            }
-        }
-
-        // Function to unlock a new biome
-        function unlockNewBiome() {
-            const newBiome = generateRandomBiome();
-            if (newBiome) {
-                biomes.push(newBiome);
-                displayBiomes();
-                generateStoryUI();
-            }
-        }
-
-        // Function to generate a random biome
-        function generateRandomBiome() {
-            const biomeNames = ["Forest", "Desert", "Ocean", "Mountain", "Swamp", "Tundra", "Savanna", "Volcano", "Jungle", "Iceberg", "Canyon"];
-            let availableBiomes = biomeNames.filter(name => !biomes.some(biome => biome.name === name));
-
-            if (availableBiomes.length === 0) {
-                showNotification("🎉 Congratulations! You've unlocked all available biomes.");
-                return null;
-            }
-
-            const randomName = availableBiomes[Math.floor(Math.random() * availableBiomes.length)];
-            let resourceBonus = {};
-            let biomeDescription = "";
-
-            switch(randomName) {
-                case "Forest":
-                    resourceBonus = { plantsPerSecond: 2 };
-                    biomeDescription = "A lush forest teeming with plant life.";
-                    break;
-                case "Desert":
-                    resourceBonus = { mineralsPerSecond: 3 };
-                    biomeDescription = "An arid desert with abundant minerals.";
-                    break;
-                case "Ocean":
-                    resourceBonus = { waterPerSecond: 5 };
-                    biomeDescription = "A vast ocean providing ample water resources.";
-                    break;
-                case "Mountain":
-                    resourceBonus = { mineralsPerSecond: 4 };
-                    biomeDescription = "Majestic mountains rich in minerals.";
-                    break;
-                case "Swamp":
-                    resourceBonus = { plantsPerSecond: 3, waterPerSecond: 2 };
-                    biomeDescription = "A mysterious swamp with diverse plant life.";
-                    break;
-                case "Tundra":
-                    resourceBonus = { energyPerSecond: 2 };
-                    biomeDescription = "A cold tundra harnessing energy resources.";
-                    break;
-                case "Savanna":
-                    resourceBonus = { plantsPerSecond: 2, mineralsPerSecond: 2 };
-                    biomeDescription = "A sprawling savanna with balanced resources.";
-                    break;
-                case "Volcano":
-                    resourceBonus = { energyPerSecond: 5 };
-                    biomeDescription = "An active volcano generating significant energy.";
-                    break;
-                case "Jungle":
-                    resourceBonus = { plantsPerSecond: 4, waterPerSecond: 3 };
-                    biomeDescription = "A dense jungle brimming with plant and water resources.";
-                    break;
-                case "Iceberg":
-                    resourceBonus = { waterPerSecond: 6 };
-                    biomeDescription = "A massive iceberg providing a steady water supply.";
-                    break;
-                case "Canyon":
-                    resourceBonus = { mineralsPerSecond: 5 };
-                    biomeDescription = "A deep canyon rich in mineral deposits.";
-                    break;
-                default:
-                    resourceBonus = {};
-                    biomeDescription = "A unique biome with special resources.";
-            }
-
-            // Apply bonuses with caps
-            for (let key in resourceBonus) {
-                if (key === "waterPerSecond") {
-                    waterPerSecond = Math.min(waterPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.waterPerSecond);
-                }
-                if (key === "mineralsPerSecond") {
-                    mineralsPerSecond = Math.min(mineralsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.mineralsPerSecond);
-                }
-                if (key === "plantsPerSecond") {
-                    plantsPerSecond = Math.min(plantsPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.plantsPerSecond);
-                }
-                if (key === "energyPerSecond") {
-                    energyPerSecond = Math.min(energyPerSecond + resourceBonus[key], MAX_RESOURCE_RATE.energyPerSecond);
-                }
-            }
-
-            return { name: randomName, id: biomes.length + 1, bonuses: resourceBonus, description: biomeDescription };
-        }
-
-        // Function to start the event system
-        function startEventSystem() {
-            if (eventInterval) clearInterval(eventInterval);
-            eventInterval = setInterval(() => {
-                triggerRandomEvent();
-            }, 600000); // Trigger an event every 10 minutes
-        }
-
-        // Function to trigger a random event
-        function triggerRandomEvent() {
-            const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-            randomEvent.effect();
-            showNotification(`🎉 Event: ${randomEvent.name} - ${randomEvent.description}`);
-            displayEvents(randomEvent);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-            saveGame();
-        }
-
-        // Function to display events
-        function displayEvents(event) {
-            const eventsDiv = document.getElementById('events');
-            const eventDiv = document.createElement('div');
-            eventDiv.className = 'event';
-            eventDiv.innerText = `${event.name}: ${event.description}`;
-            eventsDiv.prepend(eventDiv); // Add to top
-
-            // Limit the number of displayed events to 5
-            while (eventsDiv.children.length > 5) {
-                eventsDiv.removeChild(eventsDiv.lastChild);
-            }
-        }
-
-        // Function to show notifications
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.innerText = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        // Function to save game
-        function saveGame() {
-            try {
-                const saveData = {
-                    version: "0.4", // Fixed version number
-                    resources,
-                    storage,
-                    biomes,
-                    upgrades,
-                    waterPerSecond,
-                    mineralsPerSecond,
-                    plantsPerSecond,
-                    energyPerSecond,
-                    achievements,
-                    quests,
-                    storyMilestones,
-                    lastUpdateTime: Date.now()
-                };
-                localStorage.setItem('PixelPlanetSave', JSON.stringify(saveData));
-                showNotification("💾 Game saved!");
-            } catch (error) {
-                console.error("Error saving game:", error);
-                showNotification("⚠️ Error saving game.");
-            }
-        }
-
-        // Function to load game from localStorage
-        function loadFromSave(gameState) {
-            try {
-                // Validate gameState structure
-                if (!gameState.resources || !gameState.upgrades) throw new Error("Invalid save data.");
-
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('game').style.display = 'flex';
-                resources = gameState.resources;
-                storage = gameState.storage;
-                biomes = gameState.biomes;
-                upgrades = gameState.upgrades;
-                waterPerSecond = gameState.waterPerSecond;
-                mineralsPerSecond = gameState.mineralsPerSecond;
-                plantsPerSecond = gameState.plantsPerSecond;
-                energyPerSecond = gameState.energyPerSecond;
-                achievements = gameState.achievements;
-                quests = gameState.quests;
-                storyMilestones = gameState.storyMilestones;
-                updateResourcesUI();
-                generateUpgradesUI();
-                generateAchievementsUI();
-                generateQuestsUI();
-                displayBiomes();
-                handleOfflineResourceGeneration(gameState.lastUpdateTime);
-                startResourceGeneration();
-                startResourceConsumption();
-                startAutosave();
-                startEventSystem();
-                scheduleQuestReset();
-                checkAchievements();
-                checkQuests();
-                generateStoryUI();
-                loadTheme();
-                updateSocialSharing();
-                showNotification("✅ Game loaded successfully!");
-                // Hide Continue button after loading
-                document.getElementById('continue-button').style.display = 'none';
-            } catch (error) {
-                console.error("Error loading game:", error);
-                showNotification("⚠️ Error loading game. Starting a new game.");
+                showNotification(getTranslation("error_loading_game"));
                 startNewGame(false);
             }
         }
@@ -2441,12 +1583,12 @@
             const effectiveDuration = Math.min(offlineDuration, maxOfflineSeconds);
             if (effectiveDuration > 0) {
                 const multiplier = 1; // Adjust as needed
-                addResource('water', effectiveDuration * waterPerSecond * multiplier);
-                addResource('minerals', effectiveDuration * mineralsPerSecond * multiplier);
-                addResource('plants', effectiveDuration * plantsPerSecond * multiplier);
-                addResource('energy', effectiveDuration * energyPerSecond * multiplier);
+                addResource('water', Math.floor(effectiveDuration * waterPerSecond * multiplier));
+                addResource('minerals', Math.floor(effectiveDuration * mineralsPerSecond * multiplier));
+                addResource('plants', Math.floor(effectiveDuration * plantsPerSecond * multiplier));
+                addResource('energy', Math.floor(effectiveDuration * energyPerSecond * multiplier));
                 updateResourcesUI();
-                showNotification(`⏰ You were offline for ${effectiveDuration} seconds. Resources have been updated.`);
+                showNotification(`${getTranslation("offline_duration")}: ${effectiveDuration} ${getTranslation("seconds")}. ${getTranslation("resources_updated")}`);
                 checkAchievements();
                 checkQuests();
                 saveGame();
@@ -2483,7 +1625,7 @@
                 if (parsedSave.version !== "0.4") {
                     // Handle version upgrades if necessary
                     // For simplicity, start a new game if versions do not match
-                    showNotification("🔄 Game version mismatch. Starting a new game.");
+                    showNotification(getTranslation("version_mismatch"));
                     startNewGame(false);
                 } else {
                     loadFromSave(parsedSave);
@@ -2511,7 +1653,7 @@
                 // Default theme
                 document.body.classList.remove('dark-theme', 'light-theme');
             }
-            showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+            showNotification(`${getTranslation("theme_changed")} ${capitalizeFirstLetter(theme)}`);
             // Save theme selection
             localStorage.setItem('PixelPlanetTheme', theme);
         }
@@ -2526,22 +1668,22 @@
 
         // Function to reset game
         async function resetGame() {
-            const confirmed = await confirmModal("Are you sure you want to reset the game? All progress will be lost.");
+            const confirmed = await confirmModal(getTranslation("confirm_reset_game"));
             if (!confirmed) return;
 
             localStorage.removeItem('PixelPlanetSave');
             localStorage.removeItem('PixelPlanetVersion');
-            // Assuming player name is removed as per previous instructions
             startNewGame(false); // Pass false to avoid double confirmation
-            showNotification("🗑️ Game has been reset.");
+            showNotification(getTranslation("game_reset"));
         }
 
         // Function to handle social sharing URLs
         function updateSocialSharing() {
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! Check it out: https://your-github-pages-url.com`);
-            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://your-github-pages-url.com')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://your-github-pages-url.com')}&title=${shareText}`;
+            const shareText = encodeURIComponent(getTranslation("share_text"));
+            const githubURL = encodeURIComponent('https://your-github-pages-url.com'); // Replace with actual URL
+            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}&url=${githubURL}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${githubURL}`;
+            const redditURL = `https://www.reddit.com/submit?url=${githubURL}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -2560,221 +1702,92 @@
 
             if (lastShare && now - lastShare < cooldown) {
                 const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
-                showNotification(`⏳ You can share again in ${remaining} minutes.`);
+                showNotification(`${getTranslation("share_cooldown")} ${remaining} ${getTranslation("minutes")}.`);
                 return;
             }
 
             // Open share URL in new tab with security attributes
-            window.open(`https://your-github-pages-url.com`, '_blank', 'noopener,noreferrer');
+            window.open(`https://your-github-pages-url.com`, '_blank', 'noopener,noreferrer'); // Replace with actual URL
 
             // Reward the player
             resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
             updateResourcesUI();
-            showNotification("🎁 Thanks for sharing! Energy +10.");
+            showNotification(getTranslation("share_reward"));
             localStorage.setItem('PixelPlanetLastShare', now);
             saveGame();
         }
 
-        // Function to handle modals and confirmations
-        function openConfirmationModal(message, onConfirm) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-modal', 'true');
+        // Function to apply translations to all UI elements
+        function applyTranslations() {
+            // Main Menu
+            document.getElementById('main-title').innerText = getTranslation("main_title");
+            document.getElementById('start-new-game-button').innerText = `${getTranslation("start_new_game")} 🚀`;
+            document.getElementById('continue-button').innerText = `${getTranslation("continue_game")} 🔄`;
+            document.getElementById('biomes-title').innerText = getTranslation("biomes");
+            document.getElementById('upgrades-title').innerText = getTranslation("upgrades");
+            document.getElementById('achievements-title').innerText = getTranslation("achievements");
+            document.getElementById('events-title').innerText = getTranslation("events");
+            document.getElementById('quests-title').innerText = getTranslation("quests");
+            document.getElementById('story-title').innerText = getTranslation("story");
+            document.getElementById('generate-resources-button').innerText = `${getTranslation("generate_resources")} 🔄`;
+            document.getElementById('terraform-button').innerText = `${getTranslation("terraform_planet")} 🌍`;
+            document.getElementById('save-game-button').innerText = `${getTranslation("save_game")} 💾`;
+            document.getElementById('reset-button').innerText = `${getTranslation("reset_game")} 🗑️`;
+            document.getElementById('toggle-theme-button').innerText = `${getTranslation("toggle_theme")} 🎨`;
 
-            const modalContent = document.createElement('div');
-            modalContent.className = 'modal-content';
-
-            const closeBtn = document.createElement('span');
-            closeBtn.className = 'close-modal';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.onclick = () => { document.body.removeChild(modal); };
-            closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
-
-            const messagePara = document.createElement('p');
-            messagePara.innerText = message;
-
-            const buttonsDiv = document.createElement('div');
-            buttonsDiv.style.display = 'flex';
-            buttonsDiv.style.justifyContent = 'space-between';
-            buttonsDiv.style.marginTop = '20px';
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.innerText = 'Yes';
-            confirmBtn.onclick = () => {
-                onConfirm();
-                document.body.removeChild(modal);
-            };
-            confirmBtn.setAttribute('aria-label', 'Confirm');
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.innerText = 'No';
-            cancelBtn.onclick = () => { document.body.removeChild(modal); };
-            cancelBtn.setAttribute('aria-label', 'Cancel');
-
-            buttonsDiv.appendChild(confirmBtn);
-            buttonsDiv.appendChild(cancelBtn);
-
-            modalContent.appendChild(closeBtn);
-            modalContent.appendChild(messagePara);
-            modalContent.appendChild(buttonsDiv);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            // Focus management
-            confirmBtn.focus();
-
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', function(e) {
-                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-                const focusableContent = modal.querySelectorAll(focusableElements);
-                const firstElement = focusableContent[0];
-                const lastElement = focusableContent[focusableElements.length - 1];
-
-                if (e.key === 'Tab') {
-                    if (e.shiftKey) { // Shift + Tab
-                        if (document.activeElement === firstElement) {
-                            e.preventDefault();
-                            lastElement.focus();
-                        }
-                    } else { // Tab
-                        if (document.activeElement === lastElement) {
-                            e.preventDefault();
-                            firstElement.focus();
-                        }
-                    }
-                }
-
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    document.body.removeChild(modal);
-                }
+            // Tutorial Modal
+            document.getElementById('tutorial-modal-title').innerText = getTranslation("tutorial_title");
+            document.getElementById('tutorial-text').innerText = getTranslation("tutorial_intro");
+            const tutorialSteps = document.getElementById('tutorial-steps');
+            tutorialSteps.innerHTML = '';
+            const steps = getTranslation("tutorial_steps").split("\n");
+            steps.forEach(step => {
+                const li = document.createElement('li');
+                li.innerText = step;
+                tutorialSteps.appendChild(li);
             });
+            document.getElementById('tutorial-conclusion').innerText = getTranslation("tutorial_conclusion");
+            const tutorialButton = document.querySelector('#tutorial-modal button');
+            if (tutorialButton) {
+                tutorialButton.innerText = getTranslation("got_it");
+            }
+
+            // Version Number
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.4';
+            document.getElementById('version').innerText = `${getTranslation("version")} ${savedVersion}`;
+
+            // Language Selector (already applies translation)
+
+            // Biomes, Upgrades, Achievements, Quests, Story - Handled by respective functions
+
+            // Dynamic elements are handled by their respective functions
         }
 
-        // Function to confirm action using Promise
-        function confirmModal(message) {
-            return new Promise((resolve) => {
-                openConfirmationModal(message, () => {
-                    resolve(true);
-                });
-            });
+        // Function to capitalize first letter
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        // Function to alert message using custom modal
-        function openAlertModal(message) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-modal', 'true');
-
-            const modalContent = document.createElement('div');
-            modalContent.className = 'modal-content';
-
-            const closeBtn = document.createElement('span');
-            closeBtn.className = 'close-modal';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.onclick = () => { document.body.removeChild(modal); };
-            closeBtn.setAttribute('aria-label', 'Close Alert Modal');
-
-            const messagePara = document.createElement('p');
-            messagePara.innerText = message;
-
-            const okBtn = document.createElement('button');
-            okBtn.innerText = 'OK';
-            okBtn.onclick = () => { document.body.removeChild(modal); };
-            okBtn.setAttribute('aria-label', 'OK');
-
-            modalContent.appendChild(closeBtn);
-            modalContent.appendChild(messagePara);
-            modalContent.appendChild(okBtn);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            // Focus management
-            okBtn.focus();
-
-            // Add event listener for focus trapping
-            modal.addEventListener('keydown', function(e) {
-                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-                const focusableContent = modal.querySelectorAll(focusableElements);
-                const firstElement = focusableContent[0];
-                const lastElement = focusableContent[focusableElements.length - 1];
-
-                if (e.key === 'Tab') {
-                    if (e.shiftKey) { // Shift + Tab
-                        if (document.activeElement === firstElement) {
-                            e.preventDefault();
-                            lastElement.focus();
-                        }
-                    } else { // Tab
-                        if (document.activeElement === lastElement) {
-                            e.preventDefault();
-                            firstElement.focus();
-                        }
-                    }
-                }
-
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    document.body.removeChild(modal);
-                }
-            });
+        // Function to handle language change
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('PixelPlanetLanguage', lang);
+            applyTranslations();
+            showNotification(`${getTranslation("language_changed")} ${capitalizeFirstLetter(lang)}`);
         }
 
-        // Function to alert message using custom modal
-        function alertMessage(message) {
-            openAlertModal(message);
+        // Function to load language on init
+        function loadLanguage() {
+            const savedLanguage = localStorage.getItem('PixelPlanetLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            document.querySelector('#language-selector select').value = savedLanguage;
+            applyTranslations();
         }
 
-        // Function to start resource generation
-        function startResourceGeneration() {
-            if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
-            resourceGenerationInterval = setInterval(() => {
-                addResource('water', waterPerSecond);
-                addResource('minerals', mineralsPerSecond);
-                addResource('plants', plantsPerSecond);
-                addResource('energy', energyPerSecond);
-                updateResourcesUI();
-                checkAchievements();
-                checkQuests();
-            }, 1000);
-        }
-
-        // Function to start resource consumption
-        function startResourceConsumption() {
-            if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
-            resourceConsumptionInterval = setInterval(() => {
-                consumeResources();
-            }, 5000); // Consume resources every 5 seconds
-        }
-
-        // Function to consume resources
-        function consumeResources() {
-            resources.water = Math.max(0, resources.water - waterConsumption);
-            resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
-            updateResourcesUI();
-            checkAchievements();
-            checkQuests();
-            showNotification("🔻 Resources have been consumed.");
-        }
-
-        // Function to start autosave
-        function startAutosave() {
-            if (autosaveInterval) clearInterval(autosaveInterval);
-            autosaveInterval = setInterval(() => {
-                saveGame();
-            }, 30000); // Autosave every 30 seconds
-        }
-
-        // Function to schedule quest reset (daily)
-        function scheduleQuestReset() {
-            const now = new Date();
-            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0) - now;
-            setTimeout(function(){
-                resetQuests();
-                scheduleQuestReset();
-            }, millisTillMidnight);
+        // Function to initialize language and social sharing
+        function initializeLanguageAndSharing() {
+            loadLanguage();
+            updateSocialSharing();
         }
 
         // Function to initialize device detection and adjust UI
@@ -2782,12 +1795,7 @@
             detectDevice();
         }
 
-        // Function to initialize language and social sharing
-        function initializeLanguageAndSharing() {
-            updateSocialSharing();
-        }
-
-        // Function to initialize device detection and language/social sharing
+        // Function to initialize all features
         function initializeFeatures() {
             initializeDeviceDetection();
             initializeLanguageAndSharing();
@@ -2805,120 +1813,221 @@
 
             // Update version number display (fixed)
             const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.4';
-            document.getElementById('version').innerText = `Version ${savedVersion}`;
+            document.getElementById('version').innerText = `${getTranslation("version")} ${savedVersion}`;
             // Ensure version number does not change
             localStorage.setItem('PixelPlanetVersion', '0.4');
+
+            // Initialize the game on load
+            initGame();
         });
 
-        // Function to toggle theme
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem('PixelPlanetTheme') || 'default';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            changeTheme(newTheme);
+        // Function to handle resource generation
+        function startResourceGeneration() {
+            if (resourceGenerationInterval) clearInterval(resourceGenerationInterval);
+            resourceGenerationInterval = setInterval(() => {
+                addResource('water', waterPerSecond);
+                addResource('minerals', mineralsPerSecond);
+                addResource('plants', plantsPerSecond);
+                addResource('energy', energyPerSecond);
+                updateResourcesUI();
+                checkAchievements();
+                checkQuests();
+            }, 1000);
         }
 
-        // Function to change theme
-        function changeTheme(theme) {
-            document.body.className = ''; // Reset existing classes
-            if (theme === 'dark') {
-                document.body.classList.add('dark-theme');
-            } else if (theme === 'light') {
-                document.body.classList.add('light-theme');
-            } else {
-                // Default theme
-                document.body.classList.remove('dark-theme', 'light-theme');
-            }
-            showNotification(`🖌️ Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
-            // Save theme selection
-            localStorage.setItem('PixelPlanetTheme', theme);
+        // Function to handle resource consumption
+        function startResourceConsumption() {
+            if (resourceConsumptionInterval) clearInterval(resourceConsumptionInterval);
+            resourceConsumptionInterval = setInterval(() => {
+                consumeResources();
+            }, 5000); // Consume resources every 5 seconds
         }
 
-        // Function to load theme on game start
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('PixelPlanetTheme');
-            if (savedTheme) {
-                changeTheme(savedTheme);
-            }
-        }
-
-        // Function to reset game
-        async function resetGame() {
-            const confirmed = await confirmModal("Are you sure you want to reset the game? All progress will be lost.");
-            if (!confirmed) return;
-
-            localStorage.removeItem('PixelPlanetSave');
-            localStorage.removeItem('PixelPlanetVersion');
-            startNewGame(false); // Pass false to avoid double confirmation
-            showNotification("🗑️ Game has been reset.");
-        }
-
-        // Function to handle social sharing URLs
-        function updateSocialSharing() {
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! Check it out: https://your-github-pages-url.com`);
-            const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://your-github-pages-url.com')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://your-github-pages-url.com')}&title=${shareText}`;
-
-            document.getElementById('share-twitter').href = twitterURL;
-            document.getElementById('share-facebook').href = facebookURL;
-            document.getElementById('share-reddit').href = redditURL;
-
-            document.getElementById('share-twitter-game').href = twitterURL;
-            document.getElementById('share-facebook-game').href = facebookURL;
-            document.getElementById('share-reddit-game').href = redditURL;
-        }
-
-        // Function to handle social sharing cooldown and rewards
-        async function shareGame() {
-            const lastShare = localStorage.getItem('PixelPlanetLastShare');
-            const now = Date.now();
-            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (lastShare && now - lastShare < cooldown) {
-                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
-                showNotification(`⏳ You can share again in ${remaining} minutes.`);
-                return;
-            }
-
-            // Open share URL in new tab with security attributes
-            window.open(`https://your-github-pages-url.com`, '_blank', 'noopener,noreferrer');
-
-            // Reward the player
-            resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
+        // Function to consume resources
+        function consumeResources() {
+            resources.water = Math.max(0, resources.water - waterConsumption);
+            resources.minerals = Math.max(0, resources.minerals - mineralConsumption);
             updateResourcesUI();
-            showNotification("🎁 Thanks for sharing! Energy +10.");
-            localStorage.setItem('PixelPlanetLastShare', now);
-            saveGame();
+            checkAchievements();
+            checkQuests();
+            showNotification(getTranslation("resources_consumed"));
         }
 
-        // Function to initialize device detection and adjust UI
-        function detectDevice() {
-            const ua = navigator.userAgent;
-            if (/Mobi|Android/i.test(ua)) {
-                document.body.style.fontSize = '1em';
-            } else if (/iPad|Tablet/i.test(ua)) {
-                document.body.style.fontSize = '1.1em';
-            } else {
-                document.body.style.fontSize = '1.2em';
-            }
+        // Function to start autosave
+        function startAutosave() {
+            if (autosaveInterval) clearInterval(autosaveInterval);
+            autosaveInterval = setInterval(() => {
+                saveGame();
+            }, 30000); // Autosave every 30 seconds
         }
 
-        // Function to initialize the game
-        function initGame() {
-            const savedGame = localStorage.getItem('PixelPlanetSave');
-            if (savedGame) {
-                const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.4") {
-                    // Handle version upgrades if necessary
-                    // For simplicity, start a new game if versions do not match
-                    showNotification("🔄 Game version mismatch. Starting a new game.");
-                    startNewGame(false);
-                } else {
-                    loadFromSave(parsedSave);
-                }
-            } else {
-                startNewGame();
+        // === Language Support ===
+
+        const translations = {
+            en: {
+                "main_title": "🌍 Pixel Planet",
+                "start_new_game": "Start New Game",
+                "continue_game": "Continue Game",
+                "biomes": "Biomes",
+                "upgrades": "Upgrades",
+                "achievements": "Achievements",
+                "events": "Events",
+                "quests": "Quests",
+                "story": "Story",
+                "generate_resources": "Generate Resources",
+                "terraform_planet": "Terraform Planet",
+                "save_game": "Save Game",
+                "reset_game": "Reset Game",
+                "toggle_theme": "Toggle Theme",
+                "buy": "Buy",
+                "level": "Level",
+                "cost": "Cost",
+                "per_second": "Per Second",
+                "upgrade_purchased": "Upgrade Purchased",
+                "new_level": "New Level",
+                "not_enough_water": "❌ Not enough Water to purchase this upgrade!",
+                "achievement_unlocked": "🏆 Achievement Unlocked",
+                "reward": "Reward",
+                "quest_completed": "🎯 Quest Completed",
+                "all_biomes_unlocked": "🎉 Congratulations! You've unlocked all available biomes.",
+                "unique_biome_description": "A unique biome with special resources.",
+                "forest_description": "A lush forest teeming with plant life.",
+                "desert_description": "An arid desert with abundant minerals.",
+                "ocean_description": "A vast ocean providing ample water resources.",
+                "mountain_description": "Majestic mountains rich in minerals.",
+                "swamp_description": "A mysterious swamp with diverse plant life.",
+                "tundra_description": "A cold tundra harnessing energy resources.",
+                "savanna_description": "A sprawling savanna with balanced resources.",
+                "volcano_description": "An active volcano generating significant energy.",
+                "jungle_description": "A dense jungle brimming with plant and water resources.",
+                "iceberg_description": "A massive iceberg providing a steady water supply.",
+                "canyon_description": "A deep canyon rich in mineral deposits.",
+                "event_occurred": "🎉 Event Occurred",
+                "game_saved": "💾 Game saved!",
+                "error_saving_game": "⚠️ Error saving game.",
+                "game_loaded": "✅ Game loaded successfully!",
+                "error_loading_game": "⚠️ Error loading game. Starting a new game.",
+                "new_game_started": "🚀 New game started! Welcome to Pixel Planet.",
+                "no_saved_game": "❌ No saved game found.",
+                "resources_generated": "🔄 Resources generated!",
+                "offline_duration": "⏰ You were offline for",
+                "seconds": "seconds.",
+                "resources_updated": "Resources have been updated.",
+                "story_update": "📖 Story Update",
+                "terraform_unlocked": "🌍 Planet terraformed! New biome unlocked.",
+                "share_text": "I'm playing Pixel Planet! Check it out:",
+                "share_cooldown": "⏳ You can share again in",
+                "minutes": "minutes.",
+                "share_reward": "🎁 Thanks for sharing! Energy +10.",
+                "game_reset": "🗑️ Game has been reset.",
+                "language_changed": "🌐 Language changed to",
+                "theme_changed": "🖌️ Theme changed to",
+                "got_it": "Got It!",
+                "confirm_new_game": "Are you sure you want to start a new game? All progress will be lost.",
+                "confirm_terraform": "Are you sure you want to terraform the planet for",
+                "confirm_reset_game": "Are you sure you want to reset the game? All progress will be lost.",
+                "tutorial_title": "📖 Pixel Planet Tutorial",
+                "tutorial_intro": "Welcome to Pixel Planet! Let's walk you through the basics:",
+                "tutorial_steps": "1. Start New Game: Click the 'Start New Game' button to begin your adventure.\n2. Generate Resources: Click 'Generate Resources' to manually collect resources. Resources also accumulate automatically over time.\n3. Upgrades: Visit the 'Upgrades' section to purchase improvements that enhance your resource generation and efficiency. Some upgrades automate resource collection, allowing you to focus on other tasks.\n4. Biomes: Unlock new biomes by terraforming your planet. Each biome provides unique resource bonuses.\n5. Achievements: Achieve milestones to unlock rewards and showcase your progress.\n6. Quests: Complete daily and weekly quests to earn additional rewards and keep your gameplay engaging.\n7. Story: Follow the unfolding story as you develop your planet.\n8. Social Sharing: Share your achievements and progress on social media to invite friends and challenge them.\n9. Accessibility: Navigate the game using your keyboard and enjoy improved accessibility features designed for all players.",
+                "tutorial_conclusion": "Explore, strategize, and build your Pixel Planet into a thriving world! 🌍🚀",
+                "completed": "✅ Completed",
+                "incomplete": "❌ Incomplete",
+                "event_occurred": "🎉 Event Occurred",
+                "resources_consumed": "🔻 Resources have been consumed.",
+                "version": "Version",
+                "biome": "Biome",
+                "water": "Water",
+                "minerals": "Minerals",
+                "plants": "Plants",
+                "energy": "Energy"
+                // Add more translations as needed
+            },
+            es: {
+                "main_title": "🌍 Planeta Pixel",
+                "start_new_game": "Iniciar Nuevo Juego",
+                "continue_game": "Continuar Juego",
+                "biomes": "Biomas",
+                "upgrades": "Mejoras",
+                "achievements": "Logros",
+                "events": "Eventos",
+                "quests": "Misiones",
+                "story": "Historia",
+                "generate_resources": "Generar Recursos",
+                "terraform_planet": "Terraformar Planeta",
+                "save_game": "Guardar Juego",
+                "reset_game": "Reiniciar Juego",
+                "toggle_theme": "Cambiar Tema",
+                "buy": "Comprar",
+                "level": "Nivel",
+                "cost": "Costo",
+                "per_second": "Por Segundo",
+                "upgrade_purchased": "Mejora Comprada",
+                "new_level": "Nuevo Nivel",
+                "not_enough_water": "❌ ¡No hay suficiente Agua para comprar esta mejora!",
+                "achievement_unlocked": "🏆 Logro Desbloqueado",
+                "reward": "Recompensa",
+                "quest_completed": "🎯 Misión Completada",
+                "all_biomes_unlocked": "🎉 ¡Felicidades! Has desbloqueado todos los biomas disponibles.",
+                "unique_biome_description": "Un bioma único con recursos especiales.",
+                "forest_description": "Un bosque exuberante lleno de vida vegetal.",
+                "desert_description": "Un desierto árido con abundantes minerales.",
+                "ocean_description": "Un vasto océano que proporciona amplios recursos de agua.",
+                "mountain_description": "Montañas majestuosas ricas en minerales.",
+                "swamp_description": "Un pantano misterioso con diversa vida vegetal.",
+                "tundra_description": "Una tundra fría que aprovecha recursos energéticos.",
+                "savanna_description": "Una sabana extensa con recursos equilibrados.",
+                "volcano_description": "Un volcán activo que genera energía significativa.",
+                "jungle_description": "Una densa jungla repleta de recursos vegetales y de agua.",
+                "iceberg_description": "Un iceberg masivo que proporciona un suministro constante de agua.",
+                "canyon_description": "Un profundo cañón rico en depósitos minerales.",
+                "event_occurred": "🎉 Evento Ocurrió",
+                "game_saved": "💾 ¡Juego guardado!",
+                "error_saving_game": "⚠️ Error al guardar el juego.",
+                "game_loaded": "✅ ¡Juego cargado con éxito!",
+                "error_loading_game": "⚠️ Error al cargar el juego. Iniciando un nuevo juego.",
+                "new_game_started": "🚀 ¡Nuevo juego iniciado! Bienvenido a Planeta Pixel.",
+                "no_saved_game": "❌ No se encontró un juego guardado.",
+                "resources_generated": "🔄 ¡Recursos generados!",
+                "offline_duration": "⏰ Estuviste desconectado por",
+                "seconds": "segundos.",
+                "resources_updated": "Los recursos han sido actualizados.",
+                "story_update": "📖 Actualización de Historia",
+                "terraform_unlocked": "🌍 ¡Planeta terraformado! Nuevo bioma desbloqueado.",
+                "share_text": "¡Estoy jugando Pixel Planet! Échale un vistazo:",
+                "share_cooldown": "⏳ Puedes compartir de nuevo en",
+                "minutes": "minutos.",
+                "share_reward": "🎁 ¡Gracias por compartir! Energía +10.",
+                "game_reset": "🗑️ El juego ha sido reiniciado.",
+                "language_changed": "🌐 Idioma cambiado a",
+                "theme_changed": "🖌️ Tema cambiado a",
+                "got_it": "¡Entendido!",
+                "confirm_new_game": "¿Estás seguro de que deseas iniciar un nuevo juego? Todo el progreso se perderá.",
+                "confirm_terraform": "¿Estás seguro de que deseas terraformar el planeta por",
+                "confirm_reset_game": "¿Estás seguro de que deseas reiniciar el juego? Todo el progreso se perderá.",
+                "tutorial_title": "📖 Tutorial de Pixel Planet",
+                "tutorial_intro": "¡Bienvenido a Pixel Planet! Vamos a guiarte a través de los conceptos básicos:",
+                "tutorial_steps": "1. Iniciar Nuevo Juego: Haz clic en el botón 'Iniciar Nuevo Juego' para comenzar tu aventura.\n2. Generar Recursos: Haz clic en 'Generar Recursos' para recolectar recursos manualmente. Los recursos también se acumulan automáticamente con el tiempo.\n3. Mejoras: Visita la sección 'Mejoras' para comprar mejoras que aumentan tu generación de recursos y eficiencia. Algunas mejoras automatizan la recolección de recursos, permitiéndote enfocarte en otras tareas.\n4. Biomas: Desbloquea nuevos biomas terraformando tu planeta. Cada bioma proporciona bonificaciones únicas de recursos.\n5. Logros: Alcanza hitos para desbloquear recompensas y mostrar tu progreso.\n6. Misiones: Completa misiones diarias y semanales para ganar recompensas adicionales y mantener tu juego atractivo.\n7. Historia: Sigue la historia que se desarrolla a medida que desarrollas tu planeta.\n8. Compartir en Redes Sociales: Comparte tus logros y progreso en redes sociales para invitar a amigos y desafiarlos.\n9. Accesibilidad: Navega el juego usando tu teclado y disfruta de características de accesibilidad mejoradas diseñadas para todos los jugadores.",
+                "tutorial_conclusion": "¡Explora, planifica y construye tu Planeta Pixel en un mundo próspero! 🌍🚀",
+                "completed": "✅ Completado",
+                "incomplete": "❌ Incompleto",
+                "event_occurred": "🎉 Evento Ocurrió",
+                "resources_consumed": "🔻 Los recursos han sido consumidos.",
+                "version": "Versión",
+                "biome": "Bioma",
+                "water": "Agua",
+                "minerals": "Minerales",
+                "plants": "Plantas",
+                "energy": "Energía"
+                // Add more translations as needed
             }
+            // Add more languages as needed
+        };
+
+        let currentLanguage = 'en'; // Default language
+
+        // Function to get translation
+        function getTranslation(key) {
+            return translations[currentLanguage][key] || key;
         }
 
     </script>
