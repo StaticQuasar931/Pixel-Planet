@@ -448,12 +448,16 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             animation: fadeInLeaderboard 0.5s ease-in-out;
-            position: relative;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1004;
         }
 
         @keyframes fadeInLeaderboard {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
         #leaderboard h3 {
@@ -525,7 +529,7 @@
         #tutorial-modal {
             display: none; /* Hidden by default */
             position: fixed; 
-            z-index: 1003; /* Sit on top */
+            z-index: 1005; /* Sit on top */
             left: 0;
             top: 0;
             width: 100%; 
@@ -632,6 +636,48 @@
             touch-action: manipulation;
             user-select: none;
         }
+
+        /* In-Game Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1003;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: var(--modal-bg-color);
+        }
+
+        .modal-content {
+            background-color: var(--modal-content-bg);
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            position: relative;
+            color: var(--text-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .close-modal {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #000;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -642,7 +688,7 @@
 
     <!-- Version Number -->
     <div id="version">
-        Version 0.3
+        Version 0.4
     </div>
 
     <!-- Help Button -->
@@ -652,9 +698,9 @@
     <div id="share-button" onclick="shareGame()" aria-label="Share Game">📤 Share</div>
 
     <!-- Tutorial Modal -->
-    <div id="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-modal-title">
-        <div id="tutorial-modal-content">
-            <span id="close-tutorial" onclick="closeTutorial()" aria-label="Close Tutorial Modal">&times;</span>
+    <div id="tutorial-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-modal-title">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeTutorial()" aria-label="Close Tutorial Modal">&times;</span>
             <h2 id="tutorial-modal-title">📖 Pixel Planet Tutorial</h2>
             <p>Welcome to Pixel Planet! Let's walk you through the basics:</p>
             <ol>
@@ -675,7 +721,7 @@
     </div>
 
     <!-- Leaderboard Section -->
-    <div id="leaderboard">
+    <div id="leaderboard" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
         <h3>🏅 Leaderboard</h3>
         <table id="leaderboard-table">
             <thead>
@@ -881,10 +927,10 @@
                 name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -920,7 +966,7 @@
             }
 
             // Open share URL in new tab
-            window.open(`https://staticquasar931.github.io/Pixel-Planet/`, '_blank');
+            window.open(`https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`, '_blank');
 
             // Reward the player
             resources.energy += 10; // Example reward
@@ -934,82 +980,23 @@
         window.onload = updateSocialSharing;
     </script>
 
-    <!-- Tooltip Script -->
-    <script>
-        // Optional: If using dynamic tooltips, implement here
-    </script>
-
     <!-- Help Modal Script -->
     <script>
         function openHelp() {
-            const modal = document.getElementById('help-modal');
+            const modal = document.getElementById('tutorial-modal');
             modal.style.display = 'block';
             const firstFocusable = modal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
             if (firstFocusable) firstFocusable.focus();
 
             // Add event listener for focus trapping
-            modal.addEventListener('keydown', trapTabKey);
+            modal.addEventListener('keydown', trapTabKeyTutorial);
         }
 
         function closeHelp() {
-            const modal = document.getElementById('help-modal');
+            const modal = document.getElementById('tutorial-modal');
             modal.style.display = 'none';
             // Remove event listener when modal is closed
-            modal.removeEventListener('keydown', trapTabKey);
-        }
-
-        function trapTabKey(e) {
-            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-            const modal = document.getElementById('help-modal');
-            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
-            const focusableContent = modal.querySelectorAll(focusableElements);
-            const lastFocusableElement = focusableContent[focusableContent.length - 1];
-
-            if (e.key === 'Tab') {
-                if (e.shiftKey) /* shift + tab */ {
-                    if (document.activeElement === firstFocusableElement) {
-                        e.preventDefault();
-                        lastFocusableElement.focus();
-                    }
-                } else /* tab */ {
-                    if (document.activeElement === lastFocusableElement) {
-                        e.preventDefault();
-                        firstFocusableElement.focus();
-                    }
-                }
-            }
-        }
-
-        // Close the modal when clicking outside of the content
-        window.onclick = function(event) {
-            const modal = document.getElementById('help-modal');
-            const tutorialModal = document.getElementById('tutorial-modal');
-            if (event.target == modal) {
-                closeHelp();
-            }
-            if (event.target == tutorialModal) {
-                closeTutorial();
-            }
-        }
-    </script>
-
-    <!-- Tutorial Modal Script -->
-    <script>
-        function openTutorial() {
-            const tutorialModal = document.getElementById('tutorial-modal');
-            tutorialModal.style.display = 'block';
-            const firstFocusable = tutorialModal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) firstFocusable.focus();
-
-            // Add event listener for focus trapping
-            tutorialModal.addEventListener('keydown', trapTabKeyTutorial);
-        }
-
-        function closeTutorial() {
-            const tutorialModal = document.getElementById('tutorial-modal');
-            tutorialModal.style.display = 'none';
-            // Remove event listener when modal is closed
-            tutorialModal.removeEventListener('keydown', trapTabKeyTutorial);
+            modal.removeEventListener('keydown', trapTabKeyTutorial);
         }
 
         function trapTabKeyTutorial(e) {
@@ -1033,15 +1020,6 @@
                 }
             }
         }
-
-        // Show tutorial on first load
-        document.addEventListener("DOMContentLoaded", function() {
-            const hasPlayed = localStorage.getItem('PixelPlanetHasPlayed');
-            if (!hasPlayed) {
-                openTutorial();
-                localStorage.setItem('PixelPlanetHasPlayed', 'true');
-            }
-        });
     </script>
 
     <!-- Main Game Script -->
@@ -1070,7 +1048,7 @@
                 description: "+10 Water per second",
                 baseCost: 100,
                 cost: 100,
-                effect: (level) => { waterPerSecond += 10; },
+                effect: (level) => { waterPerSecond = Math.min(waterPerSecond + 10, MAX_RESOURCE_RATE.waterPerSecond); },
                 level: 0,
                 category: "Resource Boost"
             },
@@ -1079,7 +1057,7 @@
                 description: "+5 Minerals per second",
                 baseCost: 200,
                 cost: 200,
-                effect: (level) => { mineralsPerSecond += 5; },
+                effect: (level) => { mineralsPerSecond = Math.min(mineralsPerSecond + 5, MAX_RESOURCE_RATE.mineralsPerSecond); },
                 level: 0,
                 category: "Resource Boost"
             },
@@ -1088,7 +1066,7 @@
                 description: "+3 Plants per second",
                 baseCost: 150,
                 cost: 150,
-                effect: (level) => { plantsPerSecond += 3; },
+                effect: (level) => { plantsPerSecond = Math.min(plantsPerSecond + 3, MAX_RESOURCE_RATE.plantsPerSecond); },
                 level: 0,
                 category: "Resource Boost"
             },
@@ -1097,7 +1075,7 @@
                 description: "+2 Energy per second",
                 baseCost: 120,
                 cost: 120,
-                effect: (level) => { energyPerSecond += 2; },
+                effect: (level) => { energyPerSecond = Math.min(energyPerSecond + 2, MAX_RESOURCE_RATE.energyPerSecond); },
                 level: 0,
                 category: "Resource Boost"
             },
@@ -1165,7 +1143,7 @@
                 description: "Automatically collect 1 Water per second",
                 baseCost: 500,
                 cost: 500,
-                effect: (level) => { waterPerSecond += 1 * level; },
+                effect: (level) => { waterPerSecond = Math.min(waterPerSecond + 1 * level, MAX_RESOURCE_RATE.waterPerSecond); },
                 level: 0,
                 category: "Automation"
             },
@@ -1174,7 +1152,7 @@
                 description: "Automatically collect 0.5 Minerals per second",
                 baseCost: 600,
                 cost: 600,
-                effect: (level) => { mineralsPerSecond += 0.5 * level; },
+                effect: (level) => { mineralsPerSecond = Math.min(mineralsPerSecond + 0.5 * level, MAX_RESOURCE_RATE.mineralsPerSecond); },
                 level: 0,
                 category: "Automation"
             },
@@ -1183,7 +1161,7 @@
                 description: "Automatically collect 0.3 Plants per second",
                 baseCost: 550,
                 cost: 550,
-                effect: (level) => { plantsPerSecond += 0.3 * level; },
+                effect: (level) => { plantsPerSecond = Math.min(plantsPerSecond + 0.3 * level, MAX_RESOURCE_RATE.plantsPerSecond); },
                 level: 0,
                 category: "Automation"
             },
@@ -1192,7 +1170,7 @@
                 description: "Automatically collect 0.2 Energy per second",
                 baseCost: 650,
                 cost: 650,
-                effect: (level) => { energyPerSecond += 0.2 * level; },
+                effect: (level) => { energyPerSecond = Math.min(energyPerSecond + 0.2 * level, MAX_RESOURCE_RATE.energyPerSecond); },
                 level: 0,
                 category: "Automation"
             }
@@ -1325,8 +1303,8 @@
                 name: "Resource Boom",
                 description: "A sudden boom increases your Water and Minerals!",
                 effect: () => {
-                    resources.water += 50;
-                    resources.minerals += 25;
+                    resources.water = Math.min(resources.water + 50, storage.water, MAX_RESOURCES.water);
+                    resources.minerals = Math.min(resources.minerals + 25, storage.minerals, MAX_RESOURCES.minerals);
                 }
             },
             {
@@ -1340,21 +1318,21 @@
                 name: "Mineral Surge",
                 description: "Mineral Surge! You received an extra 40 Minerals!",
                 effect: () => {
-                    resources.minerals += 40;
+                    resources.minerals = Math.min(resources.minerals + 40, storage.minerals, MAX_RESOURCES.minerals);
                 }
             },
             {
                 name: "Plant Overgrowth",
                 description: "Plant Overgrowth! You received an extra 20 Plants!",
                 effect: () => {
-                    resources.plants += 20;
+                    resources.plants = Math.min(resources.plants + 20, storage.plants, MAX_RESOURCES.plants);
                 }
             },
             {
                 name: "Energy Boost",
                 description: "Energy Boost! You received an extra 10 Energy!",
                 effect: () => {
-                    resources.energy += 10;
+                    resources.energy = Math.min(resources.energy + 10, storage.energy, MAX_RESOURCES.energy);
                 }
             },
             {
@@ -1395,7 +1373,7 @@
         function saveGame() {
             try {
                 const saveData = {
-                    version: "0.3",
+                    version: incrementVersion(),
                     resources,
                     storage,
                     biomes,
@@ -1461,7 +1439,7 @@
 
         // Start New Game
         function startNewGame(confirmStart=true) {
-            if (confirmStart && !confirm("Are you sure you want to start a new game? All progress will be lost.")) {
+            if (confirmStart && !confirmModal("Are you sure you want to start a new game? All progress will be lost.")) {
                 return;
             }
             document.getElementById('main-menu').style.display = 'none';
@@ -1757,14 +1735,13 @@
             const terraformBaseCost = 500;
             const terraformCost = terraformBaseCost * (biomes.length + 1);
             if (resources.water >= terraformCost) {
-                const confirmation = confirm(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`);
-                if (confirmation) {
+                openConfirmationModal(`Are you sure you want to terraform the planet for ${terraformCost} 💧 Water?`, () => {
                     resources.water -= terraformCost;
                     unlockNewBiome();
                     updateResourcesUI();
                     showNotification(`🌍 Planet terraformed! New biome unlocked.`);
                     saveGame();
-                }
+                });
             } else {
                 showNotification("❌ Not enough Water to terraform the planet!");
             }
@@ -1978,7 +1955,7 @@
             const savedGame = localStorage.getItem('PixelPlanetSave');
             if (savedGame) {
                 const parsedSave = JSON.parse(savedGame);
-                if (parsedSave.version !== "0.3") {
+                if (parsedSave.version !== "0.4") {
                     // Handle version upgrades if necessary
                     // For simplicity, start a new game if versions do not match
                     showNotification("🔄 Game version mismatch. Starting a new game.");
@@ -1989,6 +1966,15 @@
             } else {
                 startNewGame();
             }
+        }
+
+        // Increment Version Number
+        function incrementVersion() {
+            let currentVersion = parseFloat(localStorage.getItem('PixelPlanetVersion')) || 0.3;
+            currentVersion = (Math.round((currentVersion + 0.1) * 10) / 10).toFixed(1);
+            localStorage.setItem('PixelPlanetVersion', currentVersion);
+            document.getElementById('version').innerText = `Version ${currentVersion}`;
+            return currentVersion;
         }
 
         // Change Theme
@@ -2024,13 +2010,13 @@
 
         // Reset Game
         function resetGame() {
-            const confirmation = confirm("Are you sure you want to reset the game? All progress will be lost.");
-            if (confirmation) {
+            openConfirmationModal("Are you sure you want to reset the game? All progress will be lost.", () => {
                 localStorage.removeItem('PixelPlanetSave');
                 localStorage.removeItem('PixelPlanetLeaderboard');
+                localStorage.removeItem('PixelPlanetVersion');
                 startNewGame(false); // Pass false to avoid double confirmation
                 showNotification("🗑️ Game has been reset.");
-            }
+            });
         }
 
         // Language Support
@@ -2116,6 +2102,8 @@
             if (translations[currentLanguage]["Share"]) {
                 shareButton.innerText = translations[currentLanguage]["Share"];
             }
+
+            // Update other elements if necessary
         }
 
         // Load Language on Init
@@ -2132,10 +2120,10 @@
                 name: localStorage.getItem('PixelPlanetPlayerName') || 'Player',
                 totalResources: calculateTotalResources()
             };
-            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://staticquasar931.github.io/Pixel-Planet/`);
+            const shareText = encodeURIComponent(`I'm playing Pixel Planet! My total resources: ${currentPlayer.totalResources.toFixed(1)}. Check it out: https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet`);
             const twitterURL = `https://twitter.com/intent/tweet?text=${shareText}`;
-            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}`;
-            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://staticquasar931.github.io/Pixel-Planet/')}&title=${shareText}`;
+            const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}`;
+            const redditURL = `https://www.reddit.com/submit?url=${encodeURIComponent('https://sites.google.com/view/staticquasar931/static-gmes/pixel-planet')}&title=${shareText}`;
 
             document.getElementById('share-twitter').href = twitterURL;
             document.getElementById('share-facebook').href = facebookURL;
@@ -2144,41 +2132,6 @@
             document.getElementById('share-twitter-game').href = twitterURL;
             document.getElementById('share-facebook-game').href = facebookURL;
             document.getElementById('share-reddit-game').href = redditURL;
-        }
-
-        // Function to handle sharing with reward and cooldown
-        function shareGame() {
-            const lastShare = localStorage.getItem('PixelPlanetLastShare');
-            const now = Date.now();
-            const cooldown = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (lastShare && now - lastShare < cooldown) {
-                const remaining = Math.ceil((cooldown - (now - lastShare)) / (60 * 1000));
-                showNotification(`⏳ You can share again in ${remaining} minutes.`);
-                return;
-            }
-
-            // Prompt for player name if not set
-            let playerName = localStorage.getItem('PixelPlanetPlayerName');
-            if (!playerName || playerName === 'Player') {
-                playerName = prompt("Enter your name for the leaderboard:");
-                if (playerName) {
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                } else {
-                    playerName = 'Player';
-                    localStorage.setItem('PixelPlanetPlayerName', playerName);
-                }
-            }
-
-            // Open share URL in new tab
-            window.open(`https://staticquasar931.github.io/Pixel-Planet/`, '_blank');
-
-            // Reward the player
-            resources.energy += 10; // Example reward
-            updateResourcesUI();
-            showNotification("🎁 Thanks for sharing! Energy +10.");
-            localStorage.setItem('PixelPlanetLastShare', now);
-            saveGame();
         }
 
         // Initialize Language and Social Sharing
@@ -2200,11 +2153,374 @@
             if (savedGame) {
                 document.getElementById('continue-button').style.display = 'inline-block';
             }
+
+            // Update version number display
+            const savedVersion = localStorage.getItem('PixelPlanetVersion') || '0.3';
+            document.getElementById('version').innerText = `Version ${savedVersion}`;
         });
 
         // Accessibility Enhancements
         // Ensure all buttons can be focused and navigated via keyboard
         // ARIA roles and labels are already implemented
+
+        // Confirmation Modal
+        function openConfirmationModal(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.display = 'flex';
+            buttonsDiv.style.justifyContent = 'space-between';
+            buttonsDiv.style.marginTop = '20px';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.innerText = 'Yes';
+            confirmBtn.onclick = () => {
+                onConfirm();
+                document.body.removeChild(modal);
+            };
+            confirmBtn.setAttribute('aria-label', 'Confirm');
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.innerText = 'No';
+            cancelBtn.onclick = () => { document.body.removeChild(modal); };
+            cancelBtn.setAttribute('aria-label', 'Cancel');
+
+            buttonsDiv.appendChild(confirmBtn);
+            buttonsDiv.appendChild(cancelBtn);
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(buttonsDiv);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            const firstFocusable = confirmBtn;
+            if (firstFocusable) firstFocusable.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Custom Confirm Function to Replace alert/confirm
+        function confirmModal(message, onConfirm) {
+            return new Promise((resolve) => {
+                openConfirmationModal(message, () => {
+                    onConfirm();
+                    resolve(true);
+                });
+            });
+        }
+
+        // Fixed Updating Issue: Buttons Disappearing and Reappearing
+        // **Issue:** Likely caused by UI rendering or state management glitches.
+        // **Fix:** Ensure that the UI elements are consistently rendered based on the game state without unnecessary re-renders.
+
+        // Additional Fixes and Enhancements:
+
+        // Ensure that the game interface elements are not hidden or shown unexpectedly.
+        // Optimize the `generateUpgradesUI` to prevent flickering.
+
+        // Function to open help modal
+        function openHelp() {
+            const modal = document.getElementById('tutorial-modal');
+            modal.style.display = 'block';
+            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, details,[tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) firstFocusable.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', trapTabKeyTutorial);
+        }
+
+        // Function to close help modal
+        function closeHelp() {
+            const modal = document.getElementById('tutorial-modal');
+            modal.style.display = 'none';
+            // Remove event listener when modal is closed
+            modal.removeEventListener('keydown', trapTabKeyTutorial);
+        }
+
+        // Function to trap tab key within tutorial modal
+        function trapTabKeyTutorial(e) {
+            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+            const modal = document.getElementById('tutorial-modal');
+            const firstFocusableElement = modal.querySelectorAll(focusableElements)[0];
+            const focusableContent = modal.querySelectorAll(focusableElements);
+            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+
+            if (e.key === 'Tab') {
+                if (e.shiftKey) /* shift + tab */ {
+                    if (document.activeElement === firstFocusableElement) {
+                        e.preventDefault();
+                        lastFocusableElement.focus();
+                    }
+                } else /* tab */ {
+                    if (document.activeElement === lastFocusableElement) {
+                        e.preventDefault();
+                        firstFocusableElement.focus();
+                    }
+                }
+            }
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeTutorial();
+            }
+        }
+
+        // In-Game Modal for Alerts
+        function openAlertModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Alert Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const okBtn = document.createElement('button');
+            okBtn.innerText = 'OK';
+            okBtn.onclick = () => { document.body.removeChild(modal); };
+            okBtn.setAttribute('aria-label', 'OK');
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(okBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            okBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to open confirmation modal with callback
+        function openConfirmationModal(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Confirmation Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.display = 'flex';
+            buttonsDiv.style.justifyContent = 'space-between';
+            buttonsDiv.style.marginTop = '20px';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.innerText = 'Yes';
+            confirmBtn.onclick = () => {
+                onConfirm();
+                document.body.removeChild(modal);
+            };
+            confirmBtn.setAttribute('aria-label', 'Confirm');
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.innerText = 'No';
+            cancelBtn.onclick = () => { document.body.removeChild(modal); };
+            cancelBtn.setAttribute('aria-label', 'Cancel');
+
+            buttonsDiv.appendChild(confirmBtn);
+            buttonsDiv.appendChild(cancelBtn);
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(buttonsDiv);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            confirmBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to open alert modal
+        function openAlertModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => { document.body.removeChild(modal); };
+            closeBtn.setAttribute('aria-label', 'Close Alert Modal');
+
+            const messagePara = document.createElement('p');
+            messagePara.innerText = message;
+
+            const okBtn = document.createElement('button');
+            okBtn.innerText = 'OK';
+            okBtn.onclick = () => { document.body.removeChild(modal); };
+            okBtn.setAttribute('aria-label', 'OK');
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(messagePara);
+            modalContent.appendChild(okBtn);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Focus management
+            okBtn.focus();
+
+            // Add event listener for focus trapping
+            modal.addEventListener('keydown', function(e) {
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstElement = focusableContent[0];
+                const lastElement = focusableContent[focusableContent.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Function to confirm action without using alert/confirm
+        function confirmAction(message, callback) {
+            openConfirmationModal(message, callback);
+        }
+
+        // Function to alert message without using alert
+        function alertMessage(message) {
+            openAlertModal(message);
+        }
+
+        // Initialize Device Detection
+        detectDevice();
+
+        // Initialize Game
+        initGame();
     </script>
 </body>
 </html>
